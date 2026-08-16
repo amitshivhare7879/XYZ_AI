@@ -121,41 +121,60 @@ def detect_affirmation(text: str) -> bool:
     low = text.lower().strip()
     return low in ["yes", "yeah", "yep", "sure", "please do", "request a call", "connect now", "yes please", "submit request", "confirm", "ok", "okay"]
 
+SCHEMA_MAP_CONTEXT = """
+INTERCONNECTED DATABASE SCHEMA (You can query ANY of these tables using query_school_database(sql_query="SELECT ...")):
+- users (id, auth_id, email, name, role, phone, preferred_language) -- [Roles: 'student', 'parent', 'teacher', 'principal']
+- classes (id, name, grade, section, academic_year) -- [e.g. 'Grade 10-A', 'Grade 12 Science (PCMB)']
+- subjects (id, code, name, department) -- [e.g. 'Mathematics', 'General Science', 'Physics']
+- students (id, user_id, roll_number, name, class_id, date_of_birth, gender) -- [Foreign Keys: user_id -> users.id, class_id -> classes.id]
+- parent_student_links (id, parent_user_id, student_id, relationship) -- [Foreign Keys: parent_user_id -> users.id, student_id -> students.id]
+- teacher_class_links (id, teacher_user_id, class_id, subject_id, is_class_teacher) -- [Foreign Keys: teacher_user_id -> users.id, class_id -> classes.id, subject_id -> subjects.id]
+- attendance (id, student_id, date, status, remarks) -- [Foreign Key: student_id -> students.id. status: 'present', 'absent', 'late', 'excused']
+- exams (id, name, exam_type, start_date, end_date, academic_year)
+- grades (id, student_id, subject_id, exam_id, marks_obtained, max_marks, grade, remarks) -- [Foreign Keys: student_id -> students.id, subject_id -> subjects.id, exam_id -> exams.id]
+- fee_invoices (id, student_id, invoice_number, term_name, total_amount, due_date, status) -- [Foreign Key: student_id -> students.id]
+- fee_payments (id, invoice_id, amount_paid, payment_date, payment_method, transaction_ref) -- [Foreign Key: invoice_id -> fee_invoices.id]
+- timetable_slots (id, class_id, day_of_week, period_number, subject_id, teacher_user_id, start_time, end_time, room_number) -- [Foreign Keys: class_id -> classes.id, subject_id -> subjects.id, teacher_user_id -> users.id]
+- homework (id, class_id, subject_id, teacher_user_id, title, description, due_date) -- [Foreign Keys: class_id -> classes.id, subject_id -> subjects.id, teacher_user_id -> users.id]
+- notices (id, title, content, target_audience, category, published_at, is_urgent)
+- events (id, title, description, event_date, target_audience, venue)
+- leave_applications (id, applicant_user_id, applicant_role, student_id, start_date, end_date, reason, status)
+- escalation_tickets (id, ticket_id, requested_by_user_id, requested_by_role, student_id, target_entity, reason, status)
+"""
+
 def build_user_context_instruction(user: UserTokenPayload) -> str:
-    """Dynamically builds rich persona and linked student context."""
+    """Dynamically builds rich persona, linked student context, and complete schema map."""
     base_prompt = PERSONA_PROMPTS.get(user.role, PERSONA_PROMPTS["parent"])
     
+    user_context = ""
     if user.role == "parent":
         try:
             from rbac import validate_parent_student_ownership
             child = validate_parent_student_ownership(user.user_id)
-            child_info = (
+            user_context = (
                 f"PARENT CONTEXT:\n"
                 f"- You are talking to parent '{user.name}'.\n"
                 f"- Their linked registered child is: {child['name']} ({child['class_name']}, Roll Number: {child['roll_number']}).\n"
                 f"- When the parent asks about 'my child', 'my son', 'my daughter', 'yesterday's attendance', 'fees', or 'grades', "
-                f"you ALREADY know their child is {child['name']}. Do NOT ask for the child's name. "
-                f"Immediately call the appropriate tool with student_name='{child['name']}'."
+                f"you ALREADY know their child is {child['name']}. Do NOT ask for the child's name."
             )
-            return f"{base_prompt}\n\n{child_info}"
         except Exception:
             pass
     elif user.role == "student":
         try:
             from rbac import get_student_for_user
             std = get_student_for_user(user.user_id)
-            std_info = (
+            user_context = (
                 f"STUDENT CONTEXT:\n"
                 f"- You are talking to student '{user.name}' ({std['class_name']}, Roll Number: {std['roll_number']}).\n"
-                f"- When they ask about attendance, timetable, homework, or grades, retrieve their records directly."
+                f"- When they ask about attendance, timetable, homework, upcoming exams, or grades, retrieve their records directly."
             )
-            return f"{base_prompt}\n\n{std_info}"
         except Exception:
             pass
     elif user.role == "teacher":
-        return f"{base_prompt}\n\nTEACHER CONTEXT:\nYou are speaking with Teacher '{user.name}' (Mentor for Grade 10-A)."
+        user_context = f"TEACHER CONTEXT:\nYou are speaking with Teacher '{user.name}' (Mentor for Grade 10-A)."
 
-    return base_prompt
+    return f"{base_prompt}\n\n{user_context}\n\n{SCHEMA_MAP_CONTEXT}"
 
 def sanitize_ai_output(text: str) -> str:
     """Removes any accidental raw code, XML tool tags, or pseudo-function string artifacts."""

@@ -28,6 +28,12 @@ class UniversalCursor:
     def fetchone(self):
         return self._cursor.fetchone()
 
+    def fetchmany(self, size: int = 25):
+        if hasattr(self._cursor, "fetchmany"):
+            return self._cursor.fetchmany(size)
+        rows = self._cursor.fetchall()
+        return rows[:size] if rows else []
+
     def fetchall(self):
         return self._cursor.fetchall()
 

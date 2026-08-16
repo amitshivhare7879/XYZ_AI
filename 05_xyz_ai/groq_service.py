@@ -29,7 +29,8 @@ from tools import (
     tool_get_timetable,
     tool_get_notices,
     tool_submit_leave,
-    tool_request_escalation
+    tool_request_escalation,
+    tool_query_database
 )
 
 logger = logging.getLogger("xyz_ai.groq")
@@ -160,6 +161,23 @@ GROQ_TOOLS_SCHEMA = [
                 "required": ["target_entity", "reason"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "query_school_database",
+            "description": "Execute any read-only SQL query against the 19 interconnected school ERP database tables (exams, homework, teachers, timetable, notices, students, events, attendance, grades, fee_invoices, etc.).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sql_query": {
+                        "type": "string",
+                        "description": "A valid read-only SQLite/PostgreSQL SELECT statement to query school records."
+                    }
+                },
+                "required": ["sql_query"]
+            }
+        }
     }
 ]
 
@@ -209,6 +227,11 @@ class GroqService:
                     target_entity=args.get("target_entity", "teacher"),
                     reason=args.get("reason", "Parent inquiry"),
                     student_name=args.get("student_name")
+                )
+            elif tool_name == "query_school_database":
+                res = tool_query_database(
+                    user=user,
+                    sql_query=args.get("sql_query", "")
                 )
             else:
                 res = {"error": f"Unknown tool: {tool_name}"}
@@ -272,6 +295,7 @@ class GroqService:
                 "messages": messages,
                 "tools": GROQ_TOOLS_SCHEMA,
                 "tool_choice": "auto",
+                "parallel_tool_calls": False,
                 "temperature": 0.2,
                 "max_tokens": 800
             }
@@ -282,6 +306,28 @@ class GroqService:
                 for _ in range(3):  # Max 3 tool-calling turns
                     res = await client.post(self.api_url, headers=headers, json=payload)
                     if res.status_code != 200:
+                        try:
+                            err_data = res.json()
+                            failed_gen = err_data.get("error", {}).get("failed_generation", "")
+                            if failed_gen:
+                                import re
+                                match = re.search(r'<function=(\w+)\s*(\{.*?\})', failed_gen, re.DOTALL)
+                                if match:
+                                    fn_name = match.group(1)
+                                    try:
+                                        fn_args = json.loads(match.group(2))
+                                    except Exception:
+                                        fn_args = {}
+                                    executed_tools.append(fn_name)
+                                    tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
+                                    messages.append({"role": "assistant", "content": f"I queried the school records."})
+                                    messages.append({"role": "user", "content": f"Database query result: {tool_result_str}. Now provide a clear, helpful response."})
+                                    payload["messages"] = messages
+                                    payload.pop("tools", None)
+                                    payload.pop("tool_choice", None)
+                                    continue
+                        except Exception:
+                            pass
                         logger.warning(f"Groq API returned status {res.status_code}: {res.text}")
                         return None
 
@@ -295,7 +341,10 @@ class GroqService:
 
                         for tool_call in msg_obj["tool_calls"]:
                             fn_name = tool_call["function"]["name"]
-                            fn_args = json.loads(tool_call["function"].get("arguments", "{}"))
+                            try:
+                                fn_args = json.loads(tool_call["function"].get("arguments", "{}"))
+                            except Exception:
+                                fn_args = {}
                             executed_tools.append(fn_name)
 
                             # Execute tool

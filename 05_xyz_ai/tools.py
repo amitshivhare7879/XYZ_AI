@@ -4,12 +4,19 @@ Integrates LLM structured tool definitions with application-layer RBAC and ERP s
 Every tool call enforces role permissions and entity ownership before touching the database.
 """
 
-from typing import Dict, Any, Optional, List
-import datetime
-from shared.schemas import UserTokenPayload
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+from typing import Dict, Any, Optional, List
+import datetime
+
+ROOT_PATH = str(Path(__file__).parent.parent)
+MODULE_PATH = str(Path(__file__).parent)
+if ROOT_PATH not in sys.path:
+    sys.path.insert(0, ROOT_PATH)
+if MODULE_PATH not in sys.path:
+    sys.path.insert(0, MODULE_PATH)
+
+from shared.schemas import UserTokenPayload
 
 from rbac import (
     check_rbac_permission,
@@ -279,3 +286,47 @@ def tool_request_escalation(
         return {"error": str(e), "is_security_refusal": True}
     except Exception as e:
         return {"error": f"Failed to create escalation ticket: {str(e)}"}
+
+# Tool 9: Universal Read-Only Database Query Gateway
+def tool_query_database(
+    user: UserTokenPayload,
+    sql_query: str
+) -> Dict[str, Any]:
+    """
+    Executes a read-only SQL query across the 19 interconnected ERP database tables.
+    Gives Gemini and Groq full access to query any table, subject, exam, notice, or event.
+    """
+    try:
+        import re
+        q_clean = sql_query.strip()
+        q_upper = q_clean.upper()
+
+        if not q_upper.startswith("SELECT"):
+            return {"error": "Security Alert: Only read-only SELECT queries are allowed."}
+
+        forbidden = ["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "TRUNCATE", "REPLACE", "CREATE", "ATTACH", "DETACH"]
+        for f in forbidden:
+            if re.search(rf"\b{f}\b", q_upper):
+                return {"error": f"Security Alert: Database mutation command '{f}' is blocked."}
+
+        # Role protections
+        if user.role == "student" and any(t in q_upper for t in ["FEE_INVOICES", "FEE_PAYMENTS", "AUDIT_LOG"]):
+            return {"error": "Access Denied: Students cannot access financial or audit records.", "is_security_refusal": True}
+
+        if user.role == "teacher" and any(t in q_upper for t in ["FEE_INVOICES", "FEE_PAYMENTS"]):
+            return {"error": "Access Denied: Teachers cannot access school financial records.", "is_security_refusal": True}
+
+        from shared.database import get_db_connection
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute(q_clean)
+        rows = [dict(r) for r in c.fetchmany(25)]
+        conn.close()
+
+        return {
+            "query": q_clean,
+            "row_count": len(rows),
+            "results": rows
+        }
+    except Exception as e:
+        return {"error": f"SQL Query failed: {str(e)}"}
