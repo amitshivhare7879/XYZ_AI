@@ -3,7 +3,6 @@ uvicorn
 pydantic
 python-jose[cryptography]
 google-generativeai
-google-genai
 requests
 pytest
 pytest-asyncio
