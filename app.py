@@ -23,9 +23,8 @@ spec = importlib.util.spec_from_file_location("main_module", str(BACKEND_DIR / "
 main_module = importlib.util.module_from_spec(spec)
 sys.modules["main_module"] = main_module
 spec.loader.exec_module(main_module)
-app = main_module.app
+fastapi_app = main_module.app
 
-# Mount Gradio Blocks wrapper for 100% free Hugging Face Spaces Gradio SDK
 import gradio as gr
 
 # Minimal Gradio interface linking to our full rich portals
@@ -42,10 +41,5 @@ with gr.Blocks(title="XYZ AI School ERP Hub", theme=gr.themes.Soft()) as demo:
         - 📖 **[Interactive Swagger API Docs](/docs)**: FastAPI REST & AI Endpoints
         """)
 
-# Mount Gradio onto FastAPI root/subpath
-app = gr.mount_gradio_app(app, demo, path="/gradio")
-
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", 7860))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+# Mount Gradio onto FastAPI - Hugging Face automatically serves `app` on port 7860
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
