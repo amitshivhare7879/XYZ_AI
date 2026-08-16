@@ -193,8 +193,8 @@ def get_student_for_user(student_user_id: str) -> Dict[str, Any]:
         SELECT s.id, s.name, s.roll_number, s.class_id, c.name as class_name
         FROM students s
         JOIN classes c ON c.id = s.class_id
-        WHERE s.user_id = ?
-    """, (student_user_id,))
+        WHERE s.user_id = ? OR s.id = ?
+    """, (student_user_id, student_user_id))
     row = cursor.fetchone()
     conn.close()
     if not row:
