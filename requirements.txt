@@ -12,4 +12,4 @@ python-dotenv
 psycopg2-binary
 supabase
 bcrypt
-gradio
+gradio==4.44.1

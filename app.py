@@ -41,5 +41,9 @@ with gr.Blocks(title="XYZ AI School ERP Hub", theme=gr.themes.Soft()) as demo:
         - 📖 **[Interactive Swagger API Docs](/docs)**: FastAPI REST & AI Endpoints
         """)
 
-# Mount Gradio onto FastAPI - Hugging Face automatically serves `app` on port 7860
+# Mount Gradio onto FastAPI
 app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=7860, reload=False)
