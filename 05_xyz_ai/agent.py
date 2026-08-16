@@ -9,8 +9,11 @@ import re
 import json
 import uuid
 import sys
+import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
+
+logger = logging.getLogger("xyz_ai.agent")
 
 ROOT_PATH = str(Path(__file__).parent.parent)
 MODULE_PATH = str(Path(__file__).parent)
@@ -308,6 +311,8 @@ class ConversationOrchestrator:
                     executed_tools=tools_called,
                     visemes=generate_viseme_timeline(cleaned_text) if voice_requested else None
                 )
+            else:
+                logger.info("Primary AI (Gemini) unavailable/quota exceeded. Falling back to Secondary AI (Groq Llama 3.3)...")
 
         # Step 4B: Live Groq Engine Execution (Ultra Fast Secondary / Fallback LLM)
         from groq_service import groq_service
@@ -323,6 +328,7 @@ class ConversationOrchestrator:
             if groq_result:
                 groq_text, tools_called = groq_result
                 cleaned_text = sanitize_ai_output(groq_text)
+                logger.info(f"Secondary AI (Groq Llama 3.3) responded successfully with tools: {tools_called}")
                 return ChatResponse(
                     response_text=cleaned_text,
                     session_id=sid,
@@ -330,6 +336,8 @@ class ConversationOrchestrator:
                     executed_tools=tools_called,
                     visemes=generate_viseme_timeline(cleaned_text) if voice_requested else None
                 )
+            else:
+                logger.warning("Secondary AI (Groq) also unavailable. Falling back to local offline orchestrator.")
 
         # Step 5: Intent Detection & Local Tool Execution (Deterministic Fallback / Offline Engine)
         
