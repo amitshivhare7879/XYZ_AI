@@ -144,27 +144,39 @@ def health_check():
 @app.post("/api/auth/login", response_model=LoginResponse)
 def login_with_credentials(req: EmailPasswordLoginRequest):
     """Authenticates a user via email and returns a signed JWT."""
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("SELECT id, auth_id, email, name, role, preferred_language FROM users WHERE LOWER(email) = LOWER(?)", (req.email.strip(),))
-    user_row = c.fetchone()
-    conn.close()
+    email_clean = req.email.strip().lower()
 
-    if not user_row:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"User with email '{req.email}' not found in school directory."
-        )
+    # 1. Immediate demo account fast-path
+    for role_name, demo_user in DEMO_ACCOUNTS.items():
+        if demo_user.email.lower() == email_clean:
+            token = create_access_token(demo_user)
+            return LoginResponse(access_token=token, user=demo_user)
 
-    user_payload = UserTokenPayload(
-        user_id=user_row["id"],
-        email=user_row["email"],
-        name=user_row["name"],
-        role=user_row["role"],
-        preferred_language=user_row["preferred_language"] or "en"
+    # 2. Database lookup (SQLite or Supabase PostgreSQL)
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("SELECT id, auth_id, email, name, role, preferred_language FROM users WHERE LOWER(email) = LOWER(?)", (email_clean,))
+        user_row = c.fetchone()
+        conn.close()
+
+        if user_row:
+            user_payload = UserTokenPayload(
+                user_id=user_row["id"],
+                email=user_row["email"],
+                name=user_row["name"],
+                role=user_row["role"],
+                preferred_language=user_row["preferred_language"] or "en"
+            )
+            token = create_access_token(user_payload)
+            return LoginResponse(access_token=token, user=user_payload)
+    except Exception as e:
+        print(f"[Auth Warning] Database lookup error: {e}")
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=f"User with email '{req.email}' not found in school directory."
     )
-    token = create_access_token(user_payload)
-    return LoginResponse(access_token=token, user=user_payload)
 
 # 1B. Quick Role Switcher Auth Endpoint
 @app.post("/api/auth/mock-login", response_model=LoginResponse)

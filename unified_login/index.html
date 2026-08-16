@@ -17,7 +17,7 @@
     .gradient-border { background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.2)); }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<body class="min-h-screen py-10 px-4 flex flex-col items-center justify-center relative overflow-y-auto">
 
   <!-- Subtle ambient background gradients -->
   <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/15 rounded-full blur-[120px] pointer-events-none"></div>
@@ -156,25 +156,29 @@
           body: JSON.stringify({ email: email, password: password })
         });
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || "Authentication failed");
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          throw new Error("Received unexpected server response. Please try again.");
         }
 
-        const data = await res.json();
-        
+        if (!res.ok) {
+          throw new Error(data.detail || "Authentication failed");
+        }
+
         // Save verified session token and user profile
         localStorage.setItem("xyz_token", data.access_token);
         localStorage.setItem("xyz_user", JSON.stringify(data.user));
 
         const role = data.user.role;
-        const targetUrl = PORTAL_ROUTES[role] || "http://localhost:3002";
+        const targetUrl = PORTAL_ROUTES[role] || (isSingleOrigin ? "/parent" : "http://localhost:3002");
         
-        showStatus(`Authenticated as ${data.user.name} (${role.toUpperCase()}). Redirecting to ${role} portal...`);
+        showStatus(`Authenticated as ${data.user.name} (${role.toUpperCase()}). Redirecting...`);
         
         setTimeout(() => {
           window.location.href = targetUrl;
-        }, 800);
+        }, 600);
 
       } catch (err) {
         showStatus(err.message, true);
