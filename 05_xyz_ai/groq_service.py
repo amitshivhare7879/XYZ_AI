@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 import httpx
 
+logger = logging.getLogger("xyz_ai.groq")
+
 ROOT_PATH = str(Path(__file__).parent.parent)
 MODULE_PATH = str(Path(__file__).parent)
 if ROOT_PATH not in sys.path:

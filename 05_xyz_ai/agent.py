@@ -193,6 +193,47 @@ def sanitize_ai_output(text: str) -> str:
     cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
     return cleaned.strip()
 
+STUDENT_NAMES_MAP = [
+    "rahul patel", "rahul", "aarav sharma", "aarav", "diya mehta", "diya",
+    "rohan gupta", "rohan", "priya nair", "priya", "ananya iyer", "ananya",
+    "siddharth joshi", "siddharth", "tanvi deshmukh", "tanvi", "aditya singhania", "aditya",
+    "riya mukherjee", "riya", "varun chawla", "varun", "shreya nambiar", "shreya",
+    "neil bhatia", "neil", "devika pillai", "devika", "karthik sundaram", "karthik",
+    "pooja reddy", "pooja", "yashvardhan rathore", "yashvardhan", "sneha banerjee", "sneha",
+    "arjun kapoor", "arjun", "kabir khan", "kabir", "ishaan verma", "ishaan",
+    "dhruv malhotra", "dhruv", "natasha goel", "natasha"
+]
+
+def extract_student_name_from_text(text: str) -> Optional[str]:
+    low = text.lower()
+    for name in STUDENT_NAMES_MAP:
+        if re.search(rf"\b{name}\b", low):
+            return name.title()
+    return None
+
+def detect_message_language(text: str) -> Optional[SupportedLanguage]:
+    """Detects Indian language scripts (Gujarati, Devanagari, Tamil, Telugu, etc.)."""
+    for ch in text:
+        if '\u0A80' <= ch <= '\u0AFF':
+            return "gu"
+        elif '\u0900' <= ch <= '\u097F':
+            return "hi"
+        elif '\u0B80' <= ch <= '\u0BFF':
+            return "ta"
+        elif '\u0C00' <= ch <= '\u0C7F':
+            return "te"
+        elif '\u0980' <= ch <= '\u09FF':
+            return "bn"
+        elif '\u0A00' <= ch <= '\u0A7F':
+            return "pa"
+        elif '\u0C80' <= ch <= '\u0CFF':
+            return "kn"
+        elif '\u0D00' <= ch <= '\u0D7F':
+            return "ml"
+        elif '\u0600' <= ch <= '\u06FF':
+            return "ur"
+    return None
+
 class ConversationOrchestrator:
     @staticmethod
     async def process_message(
@@ -203,7 +244,8 @@ class ConversationOrchestrator:
         voice_requested: bool = False
     ) -> ChatResponse:
         sid, state = get_session(session_id, user)
-        lang = language or user.preferred_language or "en"
+        detected_lang = detect_message_language(message)
+        lang = detected_lang or language or user.preferred_language or "en"
         msg_clean = message.strip()
         msg_lower = msg_clean.lower()
         executed_tools = []
@@ -340,16 +382,13 @@ class ConversationOrchestrator:
                 logger.warning("Secondary AI (Groq) also unavailable. Falling back to local offline orchestrator.")
 
         # Step 5: Intent Detection & Local Tool Execution (Deterministic Fallback / Offline Engine)
+        detected_student = extract_student_name_from_text(msg_clean)
         
         # 4A. Teacher: Mark Attendance ("Mark Rahul absent today", "Mark Aarav present")
         if user.role in ["teacher", "principal"] and any(w in msg_lower for w in ["mark", "attendance", "absent", "present", "late"]) and any(w in msg_lower for w in ["mark", "set"]):
             status_target = "absent" if "absent" in msg_lower else "present" if "present" in msg_lower else "late" if "late" in msg_lower else "present"
             name_match = re.search(r"mark\s+([a-zA-Z\s]+?)\s+(absent|present|late|excused)", msg_clean, re.IGNORECASE)
-            student_name = name_match.group(1).strip() if name_match else None
-            
-            if not student_name:
-                words = msg_clean.replace("Mark", "").replace("mark", "").replace("absent", "").replace("present", "").replace("today", "").strip()
-                student_name = words if words else "Rahul"
+            student_name = name_match.group(1).strip() if name_match else (detected_student or "Rahul")
 
             res = tool_mark_attendance(user=user, student_name=student_name, status=status_target)
             executed_tools.append("tool_mark_attendance")
@@ -361,9 +400,9 @@ class ConversationOrchestrator:
             else:
                 reply = f"Done. {res.get('message')} The daily roster and attendance logs have been updated."
 
-        # 4B. Attendance Queries ("Did my child come to school yesterday?", "What is my attendance?", "Rahul's attendance")
-        elif any(w in msg_lower for w in ["attendance", "present", "absent", "school yesterday", "come to school", "came to school", "days"]):
-            res = tool_get_attendance(user=user)
+        # 4B. Attendance Queries ("Did my child come to school yesterday?", "What is my attendance?", "Rahul's attendance", "હાજરી")
+        elif any(w in msg_lower for w in ["attendance", "present", "absent", "school yesterday", "come to school", "came to school", "days", "હાજરી", "હાજર", "ગેરહાજર", "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "வருகை"]):
+            res = tool_get_attendance(user=user, student_name=detected_student)
             executed_tools.append("tool_get_attendance")
 
             if res.get("is_security_refusal"):
@@ -374,10 +413,15 @@ class ConversationOrchestrator:
                 pct = res["overall_attendance_percentage"]
                 breakdown = res.get("class_breakdown", [])
                 cls_summary = ", ".join([f"{c['class_name']}: {c['class_percentage']}%" for c in breakdown[:4]])
-                reply = f"The overall school attendance is currently {pct}%. Class-wise breakdown: {cls_summary}. Would you like to review students with low attendance alerts?"
+                if lang == "gu":
+                    reply = f"સમગ્ર શાળાની સરેરાશ હાજરી {pct}% છે. વર્ગવાર વિગત: {cls_summary}."
+                elif lang == "hi":
+                    reply = f"पूरी शाला की औसत उपस्थिति {pct}% है। कक्षावार विवरण: {cls_summary}."
+                else:
+                    reply = f"The overall school attendance is currently {pct}%. Class-wise breakdown: {cls_summary}. Would you like to review students with low attendance alerts?"
                 suggested_actions = [SuggestedAction(label="View Low Attendance Alerts", action_type="view_low_attendance")]
             else:
-                sname = res.get("student_name", "your child")
+                sname = res.get("student_name", detected_student or "your child")
                 pct = res.get("percentage", 0.0)
                 tot = res.get("total_days", 0)
                 pres = res.get("present_days", 0)
@@ -387,8 +431,13 @@ class ConversationOrchestrator:
                 last_date = recent[0]["date"] if recent else "recent"
 
                 if user.role == "parent":
-                    if any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today"]):
-                        reply = f"Yes, Mr. Patel! {sname} was **{last_status.upper()}** on the last recorded school day ({last_date}). Overall, {sname} has **{pct}% attendance** ({pres} present out of {tot} school days, with {abs_cnt} absences)."
+                    if any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "કાલે"]):
+                        if lang == "gu":
+                            reply = f"હા, શ્રી પટેલ! {sname} છેલ્લી શાળા સત્ર ({last_date}) પર **{last_status.upper()}** (હાજર) હતો. કુલ હાજરી: **{pct}%** ({pres}/{tot} દિવસો)."
+                        elif lang == "hi":
+                            reply = f"हाँ, श्री पटेल! {sname} पिछले स्कूल दिवस ({last_date}) पर **{last_status.upper()}** (उपस्थित) था। कुल उपस्थिति: **{pct}%** ({pres}/{tot} दिन)."
+                        else:
+                            reply = f"Yes, Mr. Patel! {sname} was **{last_status.upper()}** on the last recorded school day ({last_date}). Overall, {sname} has **{pct}% attendance** ({pres} present out of {tot} school days, with {abs_cnt} absences)."
                     else:
                         reply = f"Here are the attendance details for {sname}: **{pct}% overall attendance** ({pres} present days out of {tot} school days, with {abs_cnt} absences). On the last school session ({last_date}), {sname} was marked **{last_status.upper()}**."
                     
@@ -399,11 +448,11 @@ class ConversationOrchestrator:
                 elif user.role == "student":
                     reply = f"Your current attendance is **{pct}%**! You have attended {pres} out of {tot} school days. Keep up the consistent attendance!"
                 else:
-                    reply = f"{sname} ({res.get('class_name', '')}) has {pct}% attendance ({pres}/{tot} days)."
+                    reply = f"{sname} ({res.get('class_name', '')}) was **{last_status.upper()}** on {last_date}. Overall attendance is {pct}% ({pres}/{tot} days)."
 
-        # 4C. Grades & Academics ("What are my grades?", "How is my child performing?", "Science marks")
-        elif any(w in msg_lower for w in ["grade", "marks", "exam", "score", "report card", "result", "academic"]):
-            res = tool_get_grades(user=user)
+        # 4C. Grades & Academics ("What are my grades?", "How is my child performing?", "Science marks", "માર્ક્સ", "પરીક્ષા")
+        elif any(w in msg_lower for w in ["grade", "marks", "exam", "score", "report card", "result", "academic", "માર્ક્સ", "પરિણામ", "પરીક્ષા", "नंबर", "रिजल्ट", "परीक्षा"]):
+            res = tool_get_grades(user=user, student_name=detected_student)
             executed_tools.append("tool_get_grades")
             if res.get("is_security_refusal"):
                 reply = f"Access Denied: {res.get('error')}"
@@ -416,9 +465,9 @@ class ConversationOrchestrator:
                 reply = f"{sname}'s overall average for {res.get('exam_name', 'Annual Final')} is {avg}%. Key subject scores include {top_grades}. Would you like the detailed breakdown across all subjects?"
                 suggested_actions = [SuggestedAction(label="View Full Report Card", action_type="full_report_card")]
 
-        # 4D. Fee Queries ("Fee balance", "Is there any pending fee?", "Total fee collection")
-        elif any(w in msg_lower for w in ["fee", "dues", "payment", "invoice", "receipt", "paid"]):
-            res = tool_get_fees(user=user)
+        # 4D. Fee Queries ("Fee balance", "Is there any pending fee?", "Total fee collection", "કુલ ફી કેટલાં ભરાઈ છે")
+        elif any(w in msg_lower for w in ["fee", "dues", "payment", "invoice", "receipt", "paid", "ફી", "ભરાઈ", "કુલ ફી", "फीस", "शुल्क", "भरपाई", "कलेक्शन", "பணம்", "கட்டணம்"]):
+            res = tool_get_fees(user=user, student_name=detected_student)
             executed_tools.append("tool_get_fees")
             if res.get("is_security_refusal"):
                 reply = f"Access Notice: {res.get('error')}"
@@ -429,7 +478,13 @@ class ConversationOrchestrator:
                 collected = res.get("total_collected", 0)
                 billed = res.get("total_billed", 0)
                 out = res.get("total_outstanding", 0)
-                reply = f"Total fee collection to date is ₹{collected:,.2f} out of ₹{billed:,.2f} billed (₹{out:,.2f} currently outstanding across {res.get('overdue_count', 0)} overdue accounts)."
+                rate = round((collected / billed * 100), 1) if billed > 0 else 0.0
+                if lang == "gu":
+                    reply = f"કુલ ફી એકત્રિકરણ: ₹{collected:,.2f} ભરાઈ છે (કુલ માંગણી: ₹{billed:,.2f}, બાકી રકમ: ₹{out:,.2f}, વસૂલાત દર: {rate}%)."
+                elif lang == "hi":
+                    reply = f"कुल फीस कलेक्शन: ₹{collected:,.2f} प्राप्त हुई है (कुल बिलिंग: ₹{billed:,.2f}, कुल बकाया: ₹{out:,.2f}, कलेक्शन दर: {rate}%)."
+                else:
+                    reply = f"Total fee collection to date is ₹{collected:,.2f} out of ₹{billed:,.2f} billed (₹{out:,.2f} currently outstanding across {res.get('overdue_count', 0)} overdue accounts, {rate}% collection rate)."
             else:
                 sname = res.get("student_name", "Student")
                 dues = res.get("total_outstanding_dues", 0)

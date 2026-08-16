@@ -58,6 +58,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+def startup_db_check():
+    """Ensures database schema and mock records are initialized on server startup."""
+    try:
+        from shared.database import get_db_connection, init_db
+        from shared.seed_data import generate_seed_data
+        init_db()
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM students;")
+        row = c.fetchone()
+        count = row[0] if isinstance(row, (tuple, list)) else (row.get("count") if isinstance(row, dict) else list(row.values())[0] if hasattr(row, "values") else 0)
+        conn.close()
+        if not count or count == 0:
+            print("[Startup] Database is empty. Seeding full real ERP records...")
+            generate_seed_data()
+        else:
+            print(f"[Startup] Database verified with {count} active student records.")
+    except Exception as e:
+        print(f"[Startup Notice] Auto-initializing database schema: {e}")
+        try:
+            from shared.seed_data import generate_seed_data
+            generate_seed_data()
+        except Exception as se:
+            print(f"[Startup Seeding Error]: {se}")
+
 # Mount all 4 Portals & Unified Login for single-origin deployment (e.g. Hugging Face Spaces / Docker)
 root_dir = Path(__file__).parent.parent
 if (root_dir / "01_student_portal").exists():
