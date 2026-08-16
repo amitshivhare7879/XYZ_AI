@@ -290,79 +290,89 @@ class GroqService:
                 "Content-Type": "application/json"
             }
 
-            payload = {
-                "model": self.model_name,
-                "messages": messages,
-                "tools": GROQ_TOOLS_SCHEMA,
-                "tool_choice": "auto",
-                "parallel_tool_calls": False,
-                "temperature": 0.2,
-                "max_tokens": 800
-            }
-
-            executed_tools = []
+            models_to_try = [self.model_name]
+            for fallback in ["llama-3.1-8b-instant", "qwen/qwen3.6-27b"]:
+                if fallback not in models_to_try:
+                    models_to_try.append(fallback)
 
             async with httpx.AsyncClient(timeout=20.0) as client:
-                for _ in range(3):  # Max 3 tool-calling turns
-                    res = await client.post(self.api_url, headers=headers, json=payload)
-                    if res.status_code != 200:
-                        try:
-                            err_data = res.json()
-                            failed_gen = err_data.get("error", {}).get("failed_generation", "")
-                            if failed_gen:
-                                import re
-                                match = re.search(r'<function=(\w+)\s*(\{.*?\})', failed_gen, re.DOTALL)
-                                if match:
-                                    fn_name = match.group(1)
-                                    try:
-                                        fn_args = json.loads(match.group(2))
-                                    except Exception:
-                                        fn_args = {}
-                                    executed_tools.append(fn_name)
-                                    tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
-                                    messages.append({"role": "assistant", "content": f"I queried the school records."})
-                                    messages.append({"role": "user", "content": f"Database query result: {tool_result_str}. Now provide a clear, helpful response."})
-                                    payload["messages"] = messages
-                                    payload.pop("tools", None)
-                                    payload.pop("tool_choice", None)
-                                    continue
-                        except Exception:
-                            pass
-                        logger.warning(f"Groq API returned status {res.status_code}: {res.text}")
-                        return None
+                for candidate_model in models_to_try:
+                    payload = {
+                        "model": candidate_model,
+                        "messages": list(messages),
+                        "tools": GROQ_TOOLS_SCHEMA,
+                        "tool_choice": "auto",
+                        "parallel_tool_calls": False,
+                        "temperature": 0.2,
+                        "max_tokens": 800
+                    }
 
-                    data = res.json()
-                    choice = data["choices"][0]
-                    msg_obj = choice["message"]
+                    executed_tools = []
+                    rate_limited = False
 
-                    # If model requested tool calls
-                    if msg_obj.get("tool_calls"):
-                        messages.append(msg_obj)
+                    for _ in range(3):  # Max 3 tool-calling turns
+                        res = await client.post(self.api_url, headers=headers, json=payload)
+                        
+                        if res.status_code == 429:
+                            logger.info(f"Groq model '{candidate_model}' reached rate limit (429). Switching to next candidate model...")
+                            rate_limited = True
+                            break
 
-                        for tool_call in msg_obj["tool_calls"]:
-                            fn_name = tool_call["function"]["name"]
+                        if res.status_code != 200:
                             try:
-                                fn_args = json.loads(tool_call["function"].get("arguments", "{}"))
+                                err_data = res.json()
+                                failed_gen = err_data.get("error", {}).get("failed_generation", "")
+                                if failed_gen:
+                                    import re
+                                    match = re.search(r'<function=(\w+)\s*(\{.*?\})', failed_gen, re.DOTALL)
+                                    if match:
+                                        fn_name = match.group(1)
+                                        try:
+                                            fn_args = json.loads(match.group(2))
+                                        except Exception:
+                                            fn_args = {}
+                                        executed_tools.append(fn_name)
+                                        tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
+                                        payload["messages"].append({"role": "assistant", "content": f"I queried the school records."})
+                                        payload["messages"].append({"role": "user", "content": f"Database query result: {tool_result_str}. Now provide a clear, helpful response."})
+                                        payload.pop("tools", None)
+                                        payload.pop("tool_choice", None)
+                                        continue
                             except Exception:
-                                fn_args = {}
-                            executed_tools.append(fn_name)
+                                pass
+                            logger.warning(f"Groq API returned status {res.status_code}: {res.text}")
+                            break
 
-                            # Execute tool
-                            tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
+                        data = res.json()
+                        choice = data["choices"][0]
+                        msg_obj = choice["message"]
 
-                            messages.append({
-                                "role": "tool",
-                                "tool_call_id": tool_call["id"],
-                                "name": fn_name,
-                                "content": tool_result_str
-                            })
+                        # If model requested tool calls
+                        if msg_obj.get("tool_calls"):
+                            payload["messages"].append(msg_obj)
 
-                        # Update payload for the next loop iteration
-                        payload["messages"] = messages
-                    elif msg_obj.get("content"):
-                        return msg_obj["content"], executed_tools
-                    else:
-                        break
+                            for tool_call in msg_obj["tool_calls"]:
+                                fn_name = tool_call["function"]["name"]
+                                try:
+                                    fn_args = json.loads(tool_call["function"].get("arguments", "{}"))
+                                except Exception:
+                                    fn_args = {}
+                                executed_tools.append(fn_name)
+
+                                # Execute tool
+                                tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
+
+                                payload["messages"].append({
+                                    "role": "tool",
+                                    "tool_call_id": tool_call["id"],
+                                    "name": fn_name,
+                                    "content": tool_result_str
+                                })
+
+                        elif msg_obj.get("content"):
+                            return msg_obj["content"], executed_tools
+                        else:
+                            break
 
             return None
         except Exception as e:
