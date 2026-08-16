@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  xyz-ai-ecosystem:
+    build: .
+    container_name: xyz_ai_school_erp
+    ports:
+      - "8000:8000" # FastAPI Backend
+      - "3000:3000" # Unified Login Gateway
+      - "3001:3001" # Student Portal
+      - "3002:3002" # Parent Portal
+      - "3003:3003" # Staff Portal
+      - "3004:3004" # Management Portal
+    env_file:
+      - .env
+    restart: unless-stopped

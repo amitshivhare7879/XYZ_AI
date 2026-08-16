@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XYZ AI — Student Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0A0D14; color: #F3F4F6; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-heading font-bold text-white shadow-lg">
+          XYZ
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-white font-heading">XYZ AI <span class="text-cyan-400 font-normal">| Student Hub</span></span>
+          <p class="text-xs text-gray-400">Class 10-A • Roll #10A-01</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Language Switcher -->
+        <div class="flex items-center space-x-2 bg-gray-800/80 border border-gray-700 px-3 py-1.5 rounded-lg text-sm">
+          <i class="fa-solid fa-language text-cyan-400"></i>
+          <select id="languageSelect" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
+            <option value="en" class="bg-gray-900 text-white">English</option>
+            <option value="hi" class="bg-gray-900 text-white">Hindi (हिंदी)</option>
+            <option value="ta" class="bg-gray-900 text-white">Tamil (தமிழ்)</option>
+            <option value="te" class="bg-gray-900 text-white">Telugu (తెలుగు)</option>
+            <option value="mr" class="bg-gray-900 text-white">Marathi (मराठी)</option>
+            <option value="bn" class="bg-gray-900 text-white">Bengali (বাংলা)</option>
+            <option value="gu" class="bg-gray-900 text-white">Gujarati (ગુજરાતી)</option>
+            <option value="pa" class="bg-gray-900 text-white">Punjabi (ਪੰਜਾਬੀ)</option>
+            <option value="kn" class="bg-gray-900 text-white">Kannada (ಕನ್ನಡ)</option>
+            <option value="ml" class="bg-gray-900 text-white">Malayalam (മലയാളം)</option>
+            <option value="ur" class="bg-gray-900 text-white">Urdu (اردو)</option>
+          </select>
+        </div>
+
+        <!-- Unified Gateway Logout Button -->
+        <a href="http://localhost:3000" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-800 hover:bg-rose-950/50 border border-gray-700 hover:border-rose-500/50 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-lg text-xs transition-colors">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Switch</span>
+        </a>
+
+        <!-- Student Profile -->
+        <div class="flex items-center space-x-3 border-l border-gray-800 pl-4">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+            RP
+          </div>
+          <div class="hidden sm:block text-left">
+            <p class="text-xs font-semibold text-white">Rahul Patel</p>
+            <p class="text-[10px] text-cyan-400">Student</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Top Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-cyan-500">
+        <p class="text-xs text-gray-400">My Attendance</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">91.2%</h3>
+        <span class="text-[11px] text-cyan-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1"></i> 83 / 91 Days Present</span>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-emerald-500">
+        <p class="text-xs text-gray-400">Annual Grade</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">A+ (89.5%)</h3>
+        <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-trophy mr-1"></i> Class Rank: Top 5%</span>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-purple-500">
+        <p class="text-xs text-gray-400">Pending Homework</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">2 Tasks</h3>
+        <span class="text-[11px] text-purple-400 flex items-center mt-1"><i class="fa-solid fa-book-open mr-1"></i> Math & Science due soon</span>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-amber-500">
+        <p class="text-xs text-gray-400">Current Period</p>
+        <h3 class="text-lg font-bold text-white mt-1 font-heading">Period 3: English</h3>
+        <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-door-open mr-1"></i> Room 10-A • Mrs. Sunita Rao</span>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Column: Student AI Avatar & Study Assistant Info -->
+      <div class="lg:col-span-5 flex flex-col space-y-4">
+        <div class="glass-card rounded-2xl p-4 flex flex-col items-center relative overflow-hidden">
+          <div class="absolute top-3 left-3 bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-[11px] px-2.5 py-1 rounded-full flex items-center">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping mr-1.5"></span>
+            Academic AI Companion
+          </div>
+
+          <!-- Avatar Canvas -->
+          <div class="w-full h-64 sm:h-72 mt-8 rounded-2xl bg-gradient-to-b from-gray-900 to-cyan-950/60 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden">
+            <canvas id="studentAvatarCanvas" width="300" height="260" class="z-10"></canvas>
+            
+            <div id="studentSpeakingIndicator" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-gray-900/90 px-3 py-1.5 rounded-full border border-cyan-500/40 z-20">
+              <span class="w-1 h-3 bg-cyan-400 rounded-full animate-bounce"></span>
+              <span class="w-1 h-5 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.1s]"></span>
+              <span class="w-1 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+              <span class="text-xs text-cyan-200 ml-2 font-medium">Assistant Speaking...</span>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="w-full mt-4 flex items-center justify-between px-2">
+            <div class="text-left">
+              <h4 class="text-sm font-semibold text-white">Voice Study Mode</h4>
+              <p class="text-[11px] text-gray-400">Ask questions by voice in 11 languages</p>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button id="studentVoiceToggle" class="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs flex items-center border border-gray-700 transition">
+                <i class="fa-solid fa-volume-high mr-1 text-cyan-400"></i> Voice: <span id="sVoiceStatus" class="ml-1 text-cyan-400 font-semibold">ON</span>
+              </button>
+              <button id="studentMicBtn" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Advisor Escalation Card -->
+        <div class="glass-card rounded-2xl p-4">
+          <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Academic & Counseling Support</h4>
+          <p class="text-xs text-gray-400 mb-3">Need guidance with subject choices, exam stress, or study schedules? Request a session with your school counselor.</p>
+          <button onclick="sendStudentPrompt('I would like to speak with my academic counselor.')" class="w-full py-2.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/40 text-cyan-200 text-xs font-semibold transition flex items-center justify-center">
+            <i class="fa-solid fa-user-tie mr-2"></i> Request Academic Advisor Callback
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Student Chat & Timetable / Homework Hub -->
+      <div class="lg:col-span-7 flex flex-col space-y-4">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1 p-1 bg-gray-900/90 rounded-2xl border border-gray-800 text-xs">
+          <button onclick="switchSTab('chat')" id="stab-chat" class="flex-1 py-2 rounded-xl font-medium transition bg-cyan-600 text-white shadow">
+            <i class="fa-solid fa-robot mr-1.5"></i> Academic Assistant
+          </button>
+          <button onclick="switchSTab('schedule')" id="stab-schedule" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-clock mr-1.5"></i> Timetable
+          </button>
+          <button onclick="switchSTab('homework')" id="stab-homework" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-list-check mr-1.5"></i> Homework
+          </button>
+        </div>
+
+        <!-- TAB 1: Academic Assistant Chat -->
+        <div id="scontent-chat" class="glass-card rounded-2xl p-4 flex flex-col h-[520px]">
+          <div id="studentChatFeed" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                XYZ
+              </div>
+              <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
+                <p>Hey Rahul! I'm your <strong>Academic Assistant</strong>. You're doing great with 91.2% attendance and an A+ average! How can I help you today? Need to check upcoming homework, today's schedule, or study concepts?</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Suggestions -->
+          <div class="py-2 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-gray-800 mt-2">
+            <button onclick="sendStudentPrompt('What is my attendance?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-gray-700 shrink-0">
+              "What is my attendance?"
+            </button>
+            <button onclick="sendStudentPrompt('What is my schedule for today?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-gray-700 shrink-0">
+              "What is my schedule today?"
+            </button>
+            <button onclick="sendStudentPrompt('What are my grades in Mathematics and Science?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-gray-700 shrink-0">
+              "My exam grades"
+            </button>
+          </div>
+
+          <!-- Input -->
+          <form id="studentChatForm" onsubmit="handleStudentChatSubmit(event)" class="flex items-center space-x-2 mt-2">
+            <input type="text" id="studentChatInput" placeholder="Ask about homework, timetable, exams, or attendance..." class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-500 transition">
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center transition shadow">
+              <span>Ask</span>
+              <i class="fa-solid fa-paper-plane ml-1.5 text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- TAB 2: Timetable -->
+        <div id="scontent-schedule" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
+          <h3 class="text-base font-bold text-white font-heading mb-4">Grade 10-A Weekly Routine</h3>
+          <div class="space-y-2 text-xs">
+            <div class="p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-cyan-300">Period 1 (08:30 - 09:15)</span>
+                <p class="text-white">Mathematics • Room 10-A</p>
+              </div>
+              <span class="text-gray-400">Mrs. Anjali Verma</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">Period 2 (09:15 - 10:00)</span>
+                <p class="text-white">Science (Chemistry) • Science Lab</p>
+              </div>
+              <span class="text-gray-400">Mr. Vikram Malhotra</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">Period 3 (10:15 - 11:00)</span>
+                <p class="text-white">English Literature • Room 10-A</p>
+              </div>
+              <span class="text-gray-400">Mrs. Sunita Rao</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">Period 4 (11:00 - 11:45)</span>
+                <p class="text-white">Hindi Language • Room 10-A</p>
+              </div>
+              <span class="text-gray-400">Mr. Rakesh Pandey</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">Period 5 (12:30 - 01:15)</span>
+                <p class="text-white">Computer Science • IT Lab 2</p>
+              </div>
+              <span class="text-gray-400">Mr. Manoj Iyer</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Homework -->
+        <div id="scontent-homework" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
+          <h3 class="text-base font-bold text-white font-heading mb-4">Assigned Homework & Projects</h3>
+          <div class="space-y-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-gray-800/80 border border-purple-500/40">
+              <div class="flex justify-between items-start">
+                <span class="font-semibold text-white">Quadratic Equations Exercise 4.2</span>
+                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Due Aug 18</span>
+              </div>
+              <p class="text-gray-400 mt-1">Complete problems 1 to 15 from NCERT textbook Chapter 4.</p>
+              <div class="mt-2 text-[10px] text-cyan-400">Assigned by Mrs. Anjali Verma (Mathematics)</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-gray-800/80 border border-blue-500/40">
+              <div class="flex justify-between items-start">
+                <span class="font-semibold text-white">Chemical Reactions Lab Report</span>
+                <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px]">Due Aug 17</span>
+              </div>
+              <p class="text-gray-400 mt-1">Write summary and balanced equations for acid-base titration experiment.</p>
+              <div class="mt-2 text-[10px] text-cyan-400">Assigned by Mr. Vikram Malhotra (Science)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const isSingleOrigin = window.location.port === "7860" || window.location.port === "8000" || window.location.hostname.includes("huggingface.co") || window.location.hostname.includes("hf.space") || window.location.port === "";
+    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
+    let token = "";
+    let autoVoice = true;
+    let sessionId = "sess_student_" + Math.random().toString(36).substring(7);
+    let selectedLanguage = "en";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      initStudentAvatarAnimation();
+      await authenticateStudent();
+      setupStudentSpeech();
+    });
+
+    async function authenticateStudent() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/mock-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: "student", language: selectedLanguage })
+        });
+        const data = await res.json();
+        token = data.access_token;
+      } catch (err) {
+        console.warn("Using local fallback:", err);
+      }
+    }
+
+    let isSpeaking = false;
+    let mouthOpening = 0;
+
+    function initStudentAvatarAnimation() {
+      const canvas = document.getElementById("studentAvatarCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2 + 10;
+
+        // Head Base
+        ctx.fillStyle = "#F5D0A9";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 65, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Modern Cool Hair
+        ctx.fillStyle = "#1E293B";
+        ctx.beginPath();
+        ctx.arc(cx, cy - 25, 68, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = "#0284C7";
+        ctx.beginPath();
+        ctx.arc(cx - 24, cy - 10, 6, 0, Math.PI * 2);
+        ctx.arc(cx + 24, cy - 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Headphones
+        ctx.strokeStyle = "#06B6D4";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(cx, cy - 10, 72, Math.PI, 0);
+        ctx.stroke();
+
+        // Mouth
+        if (isSpeaking) {
+          mouthOpening = 3 + Math.abs(Math.sin(Date.now() * 0.015)) * 12;
+        } else {
+          mouthOpening = 3;
+        }
+        ctx.fillStyle = "#BE123C";
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 28, 12, mouthOpening, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function speakStudentText(text) {
+      if (!autoVoice || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.1;
+
+      const ind = document.getElementById("studentSpeakingIndicator");
+      utterance.onstart = () => { isSpeaking = true; ind.classList.remove("hidden"); };
+      utterance.onend = () => { isSpeaking = false; ind.classList.add("hidden"); };
+      utterance.onerror = () => { isSpeaking = false; ind.classList.add("hidden"); };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function setupStudentSpeech() {
+      const micBtn = document.getElementById("studentMicBtn");
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      micBtn.onclick = () => {
+        micBtn.classList.add("animate-pulse", "bg-rose-600");
+        recognition.start();
+      };
+      recognition.onresult = (e) => {
+        document.getElementById("studentChatInput").value = e.results[0][0].transcript;
+        handleStudentChatSubmit(new Event("submit"));
+      };
+      recognition.onend = () => micBtn.classList.remove("animate-pulse", "bg-rose-600");
+    }
+
+    async function handleStudentChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById("studentChatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = "";
+
+      appendStudentMessage("user", msg);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ message: msg, session_id: sessionId, language: selectedLanguage, voice_response_requested: autoVoice })
+        });
+        const data = await res.json();
+        appendStudentMessage("assistant", data.response_text, data.suggested_actions);
+        speakStudentText(data.response_text);
+      } catch (err) {
+        let fb = "Your current attendance is 91.2%! You have attended 83 out of 91 classes. Keep up the great work!";
+        appendStudentMessage("assistant", fb);
+        speakStudentText(fb);
+      }
+    }
+
+    function appendStudentMessage(role, text, actions = null) {
+      const feed = document.getElementById("studentChatFeed");
+      const isUser = role === "user";
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+
+      let actionsHtml = "";
+      if (actions && actions.length > 0) {
+        actionsHtml = `<div class="mt-3 pt-2 border-t border-gray-700/60 flex flex-wrap gap-1.5">` +
+          actions.map(a => `<button onclick="sendStudentPrompt('${a.label}')" class="px-2.5 py-1 rounded-lg bg-cyan-600/30 hover:bg-cyan-600 text-cyan-200 border border-cyan-500/40 text-[10px] font-medium transition">${a.label}</button>`).join('') +
+          `</div>`;
+      }
+
+      wrapper.innerHTML = isUser ? `
+        <div class="bg-cyan-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] text-xs leading-relaxed shadow">
+          ${text}
+        </div>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          RP
+        </div>
+      ` : `
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          XYZ
+        </div>
+        <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
+          <p>${text}</p>
+          ${actionsHtml}
+        </div>
+      `;
+
+      feed.appendChild(wrapper);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function sendStudentPrompt(prompt) {
+      document.getElementById("studentChatInput").value = prompt;
+      handleStudentChatSubmit(new Event("submit"));
+    }
+
+    function switchSTab(tab) {
+      ['chat', 'schedule', 'homework'].forEach(t => {
+        document.getElementById(`scontent-${t}`).classList.add("hidden");
+        document.getElementById(`stab-${t}`).className = "flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white";
+      });
+      document.getElementById(`scontent-${tab}`).classList.remove("hidden");
+      document.getElementById(`stab-${tab}`).className = "flex-1 py-2 rounded-xl font-medium transition bg-cyan-600 text-white shadow";
+    }
+
+    document.getElementById("studentVoiceToggle").onclick = () => {
+      autoVoice = !autoVoice;
+      document.getElementById("sVoiceStatus").textContent = autoVoice ? "ON" : "OFF";
+      document.getElementById("sVoiceStatus").className = autoVoice ? "ml-1 text-cyan-400 font-semibold" : "ml-1 text-gray-500 font-semibold";
+    };
+
+    document.getElementById("languageSelect").onchange = (e) => {
+      selectedLanguage = e.target.value;
+      authenticateStudent();
+    };
+  </script>
+</body>
+</html>

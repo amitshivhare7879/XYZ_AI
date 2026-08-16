@@ -1,0 +1,10 @@
+{
+  "name": "parent-portal",
+  "version": "1.0.0",
+  "description": "XYZ AI — School ERP Parent Portal with Chat, Voice, and 3D Avatar",
+  "scripts": {
+    "dev": "npx serve -s . -p 3002",
+    "start": "npx serve -s . -p 3002"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XYZ AI — Parent Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B0F19; color: #F3F4F6; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card-hover:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-2px); transition: all 0.2s ease; }
+    .glow-primary { box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.3); }
+    .avatar-pulse { animation: pulse-avatar 2s infinite; }
+    @keyframes pulse-avatar { 0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); } 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-heading font-bold text-white shadow-lg">
+          XYZ
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-white font-heading">XYZ AI <span class="text-indigo-400 font-normal">| Parent Portal</span></span>
+          <p class="text-xs text-gray-400">Delhi Public Global School ERP</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Language Switcher (11 Languages) -->
+        <div class="flex items-center space-x-2 bg-gray-800/80 border border-gray-700 px-3 py-1.5 rounded-lg text-sm">
+          <i class="fa-solid fa-language text-indigo-400"></i>
+          <select id="languageSelect" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
+            <option value="en" class="bg-gray-900 text-white">English</option>
+            <option value="hi" class="bg-gray-900 text-white">Hindi (हिंदी)</option>
+            <option value="ta" class="bg-gray-900 text-white">Tamil (தமிழ்)</option>
+            <option value="te" class="bg-gray-900 text-white">Telugu (తెలుగు)</option>
+            <option value="mr" class="bg-gray-900 text-white">Marathi (मराठी)</option>
+            <option value="bn" class="bg-gray-900 text-white">Bengali (বাংলা)</option>
+            <option value="gu" class="bg-gray-900 text-white">Gujarati (ગુજરાતી)</option>
+            <option value="pa" class="bg-gray-900 text-white">Punjabi (ਪੰਜਾਬੀ)</option>
+            <option value="kn" class="bg-gray-900 text-white">Kannada (ಕನ್ನಡ)</option>
+            <option value="ml" class="bg-gray-900 text-white">Malayalam (മലയാളം)</option>
+            <option value="ur" class="bg-gray-900 text-white">Urdu (اردو)</option>
+          </select>
+        </div>
+
+        <!-- Student Selector -->
+        <div class="flex items-center space-x-2 bg-indigo-950/50 border border-indigo-500/30 px-3 py-1.5 rounded-lg text-xs">
+          <i class="fa-solid fa-graduation-cap text-indigo-400"></i>
+          <span class="text-gray-300">Child:</span>
+          <span class="font-semibold text-indigo-200" id="currentStudentName">Rahul Patel (10-A)</span>
+        </div>
+
+        <!-- Unified Gateway Logout Button -->
+        <a href="http://localhost:3000" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-800 hover:bg-rose-950/50 border border-gray-700 hover:border-rose-500/50 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-lg text-xs transition-colors">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Switch</span>
+        </a>
+
+        <!-- Parent Profile -->
+        <div class="flex items-center space-x-3 border-l border-gray-800 pl-4">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-bold text-sm">
+            AP
+          </div>
+          <div class="hidden sm:block text-left">
+            <p class="text-xs font-semibold text-white">Mr. Amit Patel</p>
+            <p class="text-[10px] text-gray-400">Verified Parent</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Top Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-emerald-500">
+        <div>
+          <p class="text-xs text-gray-400">Overall Attendance</p>
+          <h3 class="text-2xl font-bold text-white mt-1 font-heading" id="kpiAttendance">91.2%</h3>
+          <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1"></i> Good Standing (83/91 Days)</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xl">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-blue-500">
+        <div>
+          <p class="text-xs text-gray-400">Academic Score</p>
+          <h3 class="text-2xl font-bold text-white mt-1 font-heading" id="kpiGrades">89.5%</h3>
+          <span class="text-[11px] text-blue-400 flex items-center mt-1"><i class="fa-solid fa-award mr-1"></i> Grade A+ (Mid-Term)</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-indigo-500">
+        <div>
+          <p class="text-xs text-gray-400">Fee Status</p>
+          <h3 class="text-2xl font-bold text-white mt-1 font-heading" id="kpiFees">₹0.00</h3>
+          <span class="text-[11px] text-indigo-400 flex items-center mt-1"><i class="fa-solid fa-check-double mr-1"></i> Term 2 Paid Fully</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-amber-500">
+        <div>
+          <p class="text-xs text-gray-400">Next School Event</p>
+          <h3 class="text-lg font-bold text-white mt-1 font-heading">PTM Meeting</h3>
+          <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-clock mr-1"></i> Aug 22, 2026</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-xl">
+          <i class="fa-solid fa-users"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Workspace: Left 3D Avatar & Controls + Right Chat & Services -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Column: 3D AI Avatar & Persona Details (5 Cols) -->
+      <div class="lg:col-span-5 flex flex-col space-y-4">
+        <div class="glass-card rounded-2xl p-4 flex flex-col items-center relative overflow-hidden">
+          <div class="absolute top-3 left-3 bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] px-2.5 py-1 rounded-full flex items-center">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1.5"></span>
+            Parent Support Assistant
+          </div>
+
+          <!-- 3D Avatar Canvas / Interactive Animation Container -->
+          <div class="w-full h-64 sm:h-72 mt-8 rounded-2xl bg-gradient-to-b from-gray-900 to-indigo-950/60 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden">
+            <canvas id="avatarCanvas" width="300" height="260" class="z-10"></canvas>
+            
+            <!-- Voice Audio Waveform Animation -->
+            <div id="speakingIndicator" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-gray-900/90 px-3 py-1.5 rounded-full border border-indigo-500/40 z-20">
+              <span class="w-1 h-3 bg-indigo-400 rounded-full animate-bounce"></span>
+              <span class="w-1 h-5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.1s]"></span>
+              <span class="w-1 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+              <span class="text-xs text-indigo-200 ml-2 font-medium">Speaking...</span>
+            </div>
+          </div>
+
+          <!-- Avatar Audio & Mic Controls -->
+          <div class="w-full mt-4 flex items-center justify-between px-2">
+            <div class="text-left">
+              <h4 class="text-sm font-semibold text-white">Voice & Speech Interaction</h4>
+              <p class="text-[11px] text-gray-400">Speak or listen in any of the 11 languages</p>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button id="voiceListenBtn" class="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs flex items-center border border-gray-700 transition" title="Toggle AI voice response">
+                <i class="fa-solid fa-volume-high mr-1 text-indigo-400"></i> Auto-Voice: <span id="voiceStatus" class="ml-1 text-emerald-400 font-semibold">ON</span>
+              </button>
+
+              <button id="micRecordBtn" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition" title="Press to speak">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Escalation Actions Card -->
+        <div class="glass-card rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Human Assistance Escalation</h4>
+            <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">3-State Confirmed</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-3">If you need direct human support, XYZ AI connects you with the class teacher or school administration with live ticket status.</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="triggerEscalationDirect('teacher')" class="p-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 text-left text-xs transition">
+              <i class="fa-solid fa-phone text-emerald-400 mb-1"></i>
+              <div class="font-semibold text-white">Talk to Teacher</div>
+              <div class="text-[10px] text-gray-400">Mrs. Anjali Verma</div>
+            </button>
+            <button onclick="triggerEscalationDirect('management')" class="p-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 text-left text-xs transition">
+              <i class="fa-solid fa-building-columns text-indigo-400 mb-1"></i>
+              <div class="font-semibold text-white">Contact Management</div>
+              <div class="text-[10px] text-gray-400">Principal Office</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Chat & Multi-Module Hub (7 Cols) -->
+      <div class="lg:col-span-7 flex flex-col space-y-4">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1 p-1 bg-gray-900/90 rounded-2xl border border-gray-800 text-xs">
+          <button onclick="switchTab('chat')" id="tab-chat" class="flex-1 py-2 rounded-xl font-medium transition bg-indigo-600 text-white shadow">
+            <i class="fa-solid fa-comments mr-1.5"></i> AI Chat Assistant
+          </button>
+          <button onclick="switchTab('attendance')" id="tab-attendance" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-calendar-days mr-1.5"></i> Attendance
+          </button>
+          <button onclick="switchTab('grades')" id="tab-grades" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-graduation-cap mr-1.5"></i> Report Card
+          </button>
+          <button onclick="switchTab('fees')" id="tab-fees" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Fees & Dues
+          </button>
+        </div>
+
+        <!-- TAB 1: AI Chat Assistant -->
+        <div id="content-chat" class="glass-card rounded-2xl p-4 flex flex-col h-[520px]">
+          <!-- Message Feed -->
+          <div id="chatFeed" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+            <!-- Bot Initial Message -->
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                XYZ
+              </div>
+              <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
+                <p>Hello Mr. Amit Patel! I am your <strong>XYZ AI Parent Support Assistant</strong>. I am here to assist you with Rahul's attendance records, academic report cards, fee payments, school circulars, or teacher call requests.</p>
+                <p class="mt-2 text-indigo-300 font-medium">How can I help you today?</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suggested Quick Prompts -->
+          <div class="py-2 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-gray-800 mt-2">
+            <span class="text-gray-500 text-[10px] uppercase font-semibold shrink-0">Suggestions:</span>
+            <button onclick="sendQuickPrompt('How much attendance does my child have?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-indigo-300 border border-gray-700 shrink-0">
+              "How much attendance does my child have?"
+            </button>
+            <button onclick="sendQuickPrompt('What are Rahul\'s latest exam grades?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-indigo-300 border border-gray-700 shrink-0">
+              "What are Rahul's latest grades?"
+            </button>
+            <button onclick="sendQuickPrompt('I am not satisfied. I want to talk to my child\'s teacher.')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-amber-300 border border-gray-700 shrink-0">
+              "Talk to teacher"
+            </button>
+          </div>
+
+          <!-- Input Box -->
+          <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex items-center space-x-2 mt-2">
+            <input type="text" id="chatInput" placeholder="Ask about attendance, grades, fee dues, or request a call..." class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-indigo-500 transition">
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center transition shadow">
+              <span>Send</span>
+              <i class="fa-solid fa-paper-plane ml-1.5 text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- TAB 2: Attendance Details -->
+        <div id="content-attendance" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+            <div>
+              <h3 class="text-base font-bold text-white font-heading">Rahul Patel — Attendance Record</h3>
+              <p class="text-xs text-gray-400">Academic Year 2025-2026 (Grade 10-A)</p>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-bold text-emerald-400 font-heading">91.2%</span>
+              <p class="text-[10px] text-gray-400">83 Present / 91 Total Days</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 my-4">
+            <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50 text-center">
+              <div class="text-lg font-bold text-emerald-400">83</div>
+              <div class="text-[10px] text-gray-400 uppercase">Present Days</div>
+            </div>
+            <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50 text-center">
+              <div class="text-lg font-bold text-rose-400">8</div>
+              <div class="text-[10px] text-gray-400 uppercase">Absences</div>
+            </div>
+            <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50 text-center">
+              <div class="text-lg font-bold text-amber-400">0</div>
+              <div class="text-[10px] text-gray-400 uppercase">Late Marks</div>
+            </div>
+          </div>
+
+          <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Recent Attendance Logs</h4>
+          <div id="attendanceHistory" class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <span>Aug 14, 2026 (Friday)</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PRESENT</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <span>Aug 13, 2026 (Thursday)</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PRESENT</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <span>Aug 12, 2026 (Wednesday)</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PRESENT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Report Card & Grades -->
+        <div id="content-grades" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+            <div>
+              <h3 class="text-base font-bold text-white font-heading">Academic Report Card</h3>
+              <p class="text-xs text-gray-400">Annual Final Examination 2026</p>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-bold text-blue-400 font-heading">89.5%</span>
+              <p class="text-[10px] text-gray-400">Aggregate Score</p>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-semibold text-white">Mathematics (MATH101)</span>
+                <p class="text-[10px] text-gray-400">Teacher: Mrs. Anjali Verma</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-emerald-400 text-sm">94.0 / 100</span>
+                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A+</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-semibold text-white">Science (SCI101)</span>
+                <p class="text-[10px] text-gray-400">Teacher: Mr. Vikram Malhotra</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-emerald-400 text-sm">88.5 / 100</span>
+                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-semibold text-white">English (ENG101)</span>
+                <p class="text-[10px] text-gray-400">Teacher: Mrs. Sunita Rao</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-emerald-400 text-sm">91.0 / 100</span>
+                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A+</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-semibold text-white">Computer Science (CS101)</span>
+                <p class="text-[10px] text-gray-400">Teacher: Mr. Manoj Iyer</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-emerald-400 text-sm">96.0 / 100</span>
+                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Fees & Dues -->
+        <div id="content-fees" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+            <div>
+              <h3 class="text-base font-bold text-white font-heading">Fee Invoices & Payments</h3>
+              <p class="text-xs text-gray-400">Student: Rahul Patel (10-A)</p>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-bold text-emerald-400 font-heading">₹0.00 Due</span>
+              <p class="text-[10px] text-gray-400">All terms cleared</p>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            <div class="p-3.5 rounded-xl bg-gray-800/70 border border-gray-700 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-semibold text-white">Term 2 (Aug - Nov 2026)</span>
+                <p class="text-[10px] text-gray-400">Paid on Aug 05, 2026 • Net Banking</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-white">₹45,000.00</span>
+                <span class="ml-2 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase">PAID</span>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-gray-800/70 border border-gray-700 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-semibold text-white">Term 1 (Apr - Jul 2026)</span>
+                <p class="text-[10px] text-gray-400">Paid on Apr 10, 2026 • Online UPI</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-white">₹45,000.00</span>
+                <span class="ml-2 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase">PAID</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const isSingleOrigin = window.location.port === "7860" || window.location.port === "8000" || window.location.hostname.includes("huggingface.co") || window.location.hostname.includes("hf.space") || window.location.port === "";
+    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
+    let token = "";
+    let autoVoice = true;
+    let sessionId = "sess_parent_" + Math.random().toString(36).substring(7);
+    let selectedLanguage = "en";
+
+    // Initialize Auth & 3D Avatar
+    window.addEventListener("DOMContentLoaded", async () => {
+      initAvatarAnimation();
+      await authenticateParent();
+      setupSpeechRecognition();
+    });
+
+    async function authenticateParent() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/mock-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: "parent", language: selectedLanguage })
+        });
+        const data = await res.json();
+        token = data.access_token;
+        console.log("Parent token acquired successfully:", data.user.name);
+      } catch (err) {
+        console.warn("Using offline fallback mode:", err);
+      }
+    }
+
+    // 3D Avatar Canvas Animation
+    let isSpeaking = false;
+    let mouthOpening = 0;
+    let eyeBlink = 0;
+
+    function initAvatarAnimation() {
+      const canvas = document.getElementById("avatarCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function drawAvatar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2 + 10;
+
+        // Head Base
+        ctx.fillStyle = "#F8D9B4";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 65, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair
+        ctx.fillStyle = "#2D1E12";
+        ctx.beginPath();
+        ctx.arc(cx, cy - 25, 68, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        // Eyes
+        eyeBlink += 0.02;
+        const eyeHeight = Math.sin(eyeBlink) > 0.95 ? 1 : 8;
+        ctx.fillStyle = "#1E293B";
+        ctx.beginPath();
+        ctx.ellipse(cx - 24, cy - 10, 6, eyeHeight, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 24, cy - 10, 6, eyeHeight, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eyebrows
+        ctx.strokeStyle = "#2D1E12";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cx - 35, cy - 25);
+        ctx.lineTo(cx - 15, cy - 23);
+        ctx.moveTo(cx + 15, cy - 23);
+        ctx.lineTo(cx + 35, cy - 25);
+        ctx.stroke();
+
+        // Glasses Frame (Supportive Assistant Look)
+        ctx.strokeStyle = "#4F46E5";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(cx - 36, cy - 20, 26, 20, 4);
+        ctx.roundRect(cx + 10, cy - 20, 26, 20, 4);
+        ctx.moveTo(cx - 10, cy - 10);
+        ctx.lineTo(cx + 10, cy - 10);
+        ctx.stroke();
+
+        // Mouth (Dynamic Lip Sync Animation when speaking)
+        if (isSpeaking) {
+          mouthOpening = 4 + Math.abs(Math.sin(Date.now() * 0.015)) * 14;
+        } else {
+          mouthOpening = 3;
+        }
+
+        ctx.fillStyle = "#E11D48";
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 28, 14, mouthOpening, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(drawAvatar);
+      }
+      drawAvatar();
+    }
+
+    // Voice Synthesis & Web Speech API
+    function speakText(text) {
+      if (!autoVoice || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      const ind = document.getElementById("speakingIndicator");
+      utterance.onstart = () => {
+        isSpeaking = true;
+        ind.classList.remove("hidden");
+      };
+      utterance.onend = () => {
+        isSpeaking = false;
+        ind.classList.add("hidden");
+      };
+      utterance.onerror = () => {
+        isSpeaking = false;
+        ind.classList.add("hidden");
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Speech-To-Text (Voice Mic)
+    function setupSpeechRecognition() {
+      const micBtn = document.getElementById("micRecordBtn");
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        micBtn.onclick = () => alert("Web Speech API is not supported in this browser. Please type your message.");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      micBtn.onclick = () => {
+        micBtn.classList.add("animate-pulse", "bg-rose-600");
+        recognition.start();
+      };
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        document.getElementById("chatInput").value = text;
+        handleChatSubmit(new Event("submit"));
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove("animate-pulse", "bg-rose-600");
+      };
+    }
+
+    // Chat Message Handling
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = "";
+
+      appendMessage("user", msg);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            message: msg,
+            session_id: sessionId,
+            language: selectedLanguage,
+            voice_response_requested: autoVoice
+          })
+        });
+        const data = await res.json();
+        appendMessage("assistant", data.response_text, data.suggested_actions);
+        speakText(data.response_text);
+      } catch (err) {
+        // Deterministic client fallback if server restarting
+        let fallback = "Rahul currently has 91.2% attendance (83 present days out of 91 school days). Would you like me to check his recent attendance too?";
+        appendMessage("assistant", fallback);
+        speakText(fallback);
+      }
+    }
+
+    function appendMessage(role, text, actions = null) {
+      const feed = document.getElementById("chatFeed");
+      const isUser = role === "user";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+
+      let actionsHtml = "";
+      if (actions && actions.length > 0) {
+        actionsHtml = `<div class="mt-3 pt-2 border-t border-gray-700/60 flex flex-wrap gap-1.5">` +
+          actions.map(a => `<button onclick="sendQuickPrompt('${a.label}')" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 border border-indigo-500/40 text-[10px] font-medium transition">${a.label}</button>`).join('') +
+          `</div>`;
+      }
+
+      wrapper.innerHTML = isUser ? `
+        <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] text-xs leading-relaxed shadow">
+          ${text}
+        </div>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          AP
+        </div>
+      ` : `
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          XYZ
+        </div>
+        <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
+          <p>${text}</p>
+          ${actionsHtml}
+        </div>
+      `;
+
+      feed.appendChild(wrapper);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function sendQuickPrompt(prompt) {
+      document.getElementById("chatInput").value = prompt;
+      handleChatSubmit(new Event("submit"));
+    }
+
+    function triggerEscalationDirect(target) {
+      const msg = target === "teacher" 
+        ? "I am not satisfied. I want to talk to my child's teacher."
+        : "I want to contact School Management regarding an issue.";
+      sendQuickPrompt(msg);
+      switchTab('chat');
+    }
+
+    function switchTab(tab) {
+      ['chat', 'attendance', 'grades', 'fees'].forEach(t => {
+        document.getElementById(`content-${t}`).classList.add("hidden");
+        document.getElementById(`tab-${t}`).className = "flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white";
+      });
+      document.getElementById(`content-${tab}`).classList.remove("hidden");
+      document.getElementById(`tab-${tab}`).className = "flex-1 py-2 rounded-xl font-medium transition bg-indigo-600 text-white shadow";
+    }
+
+    // Toggle Voice Button
+    document.getElementById("voiceListenBtn").onclick = () => {
+      autoVoice = !autoVoice;
+      document.getElementById("voiceStatus").textContent = autoVoice ? "ON" : "OFF";
+      document.getElementById("voiceStatus").className = autoVoice ? "ml-1 text-emerald-400 font-semibold" : "ml-1 text-gray-500 font-semibold";
+      if (!autoVoice && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        document.getElementById("speakingIndicator").classList.add("hidden");
+      }
+    };
+
+    // Language change
+    document.getElementById("languageSelect").onchange = (e) => {
+      selectedLanguage = e.target.value;
+      authenticateParent();
+    };
+  </script>
+</body>
+</html>

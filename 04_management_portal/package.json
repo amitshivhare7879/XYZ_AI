@@ -1,0 +1,9 @@
+{
+  "name": "management-portal",
+  "version": "1.0.0",
+  "description": "XYZ AI — School ERP Principal & Executive Management Portal",
+  "scripts": {
+    "dev": "npx serve -s . -p 3004",
+    "start": "npx serve -s . -p 3004"
+  }
+}

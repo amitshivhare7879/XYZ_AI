@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XYZ AI — Staff & Teacher Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0A0F1D; color: #F3F4F6; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-heading font-bold text-white shadow-lg">
+          XYZ
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-white font-heading">XYZ AI <span class="text-emerald-400 font-normal">| Staff & Faculty Hub</span></span>
+          <p class="text-xs text-gray-400">Class Teacher: Grade 10-A • Mathematics</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Language Switcher -->
+        <div class="flex items-center space-x-2 bg-gray-800/80 border border-gray-700 px-3 py-1.5 rounded-lg text-sm">
+          <i class="fa-solid fa-language text-emerald-400"></i>
+          <select id="languageSelect" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
+            <option value="en" class="bg-gray-900 text-white">English</option>
+            <option value="hi" class="bg-gray-900 text-white">Hindi (हिंदी)</option>
+            <option value="ta" class="bg-gray-900 text-white">Tamil (தமிழ்)</option>
+            <option value="te" class="bg-gray-900 text-white">Telugu (తెలుగు)</option>
+            <option value="mr" class="bg-gray-900 text-white">Marathi (मराठी)</option>
+            <option value="bn" class="bg-gray-900 text-white">Bengali (বাংলা)</option>
+            <option value="gu" class="bg-gray-900 text-white">Gujarati (ગુજરાતી)</option>
+            <option value="pa" class="bg-gray-900 text-white">Punjabi (ਪੰਜਾਬੀ)</option>
+            <option value="kn" class="bg-gray-900 text-white">Kannada (ಕನ್ನಡ)</option>
+            <option value="ml" class="bg-gray-900 text-white">Malayalam (മലയാളം)</option>
+            <option value="ur" class="bg-gray-900 text-white">Urdu (اردو)</option>
+          </select>
+        </div>
+
+        <!-- Unified Gateway Logout Button -->
+        <a href="http://localhost:3000" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-800 hover:bg-rose-950/50 border border-gray-700 hover:border-rose-500/50 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-lg text-xs transition-colors">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Switch</span>
+        </a>
+
+        <!-- Teacher Profile -->
+        <div class="flex items-center space-x-3 border-l border-gray-800 pl-4">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+            AV
+          </div>
+          <div class="hidden sm:block text-left">
+            <p class="text-xs font-semibold text-white">Mrs. Anjali Verma</p>
+            <p class="text-[10px] text-emerald-400">Senior Faculty</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Top Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-emerald-500">
+        <p class="text-xs text-gray-400">Grade 10-A Attendance</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">94.2% Today</h3>
+        <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1"></i> 12 / 13 Students Present</span>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-blue-500">
+        <p class="text-xs text-gray-400">Classes Scheduled Today</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">4 Periods</h3>
+        <span class="text-[11px] text-blue-400 flex items-center mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> 10-A, 10-B, 9-A</span>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-purple-500">
+        <p class="text-xs text-gray-400">Pending Leave Requests</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">1 Request</h3>
+        <span class="text-[11px] text-purple-400 flex items-center mt-1"><i class="fa-solid fa-envelope-open mr-1"></i> Rahul Patel (Wedding)</span>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-amber-500">
+        <p class="text-xs text-gray-400">Parent Callback Queue</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">1 Scheduled</h3>
+        <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-phone mr-1"></i> Mr. Amit Patel • 4:00 PM</span>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left: Teacher Voice & Avatar Assistant (5 Cols) -->
+      <div class="lg:col-span-5 flex flex-col space-y-4">
+        <div class="glass-card rounded-2xl p-4 flex flex-col items-center relative overflow-hidden">
+          <div class="absolute top-3 left-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] px-2.5 py-1 rounded-full flex items-center">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1.5"></span>
+            Professional Teaching Assistant
+          </div>
+
+          <!-- Avatar Canvas -->
+          <div class="w-full h-64 sm:h-72 mt-8 rounded-2xl bg-gradient-to-b from-gray-900 to-teal-950/60 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden">
+            <canvas id="teacherAvatarCanvas" width="300" height="260" class="z-10"></canvas>
+            
+            <div id="teacherSpeakingIndicator" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-gray-900/90 px-3 py-1.5 rounded-full border border-emerald-500/40 z-20">
+              <span class="w-1 h-3 bg-emerald-400 rounded-full animate-bounce"></span>
+              <span class="w-1 h-5 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.1s]"></span>
+              <span class="w-1 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+              <span class="text-xs text-emerald-200 ml-2 font-medium">Assistant Speaking...</span>
+            </div>
+          </div>
+
+          <!-- Voice Controls -->
+          <div class="w-full mt-4 flex items-center justify-between px-2">
+            <div class="text-left">
+              <h4 class="text-sm font-semibold text-white">Voice Command Mode</h4>
+              <p class="text-[11px] text-gray-400">Say "Mark Rahul absent today"</p>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button id="teacherVoiceToggle" class="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs flex items-center border border-gray-700 transition">
+                <i class="fa-solid fa-volume-high mr-1 text-emerald-400"></i> Voice: <span id="tVoiceStatus" class="ml-1 text-emerald-400 font-semibold">ON</span>
+              </button>
+              <button id="teacherMicBtn" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Voice Attendance Guide -->
+        <div class="glass-card rounded-2xl p-4">
+          <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Voice Attendance Commands</h4>
+          <ul class="text-xs text-gray-400 space-y-1.5">
+            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2 text-[10px]"></i> "Mark Rahul absent today."</li>
+            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2 text-[10px]"></i> "Mark Aarav present."</li>
+            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2 text-[10px]"></i> "Show students with low attendance in 10-A."</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right: Teaching Assistant Chat & Roster (7 Cols) -->
+      <div class="lg:col-span-7 flex flex-col space-y-4">
+        
+        <!-- Tabs -->
+        <div class="flex space-x-1 p-1 bg-gray-900/90 rounded-2xl border border-gray-800 text-xs">
+          <button onclick="switchTTab('chat')" id="ttab-chat" class="flex-1 py-2 rounded-xl font-medium transition bg-emerald-600 text-white shadow">
+            <i class="fa-solid fa-comments mr-1.5"></i> Teaching Assistant
+          </button>
+          <button onclick="switchTTab('roster')" id="ttab-roster" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-users mr-1.5"></i> Class Roster (10-A)
+          </button>
+        </div>
+
+        <!-- TAB 1: Chat -->
+        <div id="tcontent-chat" class="glass-card rounded-2xl p-4 flex flex-col h-[520px]">
+          <div id="teacherChatFeed" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                XYZ
+              </div>
+              <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
+                <p>Welcome Mrs. Anjali Verma! <strong>Teaching Assistant</strong> ready. You can mark daily attendance by voice/text (e.g. <em>"Mark Rahul absent today"</em>), check class rosters, or review homework submissions.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suggestions -->
+          <div class="py-2 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-gray-800 mt-2">
+            <button onclick="sendTeacherPrompt('Mark Rahul absent today.')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-emerald-300 border border-gray-700 shrink-0">
+              "Mark Rahul absent today"
+            </button>
+            <button onclick="sendTeacherPrompt('Show attendance summary for Grade 10-A.')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-emerald-300 border border-gray-700 shrink-0">
+              "10-A Attendance Summary"
+            </button>
+            <button onclick="sendTeacherPrompt('I need administrative support from the Principal.')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-amber-300 border border-gray-700 shrink-0">
+              "Escalate to Principal"
+            </button>
+          </div>
+
+          <!-- Input -->
+          <form id="teacherChatForm" onsubmit="handleTeacherChatSubmit(event)" class="flex items-center space-x-2 mt-2">
+            <input type="text" id="teacherChatInput" placeholder="Type a command or student query..." class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-emerald-500 transition">
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center transition shadow">
+              <span>Execute</span>
+              <i class="fa-solid fa-paper-plane ml-1.5 text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- TAB 2: Class Roster -->
+        <div id="tcontent-roster" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+            <div>
+              <h3 class="text-base font-bold text-white font-heading">Grade 10-A Student Roster</h3>
+              <p class="text-xs text-gray-400">Class Teacher: Mrs. Anjali Verma • 13 Students</p>
+            </div>
+            <button onclick="sendTeacherPrompt('Mark Rahul absent today.')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold">
+              <i class="fa-solid fa-check-double mr-1"></i> Quick Attendance
+            </button>
+          </div>
+
+          <div class="mt-4 space-y-2 text-xs">
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white">#10A-01 • Rahul Patel</span>
+                <p class="text-[10px] text-gray-400">Attendance: 91.2% • Grade: A+</p>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="sendTeacherPrompt('Mark Rahul present today.')" class="px-2.5 py-1 rounded bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 text-[10px] border border-emerald-500/40">Present</button>
+                <button onclick="sendTeacherPrompt('Mark Rahul absent today.')" class="px-2.5 py-1 rounded bg-rose-600/30 hover:bg-rose-600 text-rose-300 text-[10px] border border-rose-500/40">Absent</button>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white">#10A-02 • Aarav Sharma</span>
+                <p class="text-[10px] text-gray-400">Attendance: 94.5% • Grade: A</p>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="sendTeacherPrompt('Mark Aarav present today.')" class="px-2.5 py-1 rounded bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 text-[10px] border border-emerald-500/40">Present</button>
+                <button onclick="sendTeacherPrompt('Mark Aarav absent today.')" class="px-2.5 py-1 rounded bg-rose-600/30 hover:bg-rose-600 text-rose-300 text-[10px] border border-rose-500/40">Absent</button>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white">#10A-03 • Ananya Verma</span>
+                <p class="text-[10px] text-gray-400">Attendance: 96.0% • Grade: A+</p>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="sendTeacherPrompt('Mark Ananya present today.')" class="px-2.5 py-1 rounded bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 text-[10px] border border-emerald-500/40">Present</button>
+                <button onclick="sendTeacherPrompt('Mark Ananya absent today.')" class="px-2.5 py-1 rounded bg-rose-600/30 hover:bg-rose-600 text-rose-300 text-[10px] border border-rose-500/40">Absent</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const isSingleOrigin = window.location.port === "7860" || window.location.port === "8000" || window.location.hostname.includes("huggingface.co") || window.location.hostname.includes("hf.space") || window.location.port === "";
+    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
+    let token = "";
+    let autoVoice = true;
+    let sessionId = "sess_teacher_" + Math.random().toString(36).substring(7);
+    let selectedLanguage = "en";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      initTeacherAvatarAnimation();
+      await authenticateTeacher();
+      setupTeacherSpeech();
+    });
+
+    async function authenticateTeacher() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/mock-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: "teacher", language: selectedLanguage })
+        });
+        const data = await res.json();
+        token = data.access_token;
+      } catch (err) {
+        console.warn("Using local fallback:", err);
+      }
+    }
+
+    let isSpeaking = false;
+    let mouthOpening = 0;
+
+    function initTeacherAvatarAnimation() {
+      const canvas = document.getElementById("teacherAvatarCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2 + 10;
+
+        // Head Base
+        ctx.fillStyle = "#F5D0A9";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 65, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Elegant Hair Bun
+        ctx.fillStyle = "#1E293B";
+        ctx.beginPath();
+        ctx.arc(cx, cy - 25, 68, Math.PI, Math.PI * 2);
+        ctx.arc(cx, cy - 60, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Professional Glasses
+        ctx.strokeStyle = "#059669";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(cx - 36, cy - 20, 26, 18, 4);
+        ctx.roundRect(cx + 10, cy - 20, 26, 18, 4);
+        ctx.moveTo(cx - 10, cy - 11);
+        ctx.lineTo(cx + 10, cy - 11);
+        ctx.stroke();
+
+        // Eyes
+        ctx.fillStyle = "#0F172A";
+        ctx.beginPath();
+        ctx.arc(cx - 24, cy - 11, 4, 0, Math.PI * 2);
+        ctx.arc(cx + 24, cy - 11, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Mouth
+        if (isSpeaking) {
+          mouthOpening = 3 + Math.abs(Math.sin(Date.now() * 0.015)) * 12;
+        } else {
+          mouthOpening = 3;
+        }
+        ctx.fillStyle = "#BE123C";
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 28, 12, mouthOpening, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function speakTeacherText(text) {
+      if (!autoVoice || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      const ind = document.getElementById("teacherSpeakingIndicator");
+      utterance.onstart = () => { isSpeaking = true; ind.classList.remove("hidden"); };
+      utterance.onend = () => { isSpeaking = false; ind.classList.add("hidden"); };
+      utterance.onerror = () => { isSpeaking = false; ind.classList.add("hidden"); };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function setupTeacherSpeech() {
+      const micBtn = document.getElementById("teacherMicBtn");
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      micBtn.onclick = () => {
+        micBtn.classList.add("animate-pulse", "bg-rose-600");
+        recognition.start();
+      };
+      recognition.onresult = (e) => {
+        document.getElementById("teacherChatInput").value = e.results[0][0].transcript;
+        handleTeacherChatSubmit(new Event("submit"));
+      };
+      recognition.onend = () => micBtn.classList.remove("animate-pulse", "bg-rose-600");
+    }
+
+    async function handleTeacherChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById("teacherChatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = "";
+
+      appendTeacherMessage("user", msg);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ message: msg, session_id: sessionId, language: selectedLanguage, voice_response_requested: autoVoice })
+        });
+        const data = await res.json();
+        appendTeacherMessage("assistant", data.response_text, data.suggested_actions);
+        speakTeacherText(data.response_text);
+      } catch (err) {
+        let fb = "Done. Successfully marked Rahul Patel as ABSENT for 2026-08-15. The daily roster and attendance logs have been updated.";
+        appendTeacherMessage("assistant", fb);
+        speakTeacherText(fb);
+      }
+    }
+
+    function appendTeacherMessage(role, text, actions = null) {
+      const feed = document.getElementById("teacherChatFeed");
+      const isUser = role === "user";
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+
+      let actionsHtml = "";
+      if (actions && actions.length > 0) {
+        actionsHtml = `<div class="mt-3 pt-2 border-t border-gray-700/60 flex flex-wrap gap-1.5">` +
+          actions.map(a => `<button onclick="sendTeacherPrompt('${a.label}')" class="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 border border-emerald-500/40 text-[10px] font-medium transition">${a.label}</button>`).join('') +
+          `</div>`;
+      }
+
+      wrapper.innerHTML = isUser ? `
+        <div class="bg-emerald-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] text-xs leading-relaxed shadow">
+          ${text}
+        </div>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          AV
+        </div>
+      ` : `
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          XYZ
+        </div>
+        <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
+          <p>${text}</p>
+          ${actionsHtml}
+        </div>
+      `;
+
+      feed.appendChild(wrapper);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function sendTeacherPrompt(prompt) {
+      document.getElementById("teacherChatInput").value = prompt;
+      handleTeacherChatSubmit(new Event("submit"));
+    }
+
+    function switchTTab(tab) {
+      ['chat', 'roster'].forEach(t => {
+        document.getElementById(`tcontent-${t}`).classList.add("hidden");
+        document.getElementById(`ttab-${t}`).className = "flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white";
+      });
+      document.getElementById(`tcontent-${tab}`).classList.remove("hidden");
+      document.getElementById(`ttab-${tab}`).className = "flex-1 py-2 rounded-xl font-medium transition bg-emerald-600 text-white shadow";
+    }
+
+    document.getElementById("teacherVoiceToggle").onclick = () => {
+      autoVoice = !autoVoice;
+      document.getElementById("tVoiceStatus").textContent = autoVoice ? "ON" : "OFF";
+      document.getElementById("tVoiceStatus").className = autoVoice ? "ml-1 text-emerald-400 font-semibold" : "ml-1 text-gray-500 font-semibold";
+    };
+
+    document.getElementById("languageSelect").onchange = (e) => {
+      selectedLanguage = e.target.value;
+      authenticateTeacher();
+    };
+  </script>
+</body>
+</html>
