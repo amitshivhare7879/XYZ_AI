@@ -16,9 +16,11 @@ for p in env_paths:
         break
 
 class Settings:
-    # 1. AI Configuration (Google Gemini)
+    # 1. AI Configuration (Google Gemini & Groq Llama)
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
     # 2. Database Configuration (Supabase Postgres & SQLite)
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")

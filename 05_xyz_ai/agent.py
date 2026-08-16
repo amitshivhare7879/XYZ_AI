@@ -254,7 +254,7 @@ class ConversationOrchestrator:
                 visemes=generate_viseme_timeline(reply) if voice_requested else None
             )
 
-        # Step 4: Live Gemini Engine Execution (if GEMINI_API_KEY is configured)
+        # Step 4A: Live Gemini Engine Execution (if GEMINI_API_KEY is configured)
         from gemini_service import gemini_service
         if gemini_service.is_configured:
             persona_instruction = build_user_context_instruction(user)
@@ -273,6 +273,27 @@ class ConversationOrchestrator:
                     language=lang,
                     executed_tools=tools_called,
                     visemes=generate_viseme_timeline(gemini_text) if voice_requested else None
+                )
+
+        # Step 4B: Live Groq Engine Execution (Ultra Fast Secondary / Fallback LLM)
+        from groq_service import groq_service
+        if groq_service.is_configured:
+            persona_instruction = build_user_context_instruction(user)
+            groq_result = await groq_service.generate_response(
+                message=msg_clean,
+                user=user,
+                system_instruction=persona_instruction,
+                chat_history=state.get("messages", []),
+                language=lang
+            )
+            if groq_result:
+                groq_text, tools_called = groq_result
+                return ChatResponse(
+                    response_text=groq_text,
+                    session_id=sid,
+                    language=lang,
+                    executed_tools=tools_called,
+                    visemes=generate_viseme_timeline(groq_text) if voice_requested else None
                 )
 
         # Step 5: Intent Detection & Local Tool Execution (Deterministic Fallback / Offline Engine)

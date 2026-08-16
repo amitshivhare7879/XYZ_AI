@@ -25,6 +25,25 @@ sys.modules["main_module"] = main_module
 spec.loader.exec_module(main_module)
 fastapi_app = main_module.app
 
+# Compatibility patch for newer huggingface_hub versions where HfFolder was removed
+try:
+    import huggingface_hub
+    if not hasattr(huggingface_hub, "HfFolder"):
+        class HfFolder:
+            @staticmethod
+            def get_token():
+                import os
+                return os.getenv("HF_TOKEN") or ""
+            @staticmethod
+            def save_token(token):
+                pass
+            @staticmethod
+            def delete_token():
+                pass
+        huggingface_hub.HfFolder = HfFolder
+except Exception:
+    pass
+
 import gradio as gr
 
 # Minimal Gradio interface linking to our full rich portals
