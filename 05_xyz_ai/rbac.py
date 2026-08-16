@@ -66,48 +66,67 @@ def check_rbac_permission(role: UserRole, domain: str, action: str):
             f"Security Alert: Role '{role}' is not authorized to perform action '{action}' on domain '{domain}'."
         )
 
-def validate_parent_student_ownership(parent_user_id: str, student_id: Optional[str] = None, student_name: Optional[str] = None) -> Dict[str, Any]:
+def validate_parent_student_ownership(
+    parent_user_id: str,
+    student_id: Optional[str] = None,
+    student_name: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Ensures a parent user only accesses data of their officially linked child.
-    Resolves student record or raises EntityOwnershipViolation.
+    Smartly resolves single-child parents automatically and handles first-name / fuzzy matches.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    if student_id:
-        cursor.execute("""
-            SELECT s.id, s.name, s.roll_number, s.class_id, c.name as class_name
-            FROM parent_student_links psl
-            JOIN students s ON s.id = psl.student_id
-            JOIN classes c ON c.id = s.class_id
-            WHERE psl.parent_user_id = ? AND (s.id = ? OR s.roll_number = ?)
-        """, (parent_user_id, student_id, student_id))
-    elif student_name:
-        cursor.execute("""
-            SELECT s.id, s.name, s.roll_number, s.class_id, c.name as class_name
-            FROM parent_student_links psl
-            JOIN students s ON s.id = psl.student_id
-            JOIN classes c ON c.id = s.class_id
-            WHERE psl.parent_user_id = ? AND LOWER(s.name) LIKE LOWER(?)
-        """, (parent_user_id, f"%{student_name}%"))
-    else:
-        # Default: fetch linked children for this parent
-        cursor.execute("""
-            SELECT s.id, s.name, s.roll_number, s.class_id, c.name as class_name
-            FROM parent_student_links psl
-            JOIN students s ON s.id = psl.student_id
-            JOIN classes c ON c.id = s.class_id
-            WHERE psl.parent_user_id = ?
-        """, (parent_user_id,))
-
-    rows = cursor.fetchall()
+    cursor.execute("""
+        SELECT s.id, s.name, s.roll_number, s.class_id, c.name as class_name
+        FROM parent_student_links psl
+        JOIN students s ON s.id = psl.student_id
+        JOIN classes c ON c.id = s.class_id
+        WHERE psl.parent_user_id = ?
+    """, (parent_user_id,))
+    linked_children = [dict(r) for r in cursor.fetchall()]
     conn.close()
 
-    if not rows:
+    if not linked_children:
         raise EntityOwnershipViolation(
             f"Authorization Error: Parent (ID: {parent_user_id}) does not have linked ownership for requested student."
         )
-    return dict(rows[0])
+
+    # If parent only has 1 child, default to that child automatically unless querying another specific child
+    if len(linked_children) == 1 and (not student_name or any(w in student_name.lower() for w in ["child", "son", "daughter", "kid", "my", linked_children[0]["name"].split()[0].lower()])):
+        return linked_children[0]
+
+    # If specific student_id provided
+    if student_id:
+        for child in linked_children:
+            if child["id"] == student_id or child["roll_number"].lower() == student_id.lower():
+                return child
+        raise EntityOwnershipViolation(
+            f"Access Denied: You do not have parent authorization for student ID '{student_id}'."
+        )
+
+    # If specific student_name provided
+    if student_name:
+        sname_clean = student_name.lower().strip()
+        # Direct match or partial match
+        for child in linked_children:
+            c_full = child["name"].lower()
+            c_first = c_full.split()[0]
+            if sname_clean in c_full or c_first in sname_clean or sname_clean[:3] == c_first[:3]:
+                return child
+        
+        # If still only 1 child linked to parent, return that child
+        if len(linked_children) == 1:
+            return linked_children[0]
+
+        child_names = ", ".join([c["name"] for c in linked_children])
+        raise EntityOwnershipViolation(
+            f"Could not match '{student_name}'. Your linked children on file: {child_names}."
+        )
+
+    # Default to first linked child
+    return linked_children[0]
 
 def validate_teacher_class_ownership(teacher_user_id: str, class_id: Optional[str] = None, student_name: Optional[str] = None) -> Dict[str, Any]:
     """

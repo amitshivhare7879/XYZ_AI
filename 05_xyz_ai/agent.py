@@ -8,11 +8,18 @@ import os
 import re
 import json
 import uuid
-from typing import Dict, Any, List, Optional, Tuple
-from shared.schemas import UserTokenPayload, ChatResponse, VisemeCue, SuggestedAction, SupportedLanguage
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+from typing import Dict, Any, List, Optional, Tuple
+
+ROOT_PATH = str(Path(__file__).parent.parent)
+MODULE_PATH = str(Path(__file__).parent)
+if ROOT_PATH not in sys.path:
+    sys.path.insert(0, ROOT_PATH)
+if MODULE_PATH not in sys.path:
+    sys.path.insert(0, MODULE_PATH)
+
+from shared.schemas import UserTokenPayload, ChatResponse, VisemeCue, SuggestedAction, SupportedLanguage
 
 from tools import (
     tool_get_attendance,
@@ -114,6 +121,42 @@ def detect_affirmation(text: str) -> bool:
     low = text.lower().strip()
     return low in ["yes", "yeah", "yep", "sure", "please do", "request a call", "connect now", "yes please", "submit request", "confirm", "ok", "okay"]
 
+def build_user_context_instruction(user: UserTokenPayload) -> str:
+    """Dynamically builds rich persona and linked student context."""
+    base_prompt = PERSONA_PROMPTS.get(user.role, PERSONA_PROMPTS["parent"])
+    
+    if user.role == "parent":
+        try:
+            from rbac import validate_parent_student_ownership
+            child = validate_parent_student_ownership(user.user_id)
+            child_info = (
+                f"PARENT CONTEXT:\n"
+                f"- You are talking to parent '{user.name}'.\n"
+                f"- Their linked registered child is: {child['name']} ({child['class_name']}, Roll Number: {child['roll_number']}).\n"
+                f"- When the parent asks about 'my child', 'my son', 'my daughter', 'yesterday's attendance', 'fees', or 'grades', "
+                f"you ALREADY know their child is {child['name']}. Do NOT ask for the child's name. "
+                f"Immediately call the appropriate tool with student_name='{child['name']}'."
+            )
+            return f"{base_prompt}\n\n{child_info}"
+        except Exception:
+            pass
+    elif user.role == "student":
+        try:
+            from rbac import get_student_for_user
+            std = get_student_for_user(user.user_id)
+            std_info = (
+                f"STUDENT CONTEXT:\n"
+                f"- You are talking to student '{user.name}' ({std['class_name']}, Roll Number: {std['roll_number']}).\n"
+                f"- When they ask about attendance, timetable, homework, or grades, retrieve their records directly."
+            )
+            return f"{base_prompt}\n\n{std_info}"
+        except Exception:
+            pass
+    elif user.role == "teacher":
+        return f"{base_prompt}\n\nTEACHER CONTEXT:\nYou are speaking with Teacher '{user.name}' (Mentor for Grade 10-A)."
+
+    return base_prompt
+
 class ConversationOrchestrator:
     @staticmethod
     async def process_message(
@@ -214,7 +257,7 @@ class ConversationOrchestrator:
         # Step 4: Live Gemini Engine Execution (if GEMINI_API_KEY is configured)
         from gemini_service import gemini_service
         if gemini_service.is_configured:
-            persona_instruction = PERSONA_PROMPTS.get(user.role, PERSONA_PROMPTS["parent"])
+            persona_instruction = build_user_context_instruction(user)
             gemini_result = await gemini_service.generate_response(
                 message=msg_clean,
                 user=user,
@@ -236,13 +279,11 @@ class ConversationOrchestrator:
         
         # 4A. Teacher: Mark Attendance ("Mark Rahul absent today", "Mark Aarav present")
         if user.role in ["teacher", "principal"] and any(w in msg_lower for w in ["mark", "attendance", "absent", "present", "late"]) and any(w in msg_lower for w in ["mark", "set"]):
-            # Extract student name & status
             status_target = "absent" if "absent" in msg_lower else "present" if "present" in msg_lower else "late" if "late" in msg_lower else "present"
             name_match = re.search(r"mark\s+([a-zA-Z\s]+?)\s+(absent|present|late|excused)", msg_clean, re.IGNORECASE)
             student_name = name_match.group(1).strip() if name_match else None
             
             if not student_name:
-                # Try generic extraction
                 words = msg_clean.replace("Mark", "").replace("mark", "").replace("absent", "").replace("present", "").replace("today", "").strip()
                 student_name = words if words else "Rahul"
 
@@ -256,43 +297,43 @@ class ConversationOrchestrator:
             else:
                 reply = f"Done. {res.get('message')} The daily roster and attendance logs have been updated."
 
-        # 4B. Attendance Queries ("What is my attendance?", "How much attendance does my child have?", "What is the overall attendance?")
-        elif any(w in msg_lower for w in ["attendance", "present", "absent", "days"]):
-            # Extract name if parent mentions specific child e.g. "Rahul"
-            student_name = None
-            if user.role == "parent":
-                if "rahul" in msg_lower:
-                    student_name = "Rahul"
-
-            res = tool_get_attendance(user=user, student_name=student_name)
+        # 4B. Attendance Queries ("Did my child come to school yesterday?", "What is my attendance?", "Rahul's attendance")
+        elif any(w in msg_lower for w in ["attendance", "present", "absent", "school yesterday", "come to school", "came to school", "days"]):
+            res = tool_get_attendance(user=user)
             executed_tools.append("tool_get_attendance")
 
             if res.get("is_security_refusal"):
                 reply = f"I am unable to retrieve that record: {res.get('error')}"
             elif "error" in res:
-                reply = f"{res.get('error')}"
+                reply = f"Could not load attendance record: {res.get('error')}"
             elif "overall_attendance_percentage" in res:
-                # Principal analytics
                 pct = res["overall_attendance_percentage"]
                 breakdown = res.get("class_breakdown", [])
                 cls_summary = ", ".join([f"{c['class_name']}: {c['class_percentage']}%" for c in breakdown[:4]])
                 reply = f"The overall school attendance is currently {pct}%. Class-wise breakdown: {cls_summary}. Would you like to review students with low attendance alerts?"
                 suggested_actions = [SuggestedAction(label="View Low Attendance Alerts", action_type="view_low_attendance")]
             else:
-                sname = res.get("student_name", "the student")
+                sname = res.get("student_name", "your child")
                 pct = res.get("percentage", 0.0)
                 tot = res.get("total_days", 0)
                 pres = res.get("present_days", 0)
                 abs_cnt = res.get("absent_days", 0)
-                
+                recent = res.get("recent_records", [])
+                last_status = recent[0]["status"] if recent else "present"
+                last_date = recent[0]["date"] if recent else "recent"
+
                 if user.role == "parent":
-                    reply = f"Sure, let me check that for you. {sname} currently has {pct}% attendance ({pres} present days out of {tot} school days, with {abs_cnt} absences). Would you like me to check his recent attendance too?"
+                    if any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today"]):
+                        reply = f"Yes, Mr. Patel! {sname} was **{last_status.upper()}** on the last recorded school day ({last_date}). Overall, {sname} has **{pct}% attendance** ({pres} present out of {tot} school days, with {abs_cnt} absences)."
+                    else:
+                        reply = f"Here are the attendance details for {sname}: **{pct}% overall attendance** ({pres} present days out of {tot} school days, with {abs_cnt} absences). On the last school session ({last_date}), {sname} was marked **{last_status.upper()}**."
+                    
                     suggested_actions = [
                         SuggestedAction(label="Check Recent Absences", action_type="recent_attendance"),
                         SuggestedAction(label="Submit Leave Note", action_type="submit_leave")
                     ]
                 elif user.role == "student":
-                    reply = f"Your current attendance is {pct}%! You have attended {pres} out of {tot} classes. Keep up the great work!"
+                    reply = f"Your current attendance is **{pct}%**! You have attended {pres} out of {tot} school days. Keep up the consistent attendance!"
                 else:
                     reply = f"{sname} ({res.get('class_name', '')}) has {pct}% attendance ({pres}/{tot} days)."
 
