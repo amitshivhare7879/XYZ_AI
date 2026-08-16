@@ -71,12 +71,18 @@ if (root_dir / "04_management_portal").exists():
 if (root_dir / "unified_login").exists():
     app.mount("/login", StaticFiles(directory=str(root_dir / "unified_login"), html=True), name="login")
 
+from fastapi.responses import FileResponse, Response
+
 @app.get("/")
 def serve_root():
     login_path = root_dir / "unified_login" / "index.html"
     if login_path.exists():
         return FileResponse(str(login_path))
     return {"message": "XYZ AI School ERP Engine Online", "docs": "/docs"}
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=204)
 
 # Mock demo accounts for quick role-switching
 DEMO_ACCOUNTS = {
