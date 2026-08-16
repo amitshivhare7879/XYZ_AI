@@ -1,6 +1,5 @@
 FROM python:3.12-slim
 
-# Set working directory
 WORKDIR /app
 
 # Install system dependencies
@@ -10,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python requirements
-COPY 05_xyz_ai/requirements.txt ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
@@ -24,7 +23,7 @@ ENV HOME=/home/user \
     PYTHONUNBUFFERED=1
 
 # Expose Hugging Face default port
-EXPOSE 7860 8000 3000
+EXPOSE 7860
 
-# Start unified server on port 7860 (Hugging Face Spaces default)
+# Start FastAPI server on port 7860
 CMD ["uvicorn", "05_xyz_ai.main:app", "--host", "0.0.0.0", "--port", "7860"]
