@@ -147,6 +147,14 @@ def tool_get_grades(
     except Exception as e:
         return {"error": f"Failed to retrieve grades: {str(e)}"}
 
+# Tool 3B: Get Exam Schedule & Upcoming Tests
+def tool_get_exam_schedule(user: UserTokenPayload) -> Dict[str, Any]:
+    try:
+        exams = ERPAcademicService.get_upcoming_exams()
+        return {"exams": exams, "count": len(exams)}
+    except Exception as e:
+        return {"error": f"Failed to retrieve exam schedule: {str(e)}"}
+
 # Tool 4: Get Fee Status & Invoices
 def tool_get_fees(
     user: UserTokenPayload,

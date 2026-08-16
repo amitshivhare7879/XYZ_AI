@@ -24,6 +24,7 @@ from tools import (
     tool_get_attendance,
     tool_mark_attendance,
     tool_get_grades,
+    tool_get_exam_schedule,
     tool_get_fees,
     tool_get_timetable,
     tool_get_notices,
@@ -136,6 +137,17 @@ GROQ_TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
+            "name": "get_exam_schedule",
+            "description": "Retrieve academic exam schedule, upcoming test dates, and school examination terms.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "request_escalation",
             "description": "Create a callback ticket or escalation request with a teacher, counselor, or management.",
             "parameters": {
@@ -175,6 +187,8 @@ class GroqService:
                 )
             elif tool_name == "get_grades":
                 res = tool_get_grades(user=user, student_name=args.get("student_name"))
+            elif tool_name == "get_exam_schedule":
+                res = tool_get_exam_schedule(user=user)
             elif tool_name == "get_fees":
                 res = tool_get_fees(user=user, student_name=args.get("student_name"))
             elif tool_name == "get_timetable":
@@ -264,51 +278,42 @@ class GroqService:
 
             executed_tools = []
 
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                res = await client.post(self.api_url, headers=headers, json=payload)
-                if res.status_code != 200:
-                    logger.warning(f"Groq API returned status {res.status_code}: {res.text}")
-                    return None
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                for _ in range(3):  # Max 3 tool-calling turns
+                    res = await client.post(self.api_url, headers=headers, json=payload)
+                    if res.status_code != 200:
+                        logger.warning(f"Groq API returned status {res.status_code}: {res.text}")
+                        return None
 
-                data = res.json()
-                choice = data["choices"][0]
-                msg_obj = choice["message"]
+                    data = res.json()
+                    choice = data["choices"][0]
+                    msg_obj = choice["message"]
 
-                # If the model requested tool calls
-                if msg_obj.get("tool_calls"):
-                    messages.append(msg_obj)
+                    # If model requested tool calls
+                    if msg_obj.get("tool_calls"):
+                        messages.append(msg_obj)
 
-                    for tool_call in msg_obj["tool_calls"]:
-                        fn_name = tool_call["function"]["name"]
-                        fn_args = json.loads(tool_call["function"].get("arguments", "{}"))
-                        executed_tools.append(fn_name)
+                        for tool_call in msg_obj["tool_calls"]:
+                            fn_name = tool_call["function"]["name"]
+                            fn_args = json.loads(tool_call["function"].get("arguments", "{}"))
+                            executed_tools.append(fn_name)
 
-                        # Execute tool
-                        tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
+                            # Execute tool
+                            tool_result_str = self.execute_tool_call(fn_name, fn_args, user)
 
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tool_call["id"],
-                            "name": fn_name,
-                            "content": tool_result_str
-                        })
+                            messages.append({
+                                "role": "tool",
+                                "tool_call_id": tool_call["id"],
+                                "name": fn_name,
+                                "content": tool_result_str
+                            })
 
-                    # Second turn to generate final answer using tool result
-                    second_payload = {
-                        "model": self.model_name,
-                        "messages": messages,
-                        "temperature": 0.2,
-                        "max_tokens": 800
-                    }
-                    res2 = await client.post(self.api_url, headers=headers, json=second_payload)
-                    if res2.status_code == 200:
-                        data2 = res2.json()
-                        final_text = data2["choices"][0]["message"]["content"]
-                        return final_text, executed_tools
-
-                # If direct text answer without tool call
-                if msg_obj.get("content"):
-                    return msg_obj["content"], executed_tools
+                        # Update payload for the next loop iteration
+                        payload["messages"] = messages
+                    elif msg_obj.get("content"):
+                        return msg_obj["content"], executed_tools
+                    else:
+                        break
 
             return None
         except Exception as e:

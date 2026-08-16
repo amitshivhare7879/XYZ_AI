@@ -53,6 +53,12 @@ class GeminiService:
             res = tool_get_grades(user=user, student_name=student_name if student_name else None)
             return json.dumps(res)
 
+        def get_exam_schedule() -> str:
+            """Retrieve academic exam dates, terms, and upcoming test schedules."""
+            from tools import tool_get_exam_schedule
+            res = tool_get_exam_schedule(user=user)
+            return json.dumps(res)
+
         def get_fees(student_name: str = "") -> str:
             """Retrieve fee invoice status, pending dues, or school collection analytics."""
             res = tool_get_fees(user=user, student_name=student_name if student_name else None)
@@ -82,6 +88,7 @@ class GeminiService:
             get_attendance,
             mark_attendance,
             get_grades,
+            get_exam_schedule,
             get_fees,
             get_timetable,
             get_notices,

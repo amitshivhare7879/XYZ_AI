@@ -157,6 +157,20 @@ def build_user_context_instruction(user: UserTokenPayload) -> str:
 
     return base_prompt
 
+def sanitize_ai_output(text: str) -> str:
+    """Removes any accidental raw code, XML tool tags, or pseudo-function string artifacts."""
+    if not text:
+        return text
+    # Strip <function>...</function>, <tool_call>...</tool_call> tags
+    cleaned = re.sub(r'<(function|tool_call|invoke)>.*?</\1>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    cleaned = re.sub(r'</?(function|tool_call|invoke)[^>]*>', '', cleaned, flags=re.IGNORECASE)
+    # Strip raw function calls like get_next_exam_date("...") or get_attendance(...)
+    cleaned = re.sub(r'[a-zA-Z_0-9]+\([^)]*\)', '', cleaned)
+    # Clean up double spaces or orphan punctuation
+    cleaned = re.sub(r'\s{2,}', ' ', cleaned)
+    cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
+    return cleaned.strip()
+
 class ConversationOrchestrator:
     @staticmethod
     async def process_message(
@@ -267,12 +281,13 @@ class ConversationOrchestrator:
             )
             if gemini_result:
                 gemini_text, tools_called = gemini_result
+                cleaned_text = sanitize_ai_output(gemini_text)
                 return ChatResponse(
-                    response_text=gemini_text,
+                    response_text=cleaned_text,
                     session_id=sid,
                     language=lang,
                     executed_tools=tools_called,
-                    visemes=generate_viseme_timeline(gemini_text) if voice_requested else None
+                    visemes=generate_viseme_timeline(cleaned_text) if voice_requested else None
                 )
 
         # Step 4B: Live Groq Engine Execution (Ultra Fast Secondary / Fallback LLM)
@@ -288,12 +303,13 @@ class ConversationOrchestrator:
             )
             if groq_result:
                 groq_text, tools_called = groq_result
+                cleaned_text = sanitize_ai_output(groq_text)
                 return ChatResponse(
-                    response_text=groq_text,
+                    response_text=cleaned_text,
                     session_id=sid,
                     language=lang,
                     executed_tools=tools_called,
-                    visemes=generate_viseme_timeline(groq_text) if voice_requested else None
+                    visemes=generate_viseme_timeline(cleaned_text) if voice_requested else None
                 )
 
         # Step 5: Intent Detection & Local Tool Execution (Deterministic Fallback / Offline Engine)

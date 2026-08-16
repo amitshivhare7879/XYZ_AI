@@ -244,6 +244,20 @@ class ERPAcademicService:
         }
 
     @staticmethod
+    def get_upcoming_exams() -> List[Dict[str, Any]]:
+        """Retrieves upcoming and scheduled academic examinations."""
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("""
+            SELECT id, name, exam_type, start_date, end_date, academic_year
+            FROM exams
+            ORDER BY start_date ASC
+        """)
+        exams = [dict(r) for r in c.fetchall()]
+        conn.close()
+        return exams
+
+    @staticmethod
     def get_homework_for_class(class_id: str) -> List[Dict[str, Any]]:
         conn = get_db_connection()
         c = conn.cursor()
