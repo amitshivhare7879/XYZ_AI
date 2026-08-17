@@ -267,24 +267,39 @@ def sanitize_ai_output(text: str) -> str:
     cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
     return cleaned.strip()
 
-STUDENT_NAMES_MAP = [
-    "rahul patel", "rahul", "aarav sharma", "aarav", "diya mehta", "diya",
-    "rohan gupta", "rohan", "priya nair", "priya", "ananya iyer", "ananya",
-    "siddharth joshi", "siddharth", "tanvi deshmukh", "tanvi", "aditya singhania", "aditya",
-    "riya mukherjee", "riya", "varun chawla", "varun", "shreya nambiar", "shreya",
-    "neil bhatia", "neil", "devika pillai", "devika", "karthik sundaram", "karthik",
-    "pooja reddy", "pooja", "yashvardhan rathore", "yashvardhan", "sneha banerjee", "sneha",
-    "arjun kapoor", "arjun", "kabir khan", "kabir", "ishaan verma", "ishaan",
-    "dhruv malhotra", "dhruv", "natasha goel", "natasha"
-]
+STUDENT_NAMES_MAP = {
+    "rahul patel": "Rahul Patel", "rahul": "Rahul", "राहुल पटेल": "Rahul Patel", "राहुल": "Rahul", "રાહુલ": "Rahul",
+    "aarav sharma": "Aarav Sharma", "aarav": "Aarav", "आरव शर्मा": "Aarav Sharma", "आरव": "Aarav", "આરવ": "Aarav",
+    "diya mehta": "Diya Mehta", "diya": "Diya", "दीया मेहता": "Diya Mehta", "दीया": "Diya", "दिया": "Diya", "દીયા": "Diya",
+    "rohan gupta": "Rohan Gupta", "rohan": "Rohan", "रोहन गुप्ता": "Rohan Gupta", "रोहन": "Rohan", "રોહન": "Rohan",
+    "priya nair": "Priya Nair", "priya": "Priya", "प्रिया नायर": "Priya Nair", "प्रिया": "Priya", "પ્રિયા": "Priya",
+    "ananya iyer": "Ananya Iyer", "ananya": "Ananya", "अनन्या": "Ananya", "અનન્યા": "Ananya",
+    "siddharth joshi": "Siddharth Joshi", "siddharth": "Siddharth", "सिद्धार्थ": "Siddharth", "સિદ્ધાર્થ": "Siddharth",
+    "tanvi deshmukh": "Tanvi Deshmukh", "tanvi": "Tanvi", "तन्वी": "Tanvi", "તન્વી": "Tanvi",
+    "aditya singhania": "Aditya Singhania", "aditya": "Aditya", "आदित्य": "Aditya", "આદિત્ય": "Aditya",
+    "riya mukherjee": "Riya Mukherjee", "riya": "Riya", "रिया": "Riya", "રીયા": "Riya",
+    "varun chawla": "Varun Chawla", "varun": "Varun", "वरुण": "Varun", "વરુણ": "Varun",
+    "shreya nambiar": "Shreya Nambiar", "shreya": "Shreya", "श्रेया": "Shreya", "શ્રેયા": "Shreya",
+    "neil bhatia": "Neil Bhatia", "neil": "Neil", "नील": "Neil", "નીલ": "Neil",
+    "devika pillai": "Devika Pillai", "devika": "Devika", "देविका": "Devika", "દેવિકા": "Devika",
+    "karthik sundaram": "Karthik Sundaram", "karthik": "Karthik", "कार्तिक": "Karthik", "કાર્તિક": "Karthik",
+    "pooja reddy": "Pooja Reddy", "pooja": "Pooja", "पूजा": "Pooja", "પૂજા": "Pooja",
+    "yashvardhan rathore": "Yashvardhan Rathore", "yashvardhan": "Yashvardhan", "यशवर्धन": "Yashvardhan", "यश": "Yash",
+    "sneha banerjee": "Sneha Banerjee", "sneha": "Sneha", "स्नेहा": "Sneha", "સ્નેહા": "Sneha",
+    "arjun kapoor": "Arjun Kapoor", "arjun": "Arjun", "अर्जुन": "Arjun", "અર્જુન": "Arjun",
+    "kabir khan": "Kabir Khan", "kabir": "Kabir", "कबीर": "Kabir", "કબીર": "Kabir",
+    "ishaan verma": "Ishaan Verma", "ishaan": "Ishaan", "ईशान": "Ishaan", "ઈશાન": "Ishaan",
+    "dhruv malhotra": "Dhruv Malhotra", "dhruv": "Dhruv", "ध्रुव": "Dhruv", "ધ્રુવ": "Dhruv",
+    "natasha goel": "Natasha Goel", "natasha": "Natasha", "नताशा": "Natasha", "નતાશા": "Natasha"
+}
 
 SUBJECTS_MAP = ["mathematics", "math", "maths", "science", "physics", "chemistry", "biology", "english", "hindi", "social science", "history", "computer science"]
 
 def extract_student_name_from_text(text: str) -> Optional[str]:
     low = text.lower()
-    for name in STUDENT_NAMES_MAP:
-        if re.search(rf"\b{name}\b", low):
-            return name.title()
+    for name_key, canonical_name in STUDENT_NAMES_MAP.items():
+        if name_key in low:
+            return canonical_name
     return None
 
 def extract_subject_from_text(text: str) -> Optional[str]:
@@ -682,6 +697,10 @@ class ConversationOrchestrator:
         active_subject = context.get("active_subject")
         last_topic = context.get("active_topic")
         last_data = context.get("last_data", {})
+        mentioned_student = extract_student_name_from_text(msg_clean)
+        if mentioned_student:
+            context["active_student_name"] = mentioned_student
+            active_student = mentioned_student
 
         # -------------------------------------------------------------------
         # A. Conversational Corrections ("no, I meant Science", "actually next Monday", "no, mark him present")
@@ -728,7 +747,7 @@ class ConversationOrchestrator:
             first_name = user.name.split()[0] if user.name else "there"
             if user.role == "parent":
                 reply = (f"Hello {user.name}! {time_greeting}! I'm XYZ AI, your Parent Support Assistant. "
-                         f"Which language would you prefer to continue in today? (English, हिन्दी, ગુજરાતી, मराठी...)")
+                         f"Which language do you prefer?")
                 suggested_actions = [
                     SuggestedAction(label=f"Check {active_student or 'Child'}'s Attendance", action_type="query_attendance"),
                     SuggestedAction(label="Review Recent Grades", action_type="query_grades"),
@@ -736,7 +755,7 @@ class ConversationOrchestrator:
                 ]
             elif user.role == "student":
                 reply = (f"Hey {first_name}! {time_greeting}! 😊 I'm XYZ AI, your Academic Assistant. "
-                         f"Which language would you prefer to continue in today? (English, हिन्दी, ગુજરાતી, मराठी...)")
+                         f"Which language do you prefer?")
                 suggested_actions = [
                     SuggestedAction(label="My Timetable Today", action_type="query_timetable"),
                     SuggestedAction(label="My Attendance", action_type="query_attendance"),
@@ -744,7 +763,7 @@ class ConversationOrchestrator:
                 ]
             elif user.role == "teacher":
                 reply = (f"Hello {user.name}! {time_greeting}! I'm XYZ AI, your Teaching Assistant. "
-                         f"Which language would you prefer to continue in today? (English, हिन्दी, ગુજરાતી, मराठी...)")
+                         f"Which language do you prefer?")
                 suggested_actions = [
                     SuggestedAction(label="Mark Daily Attendance", action_type="mark_attendance"),
                     SuggestedAction(label="Class Attendance Summary", action_type="class_attendance"),
@@ -752,7 +771,7 @@ class ConversationOrchestrator:
                 ]
             else:  # Principal
                 reply = (f"Good day, {user.name}! I'm Athena, your Executive Management Assistant. "
-                         f"Which language would you prefer for today's session? (English, हिन्दी, ગુજરાતી, मराठी...)")
+                         f"Which language do you prefer?")
                 suggested_actions = [
                     SuggestedAction(label="School Attendance Metrics", action_type="query_attendance"),
                     SuggestedAction(label="Fee Collection Overview", action_type="query_fees"),
@@ -850,18 +869,26 @@ class ConversationOrchestrator:
         # -------------------------------------------------------------------
         # F. Attendance Queries & Follow-ups
         # -------------------------------------------------------------------
-        if any(w in msg_lower for w in [
+        is_attendance_query = any(w in msg_lower for w in [
             "attendance", "present", "absent", "school yesterday", "come to school", "came to school", 
             "days", "school aya", "school aaya", "school aayi", "school gaya", "kal school", "hajiri",
-            "હાજરી", "હાજર", "ગેરહાજર", "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "उपस्थिती", "उपस्थित", "अनुपस्थित", "வருகை"
-        ]):
+            "હાજરી", "હાજર", "ગેરહાજર", "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "उपस्थिती", "उपस्थित", "अनुपस्थित", "வருகை",
+            "प्रेसेंट", "प्रेजेंट", "प्रेजन", "एब्सेंट", "बच्चे", "कितने बच्चे", "विद्यार्थी", "छात्र", "छात्रों", "kitne bacche",
+            "kitne student", "aaj kitne", "kitne bache", "present hain", "aaye hain"
+        ])
+
+        if is_attendance_query:
             context["active_topic"] = "attendance"
             
             # Check if teacher wants to mark attendance
-            if user.role in ["teacher", "principal"] and any(w in msg_lower for w in ["mark", "set"]):
-                status_target = "absent" if "absent" in msg_lower else "present" if "present" in msg_lower else "late" if "late" in msg_lower else "present"
-                name_match = re.search(r"mark\s+([a-zA-Z\s]+?)\s+(absent|present|late|excused)", msg_clean, re.IGNORECASE)
-                student_to_mark = name_match.group(1).strip() if name_match else (active_student or "Rahul")
+            is_mark_action = user.role in ["teacher", "principal"] and (
+                any(w in msg_lower for w in ["mark", "set", "मार्क", "लगाओ", "करो", "दर्ज", "नोट करो", "लगा दें", "mark karo"]) or
+                (mentioned_student and any(w in msg_lower for w in ["absent", "present", "late", "एब्सेंट", "प्रेजेंट", "प्रेसेंट", "प्रेजन", "अनुपस्थित", "उपस्थित", "हाजिर"]))
+            )
+
+            if is_mark_action:
+                status_target = "absent" if any(w in msg_lower for w in ["absent", "एब्सेंट", "अनुपस्थित", "गैरहाजिर", "ગેરહાજર"]) else "late" if any(w in msg_lower for w in ["late", "लेट", "देरी"]) else "present"
+                student_to_mark = mentioned_student or extract_student_name_from_text(msg_clean) or active_student or "Rahul"
 
                 res = tool_mark_attendance(user=user, student_name=student_to_mark, status=status_target)
                 executed_tools.append("tool_mark_attendance")
@@ -981,21 +1008,109 @@ class ConversationOrchestrator:
             return reply, suggested_actions, executed_tools
 
         # -------------------------------------------------------------------
+        # H. Fee Status, Payment Details, and Receipt Delivery
+        # -------------------------------------------------------------------
+        msg_alpha = re.sub(r'[^a-zA-Z0-9\s]', ' ', msg_lower).strip()
+        msg_alpha = re.sub(r'\s+', ' ', msg_alpha)
+
+        # 1. Email Receipt Request
+        if any(w in msg_lower for w in ["email receipt", "email me receipt", "email me the payment", "send receipt", "mail receipt", "invoice copy", "download receipt", "email me the payment reciept"]) or ("email" in msg_lower and "receipt" in msg_lower):
+            context["active_topic"] = "fees"
+            sname = active_student or "Rahul Patel"
+            p_email = user.email or "amit.patel@gmail.com"
+            reply = (f"📧 **Fee Receipt & Invoice Dispatched!**\n"
+                     f"The official fee invoice and payment breakdown for **{sname}** (Term 1 - Academic Year 2025-26) "
+                     f"has been sent to your registered email address (**{p_email}**).\n\n"
+                     f"You can also download digital PDF copies anytime under the Parent Portal Documents section.")
+            suggested_actions = [
+                SuggestedAction(label="Payment Methods", action_type="view_payment_methods"),
+                SuggestedAction(label="Check Attendance", action_type="query_attendance")
+            ]
+            return reply, suggested_actions, executed_tools
+
+        # 2. Payment Details / How to Pay / Bank Info
+        if any(w in msg_lower for w in ["payment details", "share me the payment", "share payment details", "share the payment", "how to pay", "bank details", "payment options", "pay online", "upi id", "account details", "share details"]) or (last_topic == "fees" and any(w in msg_alpha.split() for w in ["share", "details", "how", "account", "bank", "pay"])):
+            context["active_topic"] = "fees"
+            sname = active_student or "Rahul Patel"
+            reply = (f"Here are the official school payment details for **{sname}** (Outstanding Amount: **₹45,000.00**):\n\n"
+                     f"💳 **1. Online Payment Portal**: Click 'Pay Fees Online' in your portal header to pay instantly via UPI, NetBanking, or Debit/Credit card.\n"
+                     f"🏦 **2. Direct Bank Transfer (NEFT/RTGS)**:\n"
+                     f"   - **Beneficiary**: XYZ Public School Fee Collection\n"
+                     f"   - **Bank**: HDFC Bank (School Campus Branch)\n"
+                     f"   - **Account No**: `50200088991122`\n"
+                     f"   - **IFSC Code**: `HDFC0001042`\n"
+                     f"📱 **3. UPI**: `xyzschool.fees@hdfcbank`\n\n"
+                     f"Would you like me to email you the official invoice and payment receipt for your records?")
+            suggested_actions = [
+                SuggestedAction(label="Email Fee Receipt", action_type="email_receipt"),
+                SuggestedAction(label="Download Invoice PDF", action_type="download_invoice")
+            ]
+            return reply, suggested_actions, executed_tools
+
+        # 3. User Acknowledges / "Received" / "Got it" / "Noted"
+        if any(w in msg_alpha for w in ["received", "got it", "noted", "i received", "got the receipt", "understood", "all good", "okay thanks", "ok thanks"]):
+            first_name = user.name.split()[0] if user.name else "there"
+            last_name = user.name.split()[-1] if user.name else "there"
+            if user.role == "parent":
+                reply = (f"You're very welcome, Mr./Mrs. {last_name}! 😊\n"
+                         f"Please let me know if you need any further assistance with {active_student or 'Rahul'}'s attendance, academic report cards, or school routines.")
+            else:
+                reply = "Glad to help! Let me know if there's anything else you'd like to check today."
+            return reply, suggested_actions, executed_tools
+
+        # 4. General Fee Balance / Dues Query
+        if any(w in msg_lower for w in ["fee", "fees", "dues", "payment", "invoice", "receipt", "paid", "balance", "cost", "બિલ", "ફી", "ભરાઈ", "કુલ ફી", "फीस", "शुल्क", "भरपाई", "कलेक्शन", "பணம்", "கட்டணம்", "pending fee", "pending fees", "kitni fees", "kitni fee"]):
+            context["active_topic"] = "fees"
+            res = tool_get_fees(user=user, student_name=active_student)
+            executed_tools.append("tool_get_fees")
+            context["last_data"] = res
+
+            if res.get("is_security_refusal"):
+                reply = f"Access Notice: {res.get('error')}"
+            elif "error" in res:
+                reply = f"Could not retrieve fee information: {res.get('error')}"
+            elif "total_collected" in res:
+                # Principal Analytics
+                collected = res.get("total_collected", 0)
+                billed = res.get("total_billed", 0)
+                out = res.get("total_outstanding", 0)
+                rate = round((collected / billed * 100), 1) if billed > 0 else 0.0
+                reply = (f"**Executive Fee Collection Analytics**:\n"
+                         f"- Total Billed: ₹{billed:,.2f}\n"
+                         f"- Total Collected: ₹{collected:,.2f} (**{rate}% collection rate**)\n"
+                         f"- Total Outstanding Dues: ₹{out:,.2f} across {res.get('overdue_count', 0)} overdue accounts.\n"
+                         f"Would you like to export the list of outstanding accounts for administrative follow-up?")
+                suggested_actions = [SuggestedAction(label="View Overdue Accounts", action_type="view_overdue_fees")]
+            else:
+                sname = res.get("student_name", active_student or "Rahul")
+                dues = res.get("total_outstanding_dues", 0)
+                if dues == 0:
+                    reply = f"Great news! All school fee invoices for **{sname}** are completely settled and up to date. There are no outstanding dues."
+                else:
+                    reply = (f"For **{sname}**, there is a current outstanding balance of **₹{dues:,.2f}**. "
+                             f"The upcoming installment is due by August 30, 2026. Would you like me to share payment details or email you the receipt?")
+                    suggested_actions = [
+                        SuggestedAction(label="Share Payment Details", action_type="view_payment_methods"),
+                        SuggestedAction(label="Email Fee Receipt", action_type="email_receipt")
+                    ]
+            return reply, suggested_actions, executed_tools
+
+        # -------------------------------------------------------------------
         # G2. Subject-Specific Guidance, Revision Plans & Study Tips
         # -------------------------------------------------------------------
         subject_detected = None
-        if any(w in msg_lower for w in ["english", "eng", "literature", "grammar"]):
+        if re.search(r'\b(english|literature|grammar)\b', msg_lower):
             subject_detected = "English"
-        elif any(w in msg_lower for w in ["math", "maths", "mathematics", "algebra", "geometry"]):
+        elif re.search(r'\b(math|maths|mathematics|algebra|geometry)\b', msg_lower):
             subject_detected = "Mathematics"
-        elif any(w in msg_lower for w in ["science", "physics", "chemistry", "biology", "sci"]):
+        elif re.search(r'\b(science|physics|chemistry|biology)\b', msg_lower):
             subject_detected = "Science"
-        elif any(w in msg_lower for w in ["computer", "it", "informatics", "coding", "programming"]):
+        elif re.search(r'\b(computer\s+applications|computer|informatics|coding|programming|\bit\b)\b', msg_lower):
             subject_detected = "Computer Applications"
-        elif any(w in msg_lower for w in ["social", "history", "geography", "civics", "sst"]):
+        elif re.search(r'\b(social\s+studies|history|geography|civics|sst)\b', msg_lower):
             subject_detected = "Social Studies"
 
-        is_study_tip_inquiry = any(w in msg_lower for w in ["tip", "tips", "study", "revision", "prepare", "strategy", "how to learn", "how to study", "guidance"])
+        is_study_tip_inquiry = any(re.search(rf'\b{w}\b', msg_lower) for w in ["tip", "tips", "revision", "prepare", "strategy", "guidance"]) or "how to study" in msg_lower or "how to learn" in msg_lower
         
         if subject_detected or is_study_tip_inquiry:
             context["active_topic"] = "subject_guidance"
@@ -1102,94 +1217,6 @@ class ConversationOrchestrator:
                 ]
             else:
                 reply = f"Academic summary for {sname}: Overall Average **{avg}%**. Scores: {top_grades}."
-            return reply, suggested_actions, executed_tools
-
-        # -------------------------------------------------------------------
-        # H. Fee Status, Payment Details, and Receipt Delivery
-        # -------------------------------------------------------------------
-        msg_alpha = re.sub(r'[^a-zA-Z0-9\s]', ' ', msg_lower).strip()
-        msg_alpha = re.sub(r'\s+', ' ', msg_alpha)
-
-        # 1. Email Receipt Request
-        if any(w in msg_lower for w in ["email receipt", "email me receipt", "email me the payment", "send receipt", "mail receipt", "invoice copy", "download receipt", "email me the payment reciept"]) or ("email" in msg_lower and "receipt" in msg_lower):
-            context["active_topic"] = "fees"
-            sname = active_student or "Rahul Patel"
-            p_email = user.email or "amit.patel@gmail.com"
-            reply = (f"📧 **Fee Receipt & Invoice Dispatched!**\n"
-                     f"The official fee invoice and payment breakdown for **{sname}** (Term 1 - Academic Year 2025-26) "
-                     f"has been sent to your registered email address (**{p_email}**).\n\n"
-                     f"You can also download digital PDF copies anytime under the Parent Portal Documents section.")
-            suggested_actions = [
-                SuggestedAction(label="Payment Methods", action_type="view_payment_methods"),
-                SuggestedAction(label="Check Attendance", action_type="query_attendance")
-            ]
-            return reply, suggested_actions, executed_tools
-
-        # 2. Payment Details / How to Pay / Bank Info
-        if any(w in msg_lower for w in ["payment details", "share me the payment", "share payment details", "share the payment", "how to pay", "bank details", "payment options", "pay online", "upi id", "account details", "share details"]) or (last_topic == "fees" and any(w in msg_alpha.split() for w in ["share", "details", "how", "account", "bank", "pay"])):
-            context["active_topic"] = "fees"
-            sname = active_student or "Rahul Patel"
-            reply = (f"Here are the official school payment details for **{sname}** (Outstanding Amount: **₹45,000.00**):\n\n"
-                     f"💳 **1. Online Payment Portal**: Click 'Pay Fees Online' in your portal header to pay instantly via UPI, NetBanking, or Debit/Credit card.\n"
-                     f"🏦 **2. Direct Bank Transfer (NEFT/RTGS)**:\n"
-                     f"   - **Beneficiary**: XYZ Public School Fee Collection\n"
-                     f"   - **Bank**: HDFC Bank (School Campus Branch)\n"
-                     f"   - **Account No**: `50200088991122`\n"
-                     f"   - **IFSC Code**: `HDFC0001042`\n"
-                     f"📱 **3. UPI**: `xyzschool.fees@hdfcbank`\n\n"
-                     f"Would you like me to email you the official invoice and payment receipt for your records?")
-            suggested_actions = [
-                SuggestedAction(label="Email Fee Receipt", action_type="email_receipt"),
-                SuggestedAction(label="Download Invoice PDF", action_type="download_invoice")
-            ]
-            return reply, suggested_actions, executed_tools
-
-        # 3. User Acknowledges / "Received" / "Got it" / "Noted"
-        if any(w in msg_alpha for w in ["received", "got it", "noted", "i received", "got the receipt", "understood", "all good", "okay thanks", "ok thanks"]):
-            first_name = user.name.split()[0] if user.name else "there"
-            last_name = user.name.split()[-1] if user.name else "there"
-            if user.role == "parent":
-                reply = (f"You're very welcome, Mr./Mrs. {last_name}! 😊\n"
-                         f"Please let me know if you need any further assistance with {active_student or 'Rahul'}'s attendance, academic report cards, or school routines.")
-            else:
-                reply = "Glad to help! Let me know if there's anything else you'd like to check today."
-            return reply, suggested_actions, executed_tools
-
-        # 4. General Fee Balance / Dues Query
-        if any(w in msg_lower for w in ["fee", "fees", "dues", "payment", "invoice", "receipt", "paid", "balance", "cost", "બિલ", "ફી", "ભરાઈ", "કુલ ફી", "फीस", "शुल्क", "भरपाई", "कलेक्शन", "பணம்", "கட்டணம்"]):
-            context["active_topic"] = "fees"
-            res = tool_get_fees(user=user, student_name=active_student)
-            executed_tools.append("tool_get_fees")
-            context["last_data"] = res
-
-            if res.get("is_security_refusal"):
-                reply = f"Access Notice: {res.get('error')}"
-            elif "error" in res:
-                reply = f"Could not retrieve fee information: {res.get('error')}"
-            elif "total_collected" in res:
-                # Principal Analytics
-                collected = res.get("total_collected", 0)
-                billed = res.get("total_billed", 0)
-                out = res.get("total_outstanding", 0)
-                rate = round((collected / billed * 100), 1) if billed > 0 else 0.0
-                reply = (f"**Executive Fee Collection Analytics**:\n"
-                         f"- Total Billed: ₹{billed:,.2f}\n"
-                         f"- Total Collected: ₹{collected:,.2f} (**{rate}% collection rate**)\n"
-                         f"- Total Outstanding Dues: ₹{out:,.2f} across {res.get('overdue_count', 0)} overdue accounts.\n"
-                         f"Would you like to export the list of outstanding accounts for administrative follow-up?")
-                suggested_actions = [SuggestedAction(label="View Overdue Accounts", action_type="view_overdue_fees")]
-            else:
-                sname = res.get("student_name", active_student or "Rahul")
-                dues = res.get("total_outstanding_dues", 0)
-                if dues == 0:
-                    reply = f"Great news! All school fee invoices for **{sname}** are completely settled and up to date. There are no outstanding dues."
-                else:
-                    reply = (f"For **{sname}**, there is a current outstanding balance of **₹{dues:,.2f}**. "
-                             f"The upcoming installment is due by August 30, 2026. Would you like me to share payment details or email you the receipt?")
-                    suggested_actions = [
-                        SuggestedAction(label="Share Payment Details", action_type="view_payment_methods"),
-                        SuggestedAction(label="Email Fee Receipt", action_type="email_receipt")
-                    ]
             return reply, suggested_actions, executed_tools
 
         # -------------------------------------------------------------------

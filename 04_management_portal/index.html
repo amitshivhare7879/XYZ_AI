@@ -700,12 +700,22 @@
 
       setAvatarState('listening');
 
-      // Instantly start listening to the user without speaking canned robot cues
-      setTimeout(() => {
-        if (isLiveVoiceActive && !isSpeaking) {
-          startSpeechRecognition();
-        }
-      }, 150);
+      const greetedKey = 'xyz_live_greeted_' + 'management';
+      const hasBeenGreeted = sessionStorage.getItem(greetedKey) || sessionStorage.getItem('xyz_live_greeted');
+
+      if (!hasBeenGreeted) {
+        sessionStorage.setItem(greetedKey, 'true');
+        sessionStorage.setItem('xyz_live_greeted', 'true');
+        const firstGreeting = "Good day, Dr. Rajesh Sharma! Welcome to XYZ AI Executive Portal. Which language would you prefer for our conversation? We support English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu, and more.";
+        appendMessage('assistant', firstGreeting);
+        speakAssistantResponse(firstGreeting);
+      } else {
+        setTimeout(() => {
+          if (isLiveVoiceActive && !isSpeaking) {
+            startSpeechRecognition();
+          }
+        }, 150);
+      }
     }
 
     function stopContinuousLiveVoice() {

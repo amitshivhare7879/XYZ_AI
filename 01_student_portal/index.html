@@ -232,7 +232,7 @@
                 XYZ
               </div>
               <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
-                <p>Hey Rahul! I'm your <strong>Academic Assistant</strong>. You're doing great with 91.2% attendance and an A+ average! How can I help you today? Need to check upcoming homework, today's schedule, or study concepts?</p>
+                <p>Hello Rahul! Which language do you prefer?</p>
               </div>
             </div>
           </div>
@@ -375,26 +375,19 @@
     let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
     let isLiveVoiceActive = false;
     let recognition = null;
-    let isSpeaking = false;
-    let silenceTimer = null;
-
-    if (window.SchoolI18n) {
-      SchoolI18n.initI18n(selectedLanguage);
-    }
-
-    function onLanguageChange(lang) {
+    l    function onLanguageChange(lang) {
       selectedLanguage = lang;
       localStorage.setItem('preferred_lang', lang);
       if (window.SchoolI18n) {
         SchoolI18n.applyTranslations(lang);
       }
       const greetings = {
-        en: "Hey Rahul! I'm XYZ AI, your Academic Assistant. Which language would you prefer to continue in today? (English, हिन्दी, ગુજરાતી, मराठी...)",
-        hi: "नमस्ते राहुल! मैं आपका XYZ AI शैक्षणिक सहायक हूँ। आप आज किस भाषा में बात करना पसंद करेंगे? (English, हिन्दी, ગુજરાતી, मराठी...)",
-        gu: "નમસ્તે રાહુલ! હું XYZ AI, તમારો શૈક્ષણિક સહાયક છું. આજે તમે કઈ ભાષામાં વાતચીત કરવા માંગો છો? (English, हिन्दी, ગુજરાતી, मराठी...)",
-        mr: "नमस्कार राहुल! मी XYZ AI, तुझा शैक्षणिक सहाय्यक आहे. आज तुला कोणत्या भाषेत बोलायला आवडेल? (English, हिन्दी, ગુજરાતી, मराठी...)",
-        ta: "வணக்கம் ராகுல்! நான் XYZ AI, உங்கள் கல்வி உதவியாளர். இன்று நீங்கள் எந்த மொழியில் உரையாட விரும்புகிறீர்கள்?",
-        hinglish: "Hey Rahul! Main XYZ AI hoon, aapka Academic Assistant. Aaj aap kis language me continue karna chahenge? (English, हिन्दी, ગુજરાતી, मराठी...)"
+        en: "Hello Rahul! Which language do you prefer? (English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu...)",
+        hi: "नमस्ते राहुल! आप किस भाषा में बात करना पसंद करेंगे?",
+        gu: "નમસ્તે રાહુલ! તમે કઈ ભાષા પસંદ કરો છો?",
+        mr: "नमस्कार राहुल! तुला कोणती भाषा आवडेल?",
+        ta: "வணக்கம் ராகுல்! எந்த மொழியை விரும்புகிறீர்கள்?",
+        hinglish: "Hello Rahul! Aap kis language me baat karna prefer karenge?"
       };
       const feed = document.getElementById('studentChatFeed');
       if (feed && feed.children.length <= 1) {
@@ -738,12 +731,22 @@
 
       setAvatarState('listening');
 
-      // Instantly start listening to the user without speaking canned robot cues
-      setTimeout(() => {
-        if (isLiveVoiceActive && !isSpeaking) {
-          startSpeechRecognition();
-        }
-      }, 150);
+      const greetedKey = 'xyz_live_greeted_' + 'student';
+      const hasBeenGreeted = sessionStorage.getItem(greetedKey) || sessionStorage.getItem('xyz_live_greeted');
+
+      if (!hasBeenGreeted) {
+        sessionStorage.setItem(greetedKey, 'true');
+        sessionStorage.setItem('xyz_live_greeted', 'true');
+        const firstGreeting = "Hello Rahul! Welcome to XYZ AI. Which language do you prefer to speak in? You can choose English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu, and more.";
+        appendMessage('assistant', firstGreeting);
+        speakAssistantResponse(firstGreeting);
+      } else {
+        setTimeout(() => {
+          if (isLiveVoiceActive && !isSpeaking) {
+            startSpeechRecognition();
+          }
+        }, 150);
+      }
     }
 
     function stopContinuousLiveVoice() {

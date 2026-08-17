@@ -9,6 +9,9 @@ import time
 import os
 from pathlib import Path
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 ROOT_DIR = Path(__file__).parent
 
 def launch():

@@ -59,6 +59,13 @@ app.add_middleware(
 )
 
 import time
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -70,10 +77,13 @@ async def log_requests(request, call_next):
     duration_ms = round((time.time() - start_time) * 1000, 1)
     
     status_code = response.status_code
-    status_icon = "🟢" if status_code < 400 else "🔴"
+    status_tag = "[OK]" if status_code < 400 else "[ERR]"
     
     if path.startswith("/api/") or path == "/chat":
-        print(f"{status_icon} [{method}] {path} -> {status_code} ({duration_ms}ms)", flush=True)
+        try:
+            print(f"{status_tag} [{method}] {path} -> {status_code} ({duration_ms}ms)", flush=True)
+        except Exception:
+            pass
         
     return response
 
