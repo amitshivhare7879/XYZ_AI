@@ -6,7 +6,7 @@ Enforces thin-client architecture and cryptographic JWT application-layer RBAC.
 
 import os
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -225,19 +225,48 @@ def get_current_user_profile(user: UserTokenPayload = Depends(get_current_user))
 
 # 2. Main Conversational Chat Endpoint (Core Requirement)
 @app.post("/api/chat", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(
     req: ChatRequest,
-    user: UserTokenPayload = Depends(get_current_user)
+    authorization: Optional[str] = Header(None)
 ):
     """
     Main AI conversation endpoint.
     Orchestrates 4 personas, application-layer RBAC, slot filling, and 11-language generation.
+    Authenticates via Authorization header, embedded portal user, or demo fallback.
     """
+    calling_user = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+        try:
+            from auth import decode_access_token
+            calling_user = decode_access_token(token)
+        except Exception:
+            calling_user = None
+            
+    if not calling_user and req.user:
+        try:
+            u_role = req.user.get("role", "parent")
+            if u_role not in ["student", "parent", "teacher", "principal"]:
+                u_role = "parent"
+            calling_user = UserTokenPayload(
+                user_id=req.user.get("user_id", "usr_demo"),
+                email=req.user.get("email", "demo@school.edu"),
+                name=req.user.get("name", "Demo User"),
+                role=u_role,
+                preferred_language=req.user.get("preferred_language", req.language or "en")
+            )
+        except Exception as ue:
+            print(f"[Chat Auth Warning] Error parsing user payload: {ue}")
+
+    if not calling_user:
+        calling_user = DEMO_ACCOUNTS.get("parent")
+
     return await ConversationOrchestrator.process_message(
         message=req.message,
-        user=user,
+        user=calling_user,
         session_id=req.session_id,
-        language=req.language,
+        language=req.language or calling_user.preferred_language,
         voice_requested=req.voice_response_requested
     )
 

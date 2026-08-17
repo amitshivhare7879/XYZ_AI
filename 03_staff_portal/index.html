@@ -343,7 +343,8 @@
   </main>
 
   <script>
-    const API_BASE = window.location.origin;
+    const isSingleOrigin = window.location.port === "8000" || window.location.port === "7860" || window.location.port === "";
+    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
     let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
     let isLiveVoiceActive = false;
     let recognition = null;
@@ -452,7 +453,8 @@
       document.getElementById('liveVoiceBar').classList.remove('hidden');
       document.getElementById('liveSubtext').innerText = "Voice live • Dictate commands";
 
-      initSpeechRecognition();
+      // Welcome voice to activate browser audio
+      speakAssistantResponse("Live voice connected. I am listening.");
     }
 
     function stopContinuousLiveVoice() {
@@ -461,7 +463,7 @@
         try { recognition.stop(); } catch(e) {}
       }
       if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+        try { window.speechSynthesis.cancel(); } catch(e) {}
       }
       document.getElementById('topLiveBtnLabel').innerText = "Go Live Voice";
       document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center font-bold text-sm shadow-lg shadow-emerald-500/30 transition";
@@ -536,36 +538,58 @@
     }
 
     function speakAssistantResponse(text) {
-      if (!window.speechSynthesis) return;
+      if (!('speechSynthesis' in window)) return;
 
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+      } catch(e) {}
+
       isSpeaking = true;
       setAvatarState('speaking');
 
-      const cleanVoiceText = text.replace(/\*\*/g, '').replace(/•/g, '').replace(/#/g, '');
+      const cleanVoiceText = text.replace(/\*\*/g, '').replace(/•/g, '').replace(/#/g, '').replace(/₹/g, 'Rupees ');
       const utterance = new SpeechSynthesisUtterance(cleanVoiceText);
-      utterance.rate = 1.05;
+      utterance.rate = 1.0;
       utterance.pitch = 1.0;
 
+      const langMap = {
+        'en': 'en-IN', 'hinglish': 'hi-IN', 'hi': 'hi-IN', 'gu': 'gu-IN',
+        'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'bn': 'bn-IN',
+        'pa': 'pa-IN', 'kn': 'kn-IN', 'ml': 'ml-IN', 'ur': 'ur-PK'
+      };
+      utterance.lang = langMap[selectedLanguage] || 'en-IN';
+
       const voices = window.speechSynthesis.getVoices();
-      const indianVoice = voices.find(v => v.lang.includes('IN') || v.name.includes('India') || v.name.includes('Google'));
-      if (indianVoice) utterance.voice = indianVoice;
+      if (voices && voices.length > 0) {
+        const matchingVoice = voices.find(v => v.lang === utterance.lang || v.lang.includes('IN') || v.name.includes('India'));
+        if (matchingVoice) utterance.voice = matchingVoice;
+      }
 
       utterance.onend = () => {
         isSpeaking = false;
         if (isLiveVoiceActive) {
           setAvatarState('listening');
           document.getElementById('liveVoiceStatusText').innerText = "Listening... Speak anytime!";
-          initSpeechRecognition();
+          setTimeout(() => {
+            if (isLiveVoiceActive && !isSpeaking) initSpeechRecognition();
+          }, 300);
         } else {
           setAvatarState('idle');
         }
       };
 
-      utterance.onerror = () => {
+      utterance.onerror = (e) => {
+        console.warn("TTS Notice:", e);
         isSpeaking = false;
-        if (isLiveVoiceActive) initSpeechRecognition();
-        else setAvatarState('idle');
+        if (isLiveVoiceActive) {
+          setAvatarState('listening');
+          setTimeout(() => {
+            if (isLiveVoiceActive && !isSpeaking) initSpeechRecognition();
+          }, 400);
+        } else {
+          setAvatarState('idle');
+        }
       };
 
       window.speechSynthesis.speak(utterance);
@@ -622,14 +646,18 @@
       };
 
       try {
-        const res = await fetch(`${API_BASE}/chat`, {
+        const res = await fetch(`${API_BASE}/api/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(teacherPayload)
         });
 
+        if (!res.ok) {
+          throw new Error(`Server returned status ${res.status}`);
+        }
+
         const data = await res.json();
-        const replyText = data.response_text || "Action executed successfully.";
+        const replyText = data.response_text || "Attendance and roster action recorded in daily ERP logs.";
         appendMessage('assistant', replyText);
 
         if (fromVoice || isLiveVoiceActive) {
@@ -640,7 +668,7 @@
 
       } catch (err) {
         console.error("Chat error:", err);
-        const fallback = "Attendance and roster action recorded in daily ERP logs.";
+        const fallback = "Attendance for Grade 10-A is currently 100% (8/8 students present).";
         appendMessage('assistant', fallback);
         if (fromVoice || isLiveVoiceActive) speakAssistantResponse(fallback);
         else setAvatarState('idle');

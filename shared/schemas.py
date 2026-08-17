@@ -8,20 +8,21 @@ from typing import List, Optional, Dict, Any, Literal
 from datetime import date, datetime
 
 UserRole = Literal['student', 'parent', 'teacher', 'principal']
-SupportedLanguage = Literal['en', 'hi', 'ta', 'te', 'mr', 'bn', 'gu', 'pa', 'kn', 'ml', 'ur']
+SupportedLanguage = Literal['en', 'hi', 'ta', 'te', 'mr', 'bn', 'gu', 'pa', 'kn', 'ml', 'ur', 'hinglish']
 
 class UserTokenPayload(BaseModel):
     user_id: str
-    email: str
+    email: str = "demo@school.edu"
     name: str
     role: UserRole
-    preferred_language: SupportedLanguage = 'en'
+    preferred_language: str = 'en'
 
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
-    language: Optional[SupportedLanguage] = None
+    language: Optional[str] = None
     voice_response_requested: bool = False
+    user: Optional[Dict[str, Any]] = None
 
 class VisemeCue(BaseModel):
     time: float
