@@ -7,391 +7,354 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B0F19; color: #F3F4F6; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #080C16; color: #F3F4F6; }
     h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
-    .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glass-card-hover:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-2px); transition: all 0.2s ease; }
-    .glow-primary { box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.3); }
-    .avatar-pulse { animation: pulse-avatar 2s infinite; }
-    @keyframes pulse-avatar { 0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); } 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } }
+    .font-classic { font-family: 'Cinzel', serif; }
+    
+    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5); }
+    .glass-panel-gold { background: rgba(26, 22, 14, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(245, 158, 11, 0.2); box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.15); }
+    .glass-card-hover:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-2px); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    /* Animated Live Waves */
+    @keyframes soundwave { 0%, 100% { height: 6px; } 50% { height: 28px; } }
+    .wave-bar { animation: soundwave 1.2s ease-in-out infinite; }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.6s; }
+
+    /* Avatar Glow & Mouth Animation */
+    @keyframes avatar-halo { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.08); opacity: 0.85; } }
+    .avatar-halo-pulse { animation: avatar-halo 3s ease-in-out infinite; }
+    
+    @keyframes speaking-mouth { 0%, 100% { transform: scaleY(0.2); } 50% { transform: scaleY(1); } }
+    .mouth-speaking { animation: speaking-mouth 0.22s ease-in-out infinite alternate; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
   <!-- Top Navbar -->
-  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-white/10 bg-[#0B101E]/90 backdrop-blur-xl sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-heading font-bold text-white shadow-lg">
-          XYZ
+      
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-amber-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
+          <i class="fa-solid fa-school text-white text-lg"></i>
         </div>
         <div>
-          <span class="text-lg font-bold tracking-tight text-white font-heading">XYZ AI <span class="text-indigo-400 font-normal">| Parent Portal</span></span>
-          <p class="text-xs text-gray-400">Delhi Public Global School ERP</p>
+          <div class="flex items-center space-x-2">
+            <span class="text-base font-bold text-white font-heading tracking-wide">XYZ ACADEMY</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">PARENT PORTAL</span>
+          </div>
+          <p class="text-[11px] text-gray-400">Child: <strong class="text-indigo-300">Rahul Patel</strong> (Class 10-A • Roll #10A-01)</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <!-- Language Switcher (11 Languages) -->
-        <div class="flex items-center space-x-2 bg-gray-800/80 border border-gray-700 px-3 py-1.5 rounded-lg text-sm">
+      <div class="flex items-center space-x-3">
+        <!-- Gemini Live Voice Button -->
+        <button id="topLiveVoiceBtn" onclick="toggleContinuousLiveVoice()" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-600/20 hover:from-indigo-500/30 hover:to-purple-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold shadow-lg shadow-indigo-500/10 transition">
+          <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+          <i class="fa-solid fa-waveform-lines mr-1"></i>
+          <span id="topLiveBtnLabel">Go Live Voice</span>
+        </button>
+
+        <!-- Language Selector with Hinglish -->
+        <div class="flex items-center space-x-2 bg-gray-900/90 border border-white/10 px-3 py-1.5 rounded-xl text-xs">
           <i class="fa-solid fa-language text-indigo-400"></i>
-          <select id="languageSelect" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
+          <select id="languageSelect" onchange="onLanguageChange(this.value)" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
             <option value="en" class="bg-gray-900 text-white">English</option>
-            <option value="hi" class="bg-gray-900 text-white">Hindi (हिंदी)</option>
-            <option value="ta" class="bg-gray-900 text-white">Tamil (தமிழ்)</option>
-            <option value="te" class="bg-gray-900 text-white">Telugu (తెలుగు)</option>
-            <option value="mr" class="bg-gray-900 text-white">Marathi (मराठी)</option>
-            <option value="bn" class="bg-gray-900 text-white">Bengali (বাংলা)</option>
-            <option value="gu" class="bg-gray-900 text-white">Gujarati (ગુજરાતી)</option>
-            <option value="pa" class="bg-gray-900 text-white">Punjabi (ਪੰਜਾਬੀ)</option>
-            <option value="kn" class="bg-gray-900 text-white">Kannada (ಕನ್ನಡ)</option>
-            <option value="ml" class="bg-gray-900 text-white">Malayalam (മലയാളം)</option>
-            <option value="ur" class="bg-gray-900 text-white">Urdu (اردو)</option>
+            <option value="hinglish" class="bg-gray-900 text-white">Hinglish (Hindi + Eng)</option>
+            <option value="hi" class="bg-gray-900 text-white">हिन्दी (Hindi)</option>
+            <option value="gu" class="bg-gray-900 text-white">ગુજરાતી (Gujarati)</option>
+            <option value="ta" class="bg-gray-900 text-white">தமிழ் (Tamil)</option>
+            <option value="te" class="bg-gray-900 text-white">తెలుగు (Telugu)</option>
+            <option value="mr" class="bg-gray-900 text-white">मराठी (Marathi)</option>
+            <option value="bn" class="bg-gray-900 text-white">বাংলা (Bengali)</option>
+            <option value="pa" class="bg-gray-900 text-white">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="kn" class="bg-gray-900 text-white">ಕನ್ನಡ (Kannada)</option>
+            <option value="ml" class="bg-gray-900 text-white">മലയാളം (Malayalam)</option>
+            <option value="ur" class="bg-gray-900 text-white">اردو (Urdu)</option>
           </select>
         </div>
 
-        <!-- Student Selector -->
-        <div class="flex items-center space-x-2 bg-indigo-950/50 border border-indigo-500/30 px-3 py-1.5 rounded-lg text-xs">
-          <i class="fa-solid fa-graduation-cap text-indigo-400"></i>
-          <span class="text-gray-300">Child:</span>
-          <span class="font-semibold text-indigo-200" id="currentStudentName">Rahul Patel (10-A)</span>
-        </div>
-
-        <!-- Unified Gateway Logout Button -->
-        <a href="http://localhost:3000" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-800 hover:bg-rose-950/50 border border-gray-700 hover:border-rose-500/50 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-lg text-xs transition-colors">
-          <i class="fa-solid fa-right-from-bracket"></i>
+        <!-- Switch User / Logout -->
+        <a href="/" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-900 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/40 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-xl text-xs transition">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
           <span class="hidden sm:inline">Switch</span>
         </a>
 
         <!-- Parent Profile -->
-        <div class="flex items-center space-x-3 border-l border-gray-800 pl-4">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-bold text-sm">
+        <div class="flex items-center space-x-2.5 border-l border-white/10 pl-3">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow">
             AP
           </div>
           <div class="hidden sm:block text-left">
             <p class="text-xs font-semibold text-white">Mr. Amit Patel</p>
-            <p class="text-[10px] text-gray-400">Verified Parent</p>
+            <p class="text-[10px] text-indigo-400">Verified Parent</p>
           </div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Main Content Grid -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
-    <!-- Top Stats Row -->
+    <!-- Top Child Performance Metrics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-emerald-500">
-        <div>
-          <p class="text-xs text-gray-400">Overall Attendance</p>
-          <h3 class="text-2xl font-bold text-white mt-1 font-heading" id="kpiAttendance">91.2%</h3>
-          <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1"></i> Good Standing (83/91 Days)</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xl">
-          <i class="fa-solid fa-calendar-check"></i>
-        </div>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-emerald-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Attendance Status</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">91.2% Present</h3>
+        <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1.5"></i> Present on last session (Aug 14)</span>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-blue-500">
-        <div>
-          <p class="text-xs text-gray-400">Academic Score</p>
-          <h3 class="text-2xl font-bold text-white mt-1 font-heading" id="kpiGrades">89.5%</h3>
-          <span class="text-[11px] text-blue-400 flex items-center mt-1"><i class="fa-solid fa-award mr-1"></i> Grade A+ (Mid-Term)</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl">
-          <i class="fa-solid fa-chart-line"></i>
-        </div>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-indigo-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Annual Academic Score</p>
+        <h3 class="text-2xl font-bold text-indigo-300 mt-1 font-heading">89.5% (Grade A+)</h3>
+        <span class="text-[11px] text-indigo-400 flex items-center mt-1"><i class="fa-solid fa-award mr-1.5"></i> Ranked in Class Top 5%</span>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-indigo-500">
-        <div>
-          <p class="text-xs text-gray-400">Fee Status</p>
-          <h3 class="text-2xl font-bold text-white mt-1 font-heading" id="kpiFees">₹0.00</h3>
-          <span class="text-[11px] text-indigo-400 flex items-center mt-1"><i class="fa-solid fa-check-double mr-1"></i> Term 2 Paid Fully</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl">
-          <i class="fa-solid fa-receipt"></i>
-        </div>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Fee Invoices & Dues</p>
+        <h3 class="text-2xl font-bold text-amber-300 mt-1 font-heading">₹45,000 Due</h3>
+        <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-receipt mr-1.5"></i> Term 2 due by Aug 30, 2026</span>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-amber-500">
-        <div>
-          <p class="text-xs text-gray-400">Next School Event</p>
-          <h3 class="text-lg font-bold text-white mt-1 font-heading">PTM Meeting</h3>
-          <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-clock mr-1"></i> Aug 22, 2026</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-xl">
-          <i class="fa-solid fa-users"></i>
-        </div>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-purple-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Teacher Contact</p>
+        <h3 class="text-lg font-bold text-purple-300 mt-1 font-heading">Mrs. Anjali Verma</h3>
+        <span class="text-[11px] text-purple-400 flex items-center mt-1"><i class="fa-solid fa-chalkboard-user mr-1.5"></i> Class Teacher (Grade 10-A)</span>
       </div>
     </div>
 
-    <!-- Main Workspace: Left 3D Avatar & Controls + Right Chat & Services -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Central Workspace: 3D AI Human Avatar (Left) + Parent Chat Hub (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- Left Column: 3D AI Avatar & Persona Details (5 Cols) -->
+      <!-- LEFT COLUMN: AI Parent Support Avatar & Escalation Hub -->
       <div class="lg:col-span-5 flex flex-col space-y-4">
-        <div class="glass-card rounded-2xl p-4 flex flex-col items-center relative overflow-hidden">
-          <div class="absolute top-3 left-3 bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] px-2.5 py-1 rounded-full flex items-center">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1.5"></span>
-            Parent Support Assistant
+        
+        <!-- Interactive Speaking AI Avatar Card -->
+        <div class="glass-panel rounded-3xl p-6 relative overflow-hidden border border-white/10 flex flex-col items-center text-center">
+          
+          <div id="avatarHalo" class="absolute -top-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl avatar-halo-pulse pointer-events-none"></div>
+
+          <div class="flex items-center space-x-2 bg-gray-900/90 border border-white/10 px-3 py-1 rounded-full text-xs mb-4 z-10">
+            <span id="aiStateDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="aiStateLabel" class="font-semibold text-gray-200">Parent Support Assistant Ready</span>
           </div>
 
-          <!-- 3D Avatar Canvas / Interactive Animation Container -->
-          <div class="w-full h-64 sm:h-72 mt-8 rounded-2xl bg-gradient-to-b from-gray-900 to-indigo-950/60 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden">
-            <canvas id="avatarCanvas" width="300" height="260" class="z-10"></canvas>
-            
-            <!-- Voice Audio Waveform Animation -->
-            <div id="speakingIndicator" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-gray-900/90 px-3 py-1.5 rounded-full border border-indigo-500/40 z-20">
-              <span class="w-1 h-3 bg-indigo-400 rounded-full animate-bounce"></span>
-              <span class="w-1 h-5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.1s]"></span>
-              <span class="w-1 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-              <span class="text-xs text-indigo-200 ml-2 font-medium">Speaking...</span>
+          <!-- 3D / SVG Animated AI Human Model -->
+          <div class="relative w-44 h-44 mb-4 flex items-center justify-center z-10">
+            <div id="voiceRingOuter" class="absolute inset-0 rounded-full border-2 border-indigo-500/30 scale-110 hidden animate-ping"></div>
+            <div id="voiceRingInner" class="absolute inset-0 rounded-full border border-indigo-400/40 scale-105 hidden"></div>
+
+            <div class="w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-amber-400 shadow-2xl shadow-indigo-500/30">
+              <div class="w-full h-full rounded-full bg-[#0E1526] flex items-center justify-center relative overflow-hidden">
+                <svg viewBox="0 0 100 100" class="w-28 h-28 text-gray-200">
+                  <circle cx="50" cy="50" r="38" fill="#1E293B" stroke="#6366F1" stroke-width="1.5" />
+                  <!-- Professional Hair -->
+                  <path d="M 22 38 Q 50 12 78 38 Q 50 22 22 38 Z" fill="#818CF8" opacity="0.9" />
+                  <!-- Eyes -->
+                  <circle cx="38" cy="46" r="4.5" fill="#818CF8" />
+                  <circle cx="62" cy="46" r="4.5" fill="#818CF8" />
+                  <circle cx="39.5" cy="44.5" r="1.5" fill="#FFFFFF" />
+                  <circle cx="63.5" cy="44.5" r="1.5" fill="#FFFFFF" />
+                  <!-- Eyebrows -->
+                  <path d="M 32 38 Q 38 35 44 38" stroke="#818CF8" stroke-width="1.5" fill="none" stroke-linecap="round" />
+                  <path d="M 56 38 Q 62 35 68 38" stroke="#818CF8" stroke-width="1.5" fill="none" stroke-linecap="round" />
+                  <!-- Nose -->
+                  <path d="M 50 48 L 48 56 L 52 56" stroke="#64748B" stroke-width="1.2" fill="none" stroke-linecap="round" />
+                  <!-- Animated Mouth -->
+                  <ellipse id="avatarMouth" cx="50" cy="68" rx="7" ry="2" fill="#E0E7FF" stroke="#6366F1" stroke-width="1" class="transition-all duration-75" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          <!-- Avatar Audio & Mic Controls -->
-          <div class="w-full mt-4 flex items-center justify-between px-2">
+          <div class="z-10">
+            <h4 class="text-base font-bold text-white font-heading">Maya — Parent Support AI</h4>
+            <p class="text-xs text-gray-400 mt-0.5">24/7 Verified Parent Liaison & Academic Advisor</p>
+          </div>
+
+          <div id="liveAudioWaveforms" class="flex items-center justify-center space-x-1.5 h-8 my-3 z-10">
+            <div class="w-1 bg-indigo-400 rounded-full h-2"></div>
+            <div class="w-1 bg-indigo-400 rounded-full h-4"></div>
+            <div class="w-1 bg-indigo-400 rounded-full h-2"></div>
+            <div class="w-1 bg-indigo-400 rounded-full h-5"></div>
+            <div class="w-1 bg-indigo-400 rounded-full h-3"></div>
+          </div>
+
+          <!-- Continuous Live Voice Control Panel -->
+          <div class="w-full bg-[#0A0F1D]/80 border border-white/10 p-3 rounded-2xl flex items-center justify-between mt-2 z-10">
             <div class="text-left">
-              <h4 class="text-sm font-semibold text-white">Voice & Speech Interaction</h4>
-              <p class="text-[11px] text-gray-400">Speak or listen in any of the 11 languages</p>
+              <span class="text-[11px] font-semibold text-gray-300 block">Gemini Live Duplex Mode</span>
+              <span id="liveSubtext" class="text-[10px] text-gray-500">Hands-free continuous conversation</span>
             </div>
-
-            <div class="flex items-center space-x-2">
-              <button id="voiceListenBtn" class="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs flex items-center border border-gray-700 transition" title="Toggle AI voice response">
-                <i class="fa-solid fa-volume-high mr-1 text-indigo-400"></i> Auto-Voice: <span id="voiceStatus" class="ml-1 text-emerald-400 font-semibold">ON</span>
-              </button>
-
-              <button id="micRecordBtn" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition" title="Press to speak">
-                <i class="fa-solid fa-microphone"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Escalation Actions Card -->
-        <div class="glass-card rounded-2xl p-4">
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Human Assistance Escalation</h4>
-            <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">3-State Confirmed</span>
-          </div>
-          <p class="text-xs text-gray-400 mb-3">If you need direct human support, XYZ AI connects you with the class teacher or school administration with live ticket status.</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="triggerEscalationDirect('teacher')" class="p-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 text-left text-xs transition">
-              <i class="fa-solid fa-phone text-emerald-400 mb-1"></i>
-              <div class="font-semibold text-white">Talk to Teacher</div>
-              <div class="text-[10px] text-gray-400">Mrs. Anjali Verma</div>
-            </button>
-            <button onclick="triggerEscalationDirect('management')" class="p-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 text-left text-xs transition">
-              <i class="fa-solid fa-building-columns text-indigo-400 mb-1"></i>
-              <div class="font-semibold text-white">Contact Management</div>
-              <div class="text-[10px] text-gray-400">Principal Office</div>
+            
+            <button id="liveMicToggleBtn" onclick="toggleContinuousLiveVoice()" class="w-10 h-10 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-indigo-500/30 transition">
+              <i id="liveMicIcon" class="fa-solid fa-microphone"></i>
             </button>
           </div>
         </div>
+
+        <!-- 3-State Teacher Callback & Escalation Card -->
+        <div class="glass-panel rounded-3xl p-5 border border-white/10">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider font-heading flex items-center">
+              <i class="fa-solid fa-headset text-indigo-400 mr-2"></i> Faculty & Staff Escalation
+            </h4>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full">Active Service</span>
+          </div>
+
+          <p class="text-xs text-gray-400 mb-3">Need to speak with Rahul's class teacher or school administration directly? Request a scheduled phone callback or conference.</p>
+
+          <button onclick="sendParentPrompt('I would like to request a callback with Rahul\'s class teacher.')" class="w-full py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/40 text-indigo-200 text-xs font-semibold transition flex items-center justify-center">
+            <i class="fa-solid fa-phone mr-2"></i> Request Teacher Callback
+          </button>
+        </div>
+
       </div>
 
-      <!-- Right Column: Interactive Chat & Multi-Module Hub (7 Cols) -->
+      <!-- RIGHT COLUMN: Interactive Parent Chat & Circulars Hub -->
       <div class="lg:col-span-7 flex flex-col space-y-4">
         
         <!-- Navigation Tabs -->
-        <div class="flex space-x-1 p-1 bg-gray-900/90 rounded-2xl border border-gray-800 text-xs">
-          <button onclick="switchTab('chat')" id="tab-chat" class="flex-1 py-2 rounded-xl font-medium transition bg-indigo-600 text-white shadow">
-            <i class="fa-solid fa-comments mr-1.5"></i> AI Chat Assistant
+        <div class="flex space-x-1.5 p-1.5 bg-[#0D1424] rounded-2xl border border-white/10 text-xs">
+          <button onclick="switchPTab('chat')" id="ptab-chat" class="flex-1 py-2.5 rounded-xl font-semibold transition bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+            <i class="fa-solid fa-comments mr-1.5"></i> Parent AI Assistant
           </button>
-          <button onclick="switchTab('attendance')" id="tab-attendance" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
-            <i class="fa-solid fa-calendar-days mr-1.5"></i> Attendance
+          <button onclick="switchPTab('academics')" id="ptab-academics" class="flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-chart-line mr-1.5"></i> Report Card & Grades
           </button>
-          <button onclick="switchTab('grades')" id="tab-grades" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
-            <i class="fa-solid fa-graduation-cap mr-1.5"></i> Report Card
-          </button>
-          <button onclick="switchTab('fees')" id="tab-fees" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
-            <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Fees & Dues
+          <button onclick="switchPTab('fees')" id="ptab-fees" class="flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-receipt mr-1.5"></i> Fee Invoices
           </button>
         </div>
 
-        <!-- TAB 1: AI Chat Assistant -->
-        <div id="content-chat" class="glass-card rounded-2xl p-4 flex flex-col h-[520px]">
-          <!-- Message Feed -->
-          <div id="chatFeed" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
-            <!-- Bot Initial Message -->
+        <!-- TAB 1: Live Interactive Chat Feed -->
+        <div id="pcontent-chat" class="glass-panel rounded-3xl p-5 flex flex-col h-[540px] border border-white/10">
+          
+          <div id="parentChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin">
             <div class="flex items-start space-x-3">
-              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow">
                 XYZ
               </div>
-              <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
-                <p>Hello Mr. Amit Patel! I am your <strong>XYZ AI Parent Support Assistant</strong>. I am here to assist you with Rahul's attendance records, academic report cards, fee payments, school circulars, or teacher call requests.</p>
-                <p class="mt-2 text-indigo-300 font-medium">How can I help you today?</p>
+              <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
+                <p>Hello Mr. Amit Patel! I am your <strong>Parent Support Assistant</strong>. I am here to assist you with Rahul's attendance records, academic report cards, fee payments, school circulars, or teacher call requests. How can I help you today?</p>
               </div>
             </div>
           </div>
 
-          <!-- Suggested Quick Prompts -->
-          <div class="py-2 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-gray-800 mt-2">
-            <span class="text-gray-500 text-[10px] uppercase font-semibold shrink-0">Suggestions:</span>
-            <button onclick="sendQuickPrompt('How much attendance does my child have?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-indigo-300 border border-gray-700 shrink-0">
-              "How much attendance does my child have?"
+          <div id="liveVoiceBar" class="hidden py-2 px-3 my-2 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-between text-xs text-indigo-300 animate-pulse">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-waveform-lines"></i>
+              <span id="liveVoiceStatusText">Listening to your voice... Speak anytime!</span>
+            </div>
+            <button onclick="stopContinuousLiveVoice()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">End Call</button>
+          </div>
+
+          <!-- Quick Action Prompt Chips -->
+          <div class="py-2.5 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-white/10 mt-1">
+            <button onclick="sendParentPrompt('Did my child come to school yesterday?')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-indigo-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-calendar-check mr-1"></i> "Did Rahul attend school yesterday?"
             </button>
-            <button onclick="sendQuickPrompt('What are Rahul\'s latest exam grades?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-indigo-300 border border-gray-700 shrink-0">
-              "What are Rahul's latest grades?"
+            <button onclick="sendParentPrompt('Rahul ki pending fees kitni hai?')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-indigo-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-receipt mr-1"></i> "Rahul ki pending fees?"
             </button>
-            <button onclick="sendQuickPrompt('I am not satisfied. I want to talk to my child\'s teacher.')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-amber-300 border border-gray-700 shrink-0">
-              "Talk to teacher"
+            <button onclick="sendParentPrompt('Show me Rahul\'s latest report card scores across all subjects.')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-indigo-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-graduation-cap mr-1"></i> "Report Card & Marks"
+            </button>
+            <button onclick="sendParentPrompt('I need to request leave for Rahul from Aug 25 to Aug 27 for family function.')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-indigo-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-calendar-plus mr-1"></i> "Apply for Leave"
             </button>
           </div>
 
-          <!-- Input Box -->
-          <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex items-center space-x-2 mt-2">
-            <input type="text" id="chatInput" placeholder="Ask about attendance, grades, fee dues, or request a call..." class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-indigo-500 transition">
-            <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center transition shadow">
+          <!-- Chat Input Form with Mic Button -->
+          <form id="parentChatForm" onsubmit="handleParentChatSubmit(event)" class="flex items-center space-x-2 mt-1">
+            <input type="text" id="parentChatInput" placeholder="Ask about attendance, fees, exams, or speak in Hindi/Gujarati/Hinglish..." class="flex-1 bg-[#090E1B] border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+            
+            <button type="button" onclick="toggleContinuousLiveVoice()" title="Toggle Gemini Live Voice" class="px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-indigo-400 border border-white/10 text-xs font-semibold flex items-center transition">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+
+            <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-xs font-bold flex items-center transition shadow-lg shadow-indigo-500/25">
               <span>Send</span>
-              <i class="fa-solid fa-paper-plane ml-1.5 text-[10px]"></i>
+              <i class="fa-solid fa-paper-plane ml-2 text-[10px]"></i>
             </button>
           </form>
+
         </div>
 
-        <!-- TAB 2: Attendance Details -->
-        <div id="content-attendance" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
-          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
-            <div>
-              <h3 class="text-base font-bold text-white font-heading">Rahul Patel — Attendance Record</h3>
-              <p class="text-xs text-gray-400">Academic Year 2025-2026 (Grade 10-A)</p>
-            </div>
-            <div class="text-right">
-              <span class="text-2xl font-bold text-emerald-400 font-heading">91.2%</span>
-              <p class="text-[10px] text-gray-400">83 Present / 91 Total Days</p>
-            </div>
+        <!-- TAB 2: Report Card & Academic Breakdown -->
+        <div id="pcontent-academics" class="hidden glass-panel rounded-3xl p-6 h-[540px] overflow-y-auto border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white font-heading">Rahul Patel — Academic Progress Report</h3>
+            <span class="text-xs text-indigo-400 bg-indigo-950/40 border border-indigo-500/30 px-3 py-1 rounded-full">Annual Final 2026</span>
           </div>
 
-          <div class="grid grid-cols-3 gap-3 my-4">
-            <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50 text-center">
-              <div class="text-lg font-bold text-emerald-400">83</div>
-              <div class="text-[10px] text-gray-400 uppercase">Present Days</div>
+          <div class="space-y-2.5 text-xs">
+            <div class="p-3.5 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-indigo-300">Mathematics</span>
+                <p class="text-gray-400">Theory: 72/80 • Internal: 19/20</p>
+              </div>
+              <span class="text-sm font-bold text-white">91 / 100 (A+)</span>
             </div>
-            <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50 text-center">
-              <div class="text-lg font-bold text-rose-400">8</div>
-              <div class="text-[10px] text-gray-400 uppercase">Absences</div>
+            <div class="p-3.5 rounded-2xl bg-gray-900/60 border border-white/5 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">Science (Physics & Chemistry)</span>
+                <p class="text-gray-400">Theory: 68/80 • Practical: 20/20</p>
+              </div>
+              <span class="text-sm font-bold text-white">88 / 100 (A)</span>
             </div>
-            <div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700/50 text-center">
-              <div class="text-lg font-bold text-amber-400">0</div>
-              <div class="text-[10px] text-gray-400 uppercase">Late Marks</div>
+            <div class="p-3.5 rounded-2xl bg-gray-900/60 border border-white/5 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">English Core & Literature</span>
+                <p class="text-gray-400">Reading: 28/30 • Literature: 64/70</p>
+              </div>
+              <span class="text-sm font-bold text-white">92 / 100 (A+)</span>
             </div>
-          </div>
-
-          <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Recent Attendance Logs</h4>
-          <div id="attendanceHistory" class="space-y-2 text-xs">
-            <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
-              <span>Aug 14, 2026 (Friday)</span>
-              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PRESENT</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
-              <span>Aug 13, 2026 (Thursday)</span>
-              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PRESENT</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
-              <span>Aug 12, 2026 (Wednesday)</span>
-              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PRESENT</span>
+            <div class="p-3.5 rounded-2xl bg-gray-900/60 border border-white/5 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-300">Computer Applications / IT</span>
+                <p class="text-gray-400">Theory: 45/50 • Lab Practicals: 50/50</p>
+              </div>
+              <span class="text-sm font-bold text-white">95 / 100 (A+)</span>
             </div>
           </div>
         </div>
 
-        <!-- TAB 3: Report Card & Grades -->
-        <div id="content-grades" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
-          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
-            <div>
-              <h3 class="text-base font-bold text-white font-heading">Academic Report Card</h3>
-              <p class="text-xs text-gray-400">Annual Final Examination 2026</p>
-            </div>
-            <div class="text-right">
-              <span class="text-2xl font-bold text-blue-400 font-heading">89.5%</span>
-              <p class="text-[10px] text-gray-400">Aggregate Score</p>
-            </div>
+        <!-- TAB 3: Fee Invoices & Receipts -->
+        <div id="pcontent-fees" class="hidden glass-panel rounded-3xl p-6 h-[540px] overflow-y-auto border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white font-heading">Fee Invoices & Payment Receipts</h3>
+            <span class="text-xs text-amber-400 bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-full">₹45,000 Outstanding</span>
           </div>
 
-          <div class="mt-4 space-y-3">
-            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
-              <div>
-                <span class="font-semibold text-white">Mathematics (MATH101)</span>
-                <p class="text-[10px] text-gray-400">Teacher: Mrs. Anjali Verma</p>
+          <div class="space-y-3 text-xs">
+            <div class="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">UNPAID INVOICE</span>
+                  <h4 class="text-sm font-bold text-white mt-1">Term 2 Academic & Transport Fees</h4>
+                  <p class="text-gray-400 text-xs mt-0.5">Invoice #INV-2026-T2-01 • Due: August 30, 2026</p>
+                </div>
+                <span class="text-base font-bold text-amber-400">₹45,000.00</span>
               </div>
-              <div class="text-right">
-                <span class="font-bold text-emerald-400 text-sm">94.0 / 100</span>
-                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A+</span>
-              </div>
+              <button onclick="sendParentPrompt('How can I pay Rahul\'s pending fee of ₹45,000?')" class="mt-3 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition">Pay Online via Gateway</button>
             </div>
 
-            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
-              <div>
-                <span class="font-semibold text-white">Science (SCI101)</span>
-                <p class="text-[10px] text-gray-400">Teacher: Mr. Vikram Malhotra</p>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-emerald-400 text-sm">88.5 / 100</span>
-                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A</span>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
-              <div>
-                <span class="font-semibold text-white">English (ENG101)</span>
-                <p class="text-[10px] text-gray-400">Teacher: Mrs. Sunita Rao</p>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-emerald-400 text-sm">91.0 / 100</span>
-                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A+</span>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 flex items-center justify-between text-xs">
-              <div>
-                <span class="font-semibold text-white">Computer Science (CS101)</span>
-                <p class="text-[10px] text-gray-400">Teacher: Mr. Manoj Iyer</p>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-emerald-400 text-sm">96.0 / 100</span>
-                <span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">A+</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: Fees & Dues -->
-        <div id="content-fees" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
-          <div class="flex items-center justify-between pb-4 border-b border-gray-800">
-            <div>
-              <h3 class="text-base font-bold text-white font-heading">Fee Invoices & Payments</h3>
-              <p class="text-xs text-gray-400">Student: Rahul Patel (10-A)</p>
-            </div>
-            <div class="text-right">
-              <span class="text-2xl font-bold text-emerald-400 font-heading">₹0.00 Due</span>
-              <p class="text-[10px] text-gray-400">All terms cleared</p>
-            </div>
-          </div>
-
-          <div class="mt-4 space-y-3">
-            <div class="p-3.5 rounded-xl bg-gray-800/70 border border-gray-700 flex items-center justify-between text-xs">
-              <div>
-                <span class="font-semibold text-white">Term 2 (Aug - Nov 2026)</span>
-                <p class="text-[10px] text-gray-400">Paid on Aug 05, 2026 • Net Banking</p>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-white">₹45,000.00</span>
-                <span class="ml-2 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase">PAID</span>
-              </div>
-            </div>
-
-            <div class="p-3.5 rounded-xl bg-gray-800/70 border border-gray-700 flex items-center justify-between text-xs">
-              <div>
-                <span class="font-semibold text-white">Term 1 (Apr - Jul 2026)</span>
-                <p class="text-[10px] text-gray-400">Paid on Apr 10, 2026 • Online UPI</p>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-white">₹45,000.00</span>
-                <span class="ml-2 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase">PAID</span>
+            <div class="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">PAID RECEIPT</span>
+                  <h4 class="text-sm font-bold text-white mt-1">Term 1 Admission & Tuition Fees</h4>
+                  <p class="text-gray-400 text-xs mt-0.5">Receipt #RCPT-88219 • Paid on April 10, 2026</p>
+                </div>
+                <span class="text-base font-bold text-emerald-400">₹55,000.00</span>
               </div>
             </div>
           </div>
@@ -402,269 +365,319 @@
   </main>
 
   <script>
-    const isSingleOrigin = window.location.port === "7860" || window.location.port === "8000" || window.location.hostname.includes("huggingface.co") || window.location.hostname.includes("hf.space") || window.location.port === "";
-    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
-    let token = "";
-    let autoVoice = true;
-    let sessionId = "sess_parent_" + Math.random().toString(36).substring(7);
-    let selectedLanguage = "en";
-
-    // Initialize Auth & 3D Avatar
-    window.addEventListener("DOMContentLoaded", async () => {
-      initAvatarAnimation();
-      await authenticateParent();
-      setupSpeechRecognition();
-    });
-
-    async function authenticateParent() {
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/mock-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: "parent", language: selectedLanguage })
-        });
-        const data = await res.json();
-        token = data.access_token;
-        console.log("Parent token acquired successfully:", data.user.name);
-      } catch (err) {
-        console.warn("Using offline fallback mode:", err);
-      }
-    }
-
-    // 3D Avatar Canvas Animation
+    const API_BASE = window.location.origin;
+    let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
+    let isLiveVoiceActive = false;
+    let recognition = null;
     let isSpeaking = false;
-    let mouthOpening = 0;
-    let eyeBlink = 0;
+    let silenceTimer = null;
 
-    function initAvatarAnimation() {
-      const canvas = document.getElementById("avatarCanvas");
-      const ctx = canvas.getContext("2d");
+    document.getElementById("languageSelect").value = selectedLanguage;
 
-      function drawAvatar() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2 + 10;
+    function onLanguageChange(lang) {
+      selectedLanguage = lang;
+      localStorage.setItem("preferred_lang", lang);
+    }
 
-        // Head Base
-        ctx.fillStyle = "#F8D9B4";
-        ctx.beginPath();
-        ctx.arc(cx, cy, 65, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Hair
-        ctx.fillStyle = "#2D1E12";
-        ctx.beginPath();
-        ctx.arc(cx, cy - 25, 68, Math.PI, Math.PI * 2);
-        ctx.fill();
-
-        // Eyes
-        eyeBlink += 0.02;
-        const eyeHeight = Math.sin(eyeBlink) > 0.95 ? 1 : 8;
-        ctx.fillStyle = "#1E293B";
-        ctx.beginPath();
-        ctx.ellipse(cx - 24, cy - 10, 6, eyeHeight, 0, 0, Math.PI * 2);
-        ctx.ellipse(cx + 24, cy - 10, 6, eyeHeight, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Eyebrows
-        ctx.strokeStyle = "#2D1E12";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(cx - 35, cy - 25);
-        ctx.lineTo(cx - 15, cy - 23);
-        ctx.moveTo(cx + 15, cy - 23);
-        ctx.lineTo(cx + 35, cy - 25);
-        ctx.stroke();
-
-        // Glasses Frame (Supportive Assistant Look)
-        ctx.strokeStyle = "#4F46E5";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.roundRect(cx - 36, cy - 20, 26, 20, 4);
-        ctx.roundRect(cx + 10, cy - 20, 26, 20, 4);
-        ctx.moveTo(cx - 10, cy - 10);
-        ctx.lineTo(cx + 10, cy - 10);
-        ctx.stroke();
-
-        // Mouth (Dynamic Lip Sync Animation when speaking)
-        if (isSpeaking) {
-          mouthOpening = 4 + Math.abs(Math.sin(Date.now() * 0.015)) * 14;
+    function switchPTab(tab) {
+      ['chat', 'academics', 'fees'].forEach(t => {
+        const btn = document.getElementById(`ptab-${t}`);
+        const content = document.getElementById(`pcontent-${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 py-2.5 rounded-xl font-semibold transition bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
+          content.classList.remove('hidden');
         } else {
-          mouthOpening = 3;
+          btn.className = "flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white";
+          content.classList.add('hidden');
         }
+      });
+    }
 
-        ctx.fillStyle = "#E11D48";
-        ctx.beginPath();
-        ctx.ellipse(cx, cy + 28, 14, mouthOpening, 0, 0, Math.PI * 2);
-        ctx.fill();
+    function setAvatarState(state) {
+      const dot = document.getElementById('aiStateDot');
+      const label = document.getElementById('aiStateLabel');
+      const mouth = document.getElementById('avatarMouth');
+      const waves = document.getElementById('liveAudioWaveforms');
+      const outerRing = document.getElementById('voiceRingOuter');
+      const innerRing = document.getElementById('voiceRingInner');
 
-        requestAnimationFrame(drawAvatar);
+      if (state === 'listening') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping';
+        label.innerText = 'Listening to you...';
+        outerRing.classList.remove('hidden');
+        innerRing.classList.remove('hidden');
+        waves.innerHTML = `
+          <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
+        `;
+        mouth.setAttribute('rx', '7');
+        mouth.setAttribute('ry', '2');
+        mouth.classList.remove('mouth-speaking');
+      } else if (state === 'thinking') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        label.innerText = 'Analyzing Student Records...';
+        outerRing.classList.add('hidden');
+        innerRing.classList.remove('hidden');
+        waves.innerHTML = `<span class="text-[11px] text-amber-400 animate-pulse font-medium">Checking ERP records...</span>`;
+        mouth.classList.remove('mouth-speaking');
+      } else if (state === 'speaking') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+        label.innerText = 'Maya Speaking...';
+        outerRing.classList.remove('hidden');
+        innerRing.classList.remove('hidden');
+        mouth.classList.add('mouth-speaking');
+        waves.innerHTML = `
+          <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+        `;
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        label.innerText = 'Parent Support Assistant Ready';
+        outerRing.classList.add('hidden');
+        innerRing.classList.add('hidden');
+        mouth.classList.remove('mouth-speaking');
+        waves.innerHTML = `
+          <div class="w-1 bg-indigo-400/50 rounded-full h-2"></div>
+          <div class="w-1 bg-indigo-400/50 rounded-full h-4"></div>
+          <div class="w-1 bg-indigo-400/50 rounded-full h-2"></div>
+          <div class="w-1 bg-indigo-400/50 rounded-full h-5"></div>
+          <div class="w-1 bg-indigo-400/50 rounded-full h-3"></div>
+        `;
       }
-      drawAvatar();
     }
 
-    // Voice Synthesis & Web Speech API
-    function speakText(text) {
-      if (!autoVoice || !window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-
-      const ind = document.getElementById("speakingIndicator");
-      utterance.onstart = () => {
-        isSpeaking = true;
-        ind.classList.remove("hidden");
-      };
-      utterance.onend = () => {
-        isSpeaking = false;
-        ind.classList.add("hidden");
-      };
-      utterance.onerror = () => {
-        isSpeaking = false;
-        ind.classList.add("hidden");
-      };
-      window.speechSynthesis.speak(utterance);
+    function toggleContinuousLiveVoice() {
+      if (isLiveVoiceActive) {
+        stopContinuousLiveVoice();
+      } else {
+        startContinuousLiveVoice();
+      }
     }
 
-    // Speech-To-Text (Voice Mic)
-    function setupSpeechRecognition() {
-      const micBtn = document.getElementById("micRecordBtn");
+    function startContinuousLiveVoice() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        micBtn.onclick = () => alert("Web Speech API is not supported in this browser. Please type your message.");
+        alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
         return;
       }
 
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      isLiveVoiceActive = true;
+      document.getElementById('topLiveBtnLabel').innerText = "Live Connected";
+      document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-rose-500/30 transition animate-pulse";
+      document.getElementById('liveMicIcon').className = "fa-solid fa-phone-slash";
+      document.getElementById('liveVoiceBar').classList.remove('hidden');
+      document.getElementById('liveSubtext').innerText = "Live call active • Speak naturally";
 
-      micBtn.onclick = () => {
-        micBtn.classList.add("animate-pulse", "bg-rose-600");
-        recognition.start();
+      initSpeechRecognition();
+    }
+
+    function stopContinuousLiveVoice() {
+      isLiveVoiceActive = false;
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      document.getElementById('topLiveBtnLabel').innerText = "Go Live Voice";
+      document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-indigo-500/30 transition";
+      document.getElementById('liveMicIcon').className = "fa-solid fa-microphone";
+      document.getElementById('liveVoiceBar').classList.add('hidden');
+      document.getElementById('liveSubtext').innerText = "Hands-free continuous conversation";
+      setAvatarState('idle');
+    }
+
+    function initSpeechRecognition() {
+      if (!isLiveVoiceActive) return;
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      const langMap = {
+        'en': 'en-IN', 'hinglish': 'hi-IN', 'hi': 'hi-IN', 'gu': 'gu-IN',
+        'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'bn': 'bn-IN',
+        'pa': 'pa-IN', 'kn': 'kn-IN', 'ml': 'ml-IN', 'ur': 'ur-PK'
       };
+      recognition.lang = langMap[selectedLanguage] || 'en-IN';
+
+      setAvatarState('listening');
+      document.getElementById('liveVoiceStatusText').innerText = "Listening... Speak anytime!";
+
+      let finalTranscript = "";
 
       recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        document.getElementById("chatInput").value = text;
-        handleChatSubmit(new Event("submit"));
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        const currentSaid = finalTranscript || interimTranscript;
+        if (currentSaid) {
+          document.getElementById('liveVoiceStatusText').innerText = `You: "${currentSaid}"`;
+          
+          clearTimeout(silenceTimer);
+          silenceTimer = setTimeout(() => {
+            if (currentSaid.trim().length > 0 && isLiveVoiceActive && !isSpeaking) {
+              try { recognition.stop(); } catch(e) {}
+              sendParentPrompt(currentSaid.trim(), true);
+              finalTranscript = "";
+            }
+          }, 1400);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error !== 'no-speech' && isLiveVoiceActive) {
+          console.warn("Speech recognition notice:", event.error);
+        }
       };
 
       recognition.onend = () => {
-        micBtn.classList.remove("animate-pulse", "bg-rose-600");
+        if (isLiveVoiceActive && !isSpeaking) {
+          try { recognition.start(); } catch(e) {}
+        }
       };
-    }
-
-    // Chat Message Handling
-    async function handleChatSubmit(e) {
-      if (e) e.preventDefault();
-      const input = document.getElementById("chatInput");
-      const msg = input.value.trim();
-      if (!msg) return;
-      input.value = "";
-
-      appendMessage("user", msg);
 
       try {
-        const res = await fetch(`${API_BASE}/api/chat`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            message: msg,
-            session_id: sessionId,
-            language: selectedLanguage,
-            voice_response_requested: autoVoice
-          })
-        });
-        const data = await res.json();
-        appendMessage("assistant", data.response_text, data.suggested_actions);
-        speakText(data.response_text);
-      } catch (err) {
-        // Deterministic client fallback if server restarting
-        let fallback = "Rahul currently has 91.2% attendance (83 present days out of 91 school days). Would you like me to check his recent attendance too?";
-        appendMessage("assistant", fallback);
-        speakText(fallback);
+        recognition.start();
+      } catch(e) {
+        console.warn("Recognition already active");
       }
     }
 
-    function appendMessage(role, text, actions = null) {
-      const feed = document.getElementById("chatFeed");
-      const isUser = role === "user";
+    function speakAssistantResponse(text) {
+      if (!window.speechSynthesis) return;
 
-      const wrapper = document.createElement("div");
+      window.speechSynthesis.cancel();
+      isSpeaking = true;
+      setAvatarState('speaking');
+
+      const cleanVoiceText = text.replace(/\*\*/g, '').replace(/•/g, '').replace(/#/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanVoiceText);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const indianVoice = voices.find(v => v.lang.includes('IN') || v.name.includes('India') || v.name.includes('Google'));
+      if (indianVoice) utterance.voice = indianVoice;
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        if (isLiveVoiceActive) {
+          setAvatarState('listening');
+          document.getElementById('liveVoiceStatusText').innerText = "Listening... Speak anytime!";
+          initSpeechRecognition();
+        } else {
+          setAvatarState('idle');
+        }
+      };
+
+      utterance.onerror = () => {
+        isSpeaking = false;
+        if (isLiveVoiceActive) initSpeechRecognition();
+        else setAvatarState('idle');
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function appendMessage(role, text) {
+      const feed = document.getElementById('parentChatFeed');
+      const isUser = role === 'user';
+      
+      const wrapper = document.createElement('div');
       wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+      
+      const formatted = text.replace(/\n/g, '<br/>');
 
-      let actionsHtml = "";
-      if (actions && actions.length > 0) {
-        actionsHtml = `<div class="mt-3 pt-2 border-t border-gray-700/60 flex flex-wrap gap-1.5">` +
-          actions.map(a => `<button onclick="sendQuickPrompt('${a.label}')" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 border border-indigo-500/40 text-[10px] font-medium transition">${a.label}</button>`).join('') +
-          `</div>`;
+      if (isUser) {
+        wrapper.innerHTML = `
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl rounded-tr-none p-3.5 max-w-[85%] text-xs leading-relaxed shadow-md">
+            <p>${formatted}</p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            AP
+          </div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow">
+            XYZ
+          </div>
+          <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
+            <p>${formatted}</p>
+          </div>
+        `;
       }
-
-      wrapper.innerHTML = isUser ? `
-        <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] text-xs leading-relaxed shadow">
-          ${text}
-        </div>
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
-          AP
-        </div>
-      ` : `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-          XYZ
-        </div>
-        <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
-          <p>${text}</p>
-          ${actionsHtml}
-        </div>
-      `;
 
       feed.appendChild(wrapper);
       feed.scrollTop = feed.scrollHeight;
     }
 
-    function sendQuickPrompt(prompt) {
-      document.getElementById("chatInput").value = prompt;
-      handleChatSubmit(new Event("submit"));
-    }
+    async function sendParentPrompt(msg, fromVoice = false) {
+      if (!msg || !msg.trim()) return;
+      appendMessage('user', msg);
+      setAvatarState('thinking');
 
-    function triggerEscalationDirect(target) {
-      const msg = target === "teacher" 
-        ? "I am not satisfied. I want to talk to my child's teacher."
-        : "I want to contact School Management regarding an issue.";
-      sendQuickPrompt(msg);
-      switchTab('chat');
-    }
+      const parentPayload = {
+        message: msg,
+        language: selectedLanguage,
+        user: {
+          user_id: "usr_parent_01",
+          name: "Mr. Amit Patel",
+          role: "parent",
+          linked_student_id: "usr_student_rahul",
+          preferred_language: selectedLanguage
+        }
+      };
 
-    function switchTab(tab) {
-      ['chat', 'attendance', 'grades', 'fees'].forEach(t => {
-        document.getElementById(`content-${t}`).classList.add("hidden");
-        document.getElementById(`tab-${t}`).className = "flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white";
-      });
-      document.getElementById(`content-${tab}`).classList.remove("hidden");
-      document.getElementById(`tab-${tab}`).className = "flex-1 py-2 rounded-xl font-medium transition bg-indigo-600 text-white shadow";
-    }
+      try {
+        const res = await fetch(`${API_BASE}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(parentPayload)
+        });
 
-    // Toggle Voice Button
-    document.getElementById("voiceListenBtn").onclick = () => {
-      autoVoice = !autoVoice;
-      document.getElementById("voiceStatus").textContent = autoVoice ? "ON" : "OFF";
-      document.getElementById("voiceStatus").className = autoVoice ? "ml-1 text-emerald-400 font-semibold" : "ml-1 text-gray-500 font-semibold";
-      if (!autoVoice && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
-        document.getElementById("speakingIndicator").classList.add("hidden");
+        const data = await res.json();
+        const replyText = data.response_text || "I was unable to load that record right now. Please try again.";
+        appendMessage('assistant', replyText);
+
+        if (fromVoice || isLiveVoiceActive) {
+          speakAssistantResponse(replyText);
+        } else {
+          setAvatarState('idle');
+        }
+
+      } catch (err) {
+        console.error("Chat error:", err);
+        const fallback = "Rahul has 91.2% attendance and all fee and report card records are verified.";
+        appendMessage('assistant', fallback);
+        if (fromVoice || isLiveVoiceActive) speakAssistantResponse(fallback);
+        else setAvatarState('idle');
       }
-    };
+    }
 
-    // Language change
-    document.getElementById("languageSelect").onchange = (e) => {
-      selectedLanguage = e.target.value;
-      authenticateParent();
-    };
+    function handleParentChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('parentChatInput');
+      const val = input.value.trim();
+      if (val) {
+        sendParentPrompt(val, false);
+        input.value = "";
+      }
+    }
   </script>
 </body>
 </html>

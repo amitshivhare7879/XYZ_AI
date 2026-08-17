@@ -45,7 +45,7 @@ PERMISSIONS: Dict[UserRole, Dict[str, List[str]]] = {
         "timetable": ["read_schedule"],
         "notices": ["read", "create_class"],
         "leave": ["read_class", "approve_class"],
-        "escalation": ["read_assigned", "create_admin"]
+        "escalation": ["read_assigned", "create_admin", "create_own"]
     },
     "principal": {
         "attendance": ["read_all", "analytics"],

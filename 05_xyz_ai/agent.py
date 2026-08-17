@@ -420,6 +420,21 @@ class ConversationOrchestrator:
                 else:
                     reply = f"The overall school attendance is currently {pct}%. Class-wise breakdown: {cls_summary}. Would you like to review students with low attendance alerts?"
                 suggested_actions = [SuggestedAction(label="View Low Attendance Alerts", action_type="view_low_attendance")]
+            elif "present_count" in res:
+                cname = res.get("class_name", "your class")
+                tot = res.get("total_students", 0)
+                pres = res.get("present_count", 0)
+                abs_cnt = res.get("absent_count", 0)
+                abs_list = ", ".join(res.get("absent_students", []))
+                dt = res.get("date", "today")
+                if abs_cnt > 0:
+                    reply = f"For **{cname}** on {dt}: **{pres} out of {tot} students are PRESENT** ({res.get('attendance_rate', 0)}%). Absent students ({abs_cnt}): **{abs_list}**."
+                else:
+                    reply = f"For **{cname}** on {dt}: **All {tot} students are PRESENT** (100% attendance). No absentees recorded."
+                suggested_actions = [
+                    SuggestedAction(label="Mark Attendance", action_type="mark_attendance"),
+                    SuggestedAction(label="View Full Class Roster", action_type="class_roster")
+                ]
             else:
                 sname = res.get("student_name", detected_student or "your child")
                 pct = res.get("percentage", 0.0)

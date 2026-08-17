@@ -73,7 +73,6 @@ class ERPAttendanceService:
         """, (student_id,))
         recent = [dict(r) for r in c.fetchall()]
 
-        conn.close()
         return {
             "student_id": student["id"],
             "student_name": student["name"],
@@ -86,6 +85,73 @@ class ERPAttendanceService:
             "excused_days": excused,
             "percentage": percentage,
             "recent_records": recent
+        }
+
+    @staticmethod
+    def get_class_attendance_summary(class_id: str, date_str: Optional[str] = None) -> Dict[str, Any]:
+        """Returns the daily roster attendance breakdown for a specific class."""
+        conn = get_db_connection()
+        c = conn.cursor()
+
+        # Get class info
+        c.execute("SELECT id, name FROM classes WHERE id = ?", (class_id,))
+        cls = c.fetchone()
+        if not cls:
+            conn.close()
+            return {"error": f"Class '{class_id}' not found."}
+
+        class_name = cls["name"]
+
+        # Get all students in class
+        c.execute("SELECT id, name, roll_number FROM students WHERE class_id = ? ORDER BY roll_number", (class_id,))
+        students = [dict(r) for r in c.fetchall()]
+        total_students = len(students)
+
+        # Target date
+        if not date_str:
+            c.execute("""
+                SELECT a.date FROM attendance a
+                JOIN students s ON s.id = a.student_id
+                WHERE s.class_id = ?
+                ORDER BY a.date DESC LIMIT 1
+            """, (class_id,))
+            d_row = c.fetchone()
+            target_date = d_row["date"] if d_row else "2026-08-16"
+        else:
+            target_date = date_str
+
+        # Get attendance records for this date
+        c.execute("""
+            SELECT s.name, a.status, s.roll_number
+            FROM students s
+            LEFT JOIN attendance a ON a.student_id = s.id AND a.date = ?
+            WHERE s.class_id = ?
+        """, (target_date, class_id))
+        records = c.fetchall()
+
+        present_count = 0
+        absent_count = 0
+        absent_students = []
+        for r in records:
+            st = (r["status"] or "present").lower()
+            if st == "present":
+                present_count += 1
+            else:
+                absent_count += 1
+                absent_students.append(r["name"])
+
+        rate = round((present_count / total_students * 100), 1) if total_students > 0 else 100.0
+        conn.close()
+
+        return {
+            "class_id": class_id,
+            "class_name": class_name,
+            "date": target_date,
+            "total_students": total_students,
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "attendance_rate": rate,
+            "absent_students": absent_students
         }
 
     @staticmethod

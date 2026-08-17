@@ -3,266 +3,328 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XYZ AI — Management Portal</title>
+  <title>XYZ AI — Principal & Management Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #07090E; color: #F3F4F6; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B0814; color: #F3F4F6; }
     h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
-    .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .font-classic { font-family: 'Cinzel', serif; }
+    
+    .glass-panel { background: rgba(26, 16, 42, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5); }
+    .glass-panel-gold { background: rgba(36, 24, 10, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(245, 158, 11, 0.25); box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.2); }
+    .glass-card-hover:hover { border-color: rgba(245, 158, 11, 0.45); transform: translateY(-2px); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    /* Animated Live Waves */
+    @keyframes soundwave { 0%, 100% { height: 6px; } 50% { height: 28px; } }
+    .wave-bar { animation: soundwave 1.2s ease-in-out infinite; }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.6s; }
+
+    /* Avatar Glow & Mouth Animation */
+    @keyframes avatar-halo { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.08); opacity: 0.85; } }
+    .avatar-halo-pulse { animation: avatar-halo 3s ease-in-out infinite; }
+    
+    @keyframes speaking-mouth { 0%, 100% { transform: scaleY(0.2); } 50% { transform: scaleY(1); } }
+    .mouth-speaking { animation: speaking-mouth 0.22s ease-in-out infinite alternate; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-black">
 
-  <!-- Top Navbar -->
-  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+  <!-- Top Navbar with Classic Institutional Branding -->
+  <header class="border-b border-white/10 bg-[#120B20]/90 backdrop-blur-xl sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-heading font-bold text-white shadow-lg">
-          XYZ
+      
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-purple-600 to-rose-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-white/20">
+          <i class="fa-solid fa-crown text-white text-lg"></i>
         </div>
         <div>
-          <span class="text-lg font-bold tracking-tight text-white font-heading">XYZ AI <span class="text-amber-400 font-normal">| Executive Management</span></span>
-          <p class="text-xs text-gray-400">Institutional Governance & Analytics</p>
+          <div class="flex items-center space-x-2">
+            <span class="text-base font-bold text-white font-heading tracking-wide">XYZ ACADEMY</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">EXECUTIVE LEADERSHIP</span>
+          </div>
+          <p class="text-[11px] text-gray-400">Institutional Governance & Comprehensive Analytics Suite</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <!-- Language Switcher -->
-        <div class="flex items-center space-x-2 bg-gray-800/80 border border-gray-700 px-3 py-1.5 rounded-lg text-sm">
+      <div class="flex items-center space-x-3">
+        <!-- Gemini Live Voice Button -->
+        <button id="topLiveVoiceBtn" onclick="toggleContinuousLiveVoice()" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-600/20 hover:from-amber-500/30 hover:to-purple-600/30 border border-amber-500/40 text-amber-300 text-xs font-semibold shadow-lg shadow-amber-500/10 transition">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          <i class="fa-solid fa-waveform-lines mr-1"></i>
+          <span id="topLiveBtnLabel">Go Live Voice</span>
+        </button>
+
+        <!-- Language Selector with Hinglish -->
+        <div class="flex items-center space-x-2 bg-gray-900/90 border border-white/10 px-3 py-1.5 rounded-xl text-xs">
           <i class="fa-solid fa-language text-amber-400"></i>
-          <select id="languageSelect" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
+          <select id="languageSelect" onchange="onLanguageChange(this.value)" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
             <option value="en" class="bg-gray-900 text-white">English</option>
-            <option value="hi" class="bg-gray-900 text-white">Hindi (हिंदी)</option>
-            <option value="ta" class="bg-gray-900 text-white">Tamil (தமிழ்)</option>
-            <option value="te" class="bg-gray-900 text-white">Telugu (తెలుగు)</option>
-            <option value="mr" class="bg-gray-900 text-white">Marathi (मराठी)</option>
-            <option value="bn" class="bg-gray-900 text-white">Bengali (বাংলা)</option>
-            <option value="gu" class="bg-gray-900 text-white">Gujarati (ગુજરાતી)</option>
-            <option value="pa" class="bg-gray-900 text-white">Punjabi (ਪੰਜਾਬੀ)</option>
-            <option value="kn" class="bg-gray-900 text-white">Kannada (ಕನ್ನಡ)</option>
-            <option value="ml" class="bg-gray-900 text-white">Malayalam (മലയാളം)</option>
-            <option value="ur" class="bg-gray-900 text-white">Urdu (اردو)</option>
+            <option value="hinglish" class="bg-gray-900 text-white">Hinglish (Hindi + Eng)</option>
+            <option value="hi" class="bg-gray-900 text-white">हिन्दी (Hindi)</option>
+            <option value="gu" class="bg-gray-900 text-white">ગુજરાતી (Gujarati)</option>
+            <option value="ta" class="bg-gray-900 text-white">தமிழ் (Tamil)</option>
+            <option value="te" class="bg-gray-900 text-white">తెలుగు (Telugu)</option>
+            <option value="mr" class="bg-gray-900 text-white">मराठी (Marathi)</option>
+            <option value="bn" class="bg-gray-900 text-white">বাংলা (Bengali)</option>
+            <option value="pa" class="bg-gray-900 text-white">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="kn" class="bg-gray-900 text-white">ಕನ್ನಡ (Kannada)</option>
+            <option value="ml" class="bg-gray-900 text-white">മലയാളം (Malayalam)</option>
+            <option value="ur" class="bg-gray-900 text-white">اردو (Urdu)</option>
           </select>
         </div>
 
-        <!-- Unified Gateway Logout Button -->
-        <a href="http://localhost:3000" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-800 hover:bg-rose-950/50 border border-gray-700 hover:border-rose-500/50 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-lg text-xs transition-colors">
-          <i class="fa-solid fa-right-from-bracket"></i>
+        <!-- Switch User / Logout -->
+        <a href="/" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-900 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/40 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-xl text-xs transition">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
           <span class="hidden sm:inline">Switch</span>
         </a>
 
         <!-- Principal Profile -->
-        <div class="flex items-center space-x-3 border-l border-gray-800 pl-4">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
+        <div class="flex items-center space-x-2.5 border-l border-white/10 pl-3">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-purple-700 flex items-center justify-center text-white font-bold text-xs shadow">
             RS
           </div>
           <div class="hidden sm:block text-left">
             <p class="text-xs font-semibold text-white">Dr. Rajesh Sharma</p>
-            <p class="text-[10px] text-amber-400">Principal / Management</p>
+            <p class="text-[10px] text-amber-400">Principal</p>
           </div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Main Content Grid -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
-    <!-- Top Stats KPI Row -->
+    <!-- Executive KPI Bar -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-amber-500">
-        <p class="text-xs text-gray-400">School-Wide Attendance</p>
-        <h3 class="text-2xl font-bold text-white mt-1 font-heading">92.4%</h3>
-        <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-school mr-1"></i> Across 50 Students & 4 Classes</span>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Fee Collection Efficiency</p>
+        <h3 class="text-2xl font-bold text-amber-300 mt-1 font-heading">₹1,85,000 / ₹2.3L</h3>
+        <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-chart-pie mr-1.5"></i> 80.4% Billed Fees Collected</span>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-emerald-500">
-        <p class="text-xs text-gray-400">Total Fee Recovery</p>
-        <h3 class="text-2xl font-bold text-white mt-1 font-heading">₹3.82M</h3>
-        <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-coins mr-1"></i> 85% Collected (Term 1 & 2)</span>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-emerald-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">School-Wide Attendance</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">92.8% Average</h3>
+        <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1.5"></i> 23 Active Student Profiles</span>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-blue-500">
-        <p class="text-xs text-gray-400">Active Faculty</p>
-        <h3 class="text-2xl font-bold text-white mt-1 font-heading">10 Teachers</h3>
-        <span class="text-[11px] text-blue-400 flex items-center mt-1"><i class="fa-solid fa-user-check mr-1"></i> 100% Present Today</span>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-purple-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Escalation Ticket Queue</p>
+        <h3 class="text-2xl font-bold text-purple-300 mt-1 font-heading">1 Pending</h3>
+        <span class="text-[11px] text-purple-400 flex items-center mt-1"><i class="fa-solid fa-headset mr-1.5"></i> Amit Patel (Fee Structure Clarification)</span>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl border-l-4 border-l-rose-500">
-        <p class="text-xs text-gray-400">Open Escalation Tickets</p>
-        <h3 class="text-2xl font-bold text-white mt-1 font-heading">1 Pending</h3>
-        <span class="text-[11px] text-rose-400 flex items-center mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i> Parent Callback Queue</span>
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-cyan-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Academic Term</p>
+        <h3 class="text-lg font-bold text-cyan-300 mt-1 font-heading">Mid-Term Cycle 2026</h3>
+        <span class="text-[11px] text-cyan-400 flex items-center mt-1"><i class="fa-solid fa-calendar-check mr-1.5"></i> Exams commence Sept 15</span>
       </div>
     </div>
 
-    <!-- Main Workspace -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Central Workspace: 3D AI Human Avatar (Left) + Management Chat Hub (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- Left: Executive Avatar & Controls (5 Cols) -->
+      <!-- LEFT COLUMN: Executive AI Avatar & Live Audit Hub -->
       <div class="lg:col-span-5 flex flex-col space-y-4">
-        <div class="glass-card rounded-2xl p-4 flex flex-col items-center relative overflow-hidden">
-          <div class="absolute top-3 left-3 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] px-2.5 py-1 rounded-full flex items-center">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping mr-1.5"></span>
-            Professional Management Assistant
+        
+        <!-- Interactive Speaking AI Avatar Card -->
+        <div class="glass-panel rounded-3xl p-6 relative overflow-hidden border border-white/10 flex flex-col items-center text-center">
+          
+          <div id="avatarHalo" class="absolute -top-10 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl avatar-halo-pulse pointer-events-none"></div>
+
+          <div class="flex items-center space-x-2 bg-gray-900/90 border border-white/10 px-3 py-1 rounded-full text-xs mb-4 z-10">
+            <span id="aiStateDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="aiStateLabel" class="font-semibold text-gray-200">Management Assistant Ready</span>
           </div>
 
-          <!-- Avatar Canvas -->
-          <div class="w-full h-64 sm:h-72 mt-8 rounded-2xl bg-gradient-to-b from-gray-900 to-amber-950/40 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden">
-            <canvas id="managementAvatarCanvas" width="300" height="260" class="z-10"></canvas>
-            
-            <div id="mgmtSpeakingIndicator" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-gray-900/90 px-3 py-1.5 rounded-full border border-amber-500/40 z-20">
-              <span class="w-1 h-3 bg-amber-400 rounded-full animate-bounce"></span>
-              <span class="w-1 h-5 bg-amber-400 rounded-full animate-bounce [animation-delay:0.1s]"></span>
-              <span class="w-1 h-2 bg-amber-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-              <span class="text-xs text-amber-200 ml-2 font-medium">Assistant Speaking...</span>
+          <!-- 3D / SVG Animated AI Human Model -->
+          <div class="relative w-44 h-44 mb-4 flex items-center justify-center z-10">
+            <div id="voiceRingOuter" class="absolute inset-0 rounded-full border-2 border-amber-500/30 scale-110 hidden animate-ping"></div>
+            <div id="voiceRingInner" class="absolute inset-0 rounded-full border border-amber-400/40 scale-105 hidden"></div>
+
+            <div class="w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-amber-500 via-purple-600 to-rose-500 shadow-2xl shadow-amber-500/30">
+              <div class="w-full h-full rounded-full bg-[#180E29] flex items-center justify-center relative overflow-hidden">
+                <svg viewBox="0 0 100 100" class="w-28 h-28 text-gray-200">
+                  <circle cx="50" cy="50" r="38" fill="#1F1535" stroke="#F59E0B" stroke-width="1.5" />
+                  <path d="M 22 36 Q 50 12 78 36 Q 50 20 22 36 Z" fill="#FBBF24" opacity="0.9" />
+                  <circle cx="38" cy="46" r="4.5" fill="#FBBF24" />
+                  <circle cx="62" cy="46" r="4.5" fill="#FBBF24" />
+                  <circle cx="39.5" cy="44.5" r="1.5" fill="#FFFFFF" />
+                  <circle cx="63.5" cy="44.5" r="1.5" fill="#FFFFFF" />
+                  <path d="M 32 38 Q 38 35 44 38" stroke="#FBBF24" stroke-width="1.5" fill="none" stroke-linecap="round" />
+                  <path d="M 56 38 Q 62 35 68 38" stroke="#FBBF24" stroke-width="1.5" fill="none" stroke-linecap="round" />
+                  <path d="M 50 48 L 48 56 L 52 56" stroke="#A78BFA" stroke-width="1.2" fill="none" stroke-linecap="round" />
+                  <ellipse id="avatarMouth" cx="50" cy="68" rx="7" ry="2" fill="#E0E7FF" stroke="#F59E0B" stroke-width="1" class="transition-all duration-75" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          <!-- Voice Controls -->
-          <div class="w-full mt-4 flex items-center justify-between px-2">
+          <div class="z-10">
+            <h4 class="text-base font-bold text-white font-heading">Athena — Executive Management AI</h4>
+            <p class="text-xs text-gray-400 mt-0.5">Autonomous Governance, Financial Audit & Escalation Dispatch</p>
+          </div>
+
+          <div id="liveAudioWaveforms" class="flex items-center justify-center space-x-1.5 h-8 my-3 z-10">
+            <div class="w-1 bg-amber-400 rounded-full h-2"></div>
+            <div class="w-1 bg-amber-400 rounded-full h-4"></div>
+            <div class="w-1 bg-amber-400 rounded-full h-2"></div>
+            <div class="w-1 bg-amber-400 rounded-full h-5"></div>
+            <div class="w-1 bg-amber-400 rounded-full h-3"></div>
+          </div>
+
+          <div class="w-full bg-[#10091D]/80 border border-white/10 p-3 rounded-2xl flex items-center justify-between mt-2 z-10">
             <div class="text-left">
-              <h4 class="text-sm font-semibold text-white">Executive Voice Interface</h4>
-              <p class="text-[11px] text-gray-400">Ask for analytics, reports, or audits</p>
+              <span class="text-[11px] font-semibold text-gray-300 block">Gemini Live Executive Voice</span>
+              <span id="liveSubtext" class="text-[10px] text-gray-500">Hands-free strategic analytics briefing</span>
             </div>
+            
+            <button id="liveMicToggleBtn" onclick="toggleContinuousLiveVoice()" class="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-400 text-black flex items-center justify-center font-bold text-sm shadow-lg shadow-amber-500/30 transition">
+              <i id="liveMicIcon" class="fa-solid fa-microphone"></i>
+            </button>
+          </div>
+        </div>
 
-            <div class="flex items-center space-x-2">
-              <button id="mgmtVoiceToggle" class="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs flex items-center border border-gray-700 transition">
-                <i class="fa-solid fa-volume-high mr-1 text-amber-400"></i> Voice: <span id="mVoiceStatus" class="ml-1 text-amber-400 font-semibold">ON</span>
-              </button>
-              <button id="mgmtMicBtn" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition">
-                <i class="fa-solid fa-microphone"></i>
-              </button>
+        <!-- Real-Time Audit Log Mini-Feed -->
+        <div class="glass-panel rounded-3xl p-5 border border-white/10">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider font-heading flex items-center">
+              <i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> Real-Time Audit Logs
+            </h4>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full">Encrypted</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-gray-900/60 border border-white/5 flex justify-between items-center text-gray-300">
+              <span>Attendance Verified: Grade 10-A</span>
+              <span class="text-[10px] text-gray-500">10:45 AM</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-gray-900/60 border border-white/5 flex justify-between items-center text-gray-300">
+              <span>Fee Payment Received: ₹55,000 (T1)</span>
+              <span class="text-[10px] text-gray-500">Yesterday</span>
             </div>
           </div>
         </div>
 
-        <!-- Management Direct Commands -->
-        <div class="glass-card rounded-2xl p-4">
-          <h4 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Executive Analytics Commands</h4>
-          <ul class="text-xs text-gray-400 space-y-1.5">
-            <li class="flex items-center"><i class="fa-solid fa-chart-pie text-amber-400 mr-2 text-[10px]"></i> "What is the overall attendance?"</li>
-            <li class="flex items-center"><i class="fa-solid fa-coins text-emerald-400 mr-2 text-[10px]"></i> "What is the total fee collection status?"</li>
-            <li class="flex items-center"><i class="fa-solid fa-triangle-exclamation text-rose-400 mr-2 text-[10px]"></i> "Show students with low attendance alerts."</li>
-          </ul>
-        </div>
       </div>
 
-      <!-- Right: Management Chat & Analytics Hub (7 Cols) -->
+      <!-- RIGHT COLUMN: Interactive Executive Chat & Financial Audit Hub -->
       <div class="lg:col-span-7 flex flex-col space-y-4">
         
-        <!-- Tabs -->
-        <div class="flex space-x-1 p-1 bg-gray-900/90 rounded-2xl border border-gray-800 text-xs">
-          <button onclick="switchMTab('chat')" id="mtab-chat" class="flex-1 py-2 rounded-xl font-medium transition bg-amber-600 text-white shadow">
-            <i class="fa-solid fa-comments mr-1.5"></i> Management AI
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1.5 p-1.5 bg-[#170E2B] rounded-2xl border border-white/10 text-xs">
+          <button onclick="switchMTab('chat')" id="mtab-chat" class="flex-1 py-2.5 rounded-xl font-semibold transition bg-amber-600 text-black shadow-lg shadow-amber-600/20">
+            <i class="fa-solid fa-chart-line mr-1.5"></i> Management Assistant
           </button>
-          <button onclick="switchMTab('attendance')" id="mtab-attendance" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
-            <i class="fa-solid fa-chart-line mr-1.5"></i> Attendance Trends
+          <button onclick="switchMTab('finance')" id="mtab-finance" class="flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-sack-dollar mr-1.5"></i> Fee Audit & Revenue
           </button>
-          <button onclick="switchMTab('escalation')" id="mtab-escalation" class="flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white">
-            <i class="fa-solid fa-headset mr-1.5"></i> Escalation Queue
+          <button onclick="switchMTab('escalations')" id="mtab-escalations" class="flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-ticket mr-1.5"></i> Escalation Queue (1)
           </button>
         </div>
 
-        <!-- TAB 1: Chat -->
-        <div id="mcontent-chat" class="glass-card rounded-2xl p-4 flex flex-col h-[520px]">
-          <div id="mgmtChatFeed" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+        <!-- TAB 1: Live Interactive Chat Feed -->
+        <div id="mcontent-chat" class="glass-panel rounded-3xl p-5 flex flex-col h-[540px] border border-white/10">
+          
+          <div id="managementChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin">
             <div class="flex items-start space-x-3">
-              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 flex items-center justify-center text-black text-xs font-bold shrink-0 shadow">
                 XYZ
               </div>
-              <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
-                <p>Good day, Dr. Rajesh Sharma. <strong>Management Assistant</strong> online. I am prepared to provide institution-wide attendance analytics, fee collection audit reports, academic distributions, or monitor human escalation queues.</p>
+              <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
+                <p>Good day, Dr. Rajesh Sharma. <strong>Management Assistant online</strong>. I am prepared to provide institution-wide attendance analytics, fee collection audit reports, academic distributions, or monitor human escalation queues. How may I assist you today?</p>
               </div>
             </div>
           </div>
 
-          <!-- Suggestions -->
-          <div class="py-2 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-gray-800 mt-2">
-            <button onclick="sendMgmtPrompt('What is the overall attendance?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-amber-300 border border-gray-700 shrink-0">
-              "What is the overall attendance?"
+          <div id="liveVoiceBar" class="hidden py-2 px-3 my-2 rounded-xl bg-amber-950/40 border border-amber-500/30 flex items-center justify-between text-xs text-amber-300 animate-pulse">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-waveform-lines"></i>
+              <span id="liveVoiceStatusText">Listening to executive brief... Speak anytime!</span>
+            </div>
+            <button onclick="stopContinuousLiveVoice()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">End Call</button>
+          </div>
+
+          <!-- Quick Action Prompt Chips -->
+          <div class="py-2.5 flex items-center space-x-2 overflow-x-auto text-[11px] border-t border-white/10 mt-1">
+            <button onclick="sendManagementPrompt('What is the total fee collection to date?')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-indian-rupee-sign mr-1"></i> "Total fee collection audit"
             </button>
-            <button onclick="sendMgmtPrompt('What is the total fee collection status?')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-emerald-300 border border-gray-700 shrink-0">
-              "Total Fee Collection"
+            <button onclick="sendManagementPrompt('કુલ ફી કેટલાં ભરાઈ છે?')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-language mr-1"></i> "કુલ ફી કેટલાં ભરાઈ છે?"
             </button>
-            <button onclick="sendMgmtPrompt('Show students with low attendance alerts.')" class="px-2.5 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-rose-300 border border-gray-700 shrink-0">
-              "Low Attendance Alerts"
+            <button onclick="sendManagementPrompt('is rahul patel present yesterday')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-user-check mr-1"></i> "Is Rahul Patel present?"
+            </button>
+            <button onclick="sendManagementPrompt('Show all open escalation tickets.')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-headset mr-1"></i> "Escalation Queue"
             </button>
           </div>
 
-          <!-- Input -->
-          <form id="mgmtChatForm" onsubmit="handleMgmtChatSubmit(event)" class="flex items-center space-x-2 mt-2">
-            <input type="text" id="mgmtChatInput" placeholder="Query institutional metrics or dispatch policies..." class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-amber-500 transition">
-            <button type="submit" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center transition shadow">
+          <!-- Chat Input Form with Mic Button -->
+          <form id="managementChatForm" onsubmit="handleManagementChatSubmit(event)" class="flex items-center space-x-2 mt-1">
+            <input type="text" id="managementChatInput" placeholder="Request fee audits, student records, or speak in English/Hindi/Gujarati/Hinglish..." class="flex-1 bg-[#120820] border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
+            
+            <button type="button" onclick="toggleContinuousLiveVoice()" title="Toggle Gemini Live Voice" class="px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-amber-400 border border-white/10 text-xs font-semibold flex items-center transition">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+
+            <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-black text-xs font-bold flex items-center transition shadow-lg shadow-amber-500/25">
               <span>Query</span>
-              <i class="fa-solid fa-paper-plane ml-1.5 text-[10px]"></i>
+              <i class="fa-solid fa-paper-plane ml-2 text-[10px]"></i>
             </button>
           </form>
+
         </div>
 
-        <!-- TAB 2: Attendance Trends -->
-        <div id="mcontent-attendance" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
-          <h3 class="text-base font-bold text-white font-heading mb-4">Grade-Wise Attendance Breakdown</h3>
-          <div class="space-y-3 text-xs">
-            <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-white">Grade 10-A (Class Teacher: Mrs. Anjali Verma)</span>
-                <span class="text-emerald-400 font-bold">94.2%</span>
-              </div>
-              <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                <div class="bg-emerald-500 h-full rounded-full" style="width: 94.2%"></div>
-              </div>
-            </div>
+        <!-- TAB 2: Fee Audit & Revenue Analytics -->
+        <div id="mcontent-finance" class="hidden glass-panel rounded-3xl p-6 h-[540px] overflow-y-auto border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white font-heading">Institutional Fee Collection & Balance Audit</h3>
+            <span class="text-xs text-amber-400 bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-full">FY 2026-27</span>
+          </div>
 
-            <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-white">Grade 10-B (Class Teacher: Mr. Vikram Malhotra)</span>
-                <span class="text-blue-400 font-bold">92.8%</span>
-              </div>
-              <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                <div class="bg-blue-500 h-full rounded-full" style="width: 92.8%"></div>
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
+            <div class="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
+              <p class="text-gray-400">Total Realized</p>
+              <h4 class="text-lg font-bold text-emerald-400 mt-1">₹1,85,000</h4>
             </div>
-
-            <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-white">Grade 9-A (Class Teacher: Mrs. Sunita Rao)</span>
-                <span class="text-cyan-400 font-bold">91.5%</span>
-              </div>
-              <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                <div class="bg-cyan-500 h-full rounded-full" style="width: 91.5%"></div>
-              </div>
+            <div class="p-3.5 rounded-2xl bg-gray-900/60 border border-white/5">
+              <p class="text-gray-400">Total Billed</p>
+              <h4 class="text-lg font-bold text-white mt-1">₹2,30,000</h4>
             </div>
-
-            <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-white">Grade 9-B (Class Teacher: Mrs. Kavita Singh)</span>
-                <span class="text-amber-400 font-bold">91.0%</span>
-              </div>
-              <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                <div class="bg-amber-500 h-full rounded-full" style="width: 91.0%"></div>
-              </div>
+            <div class="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/30">
+              <p class="text-gray-400">Outstanding Receivables</p>
+              <h4 class="text-lg font-bold text-amber-400 mt-1">₹45,000</h4>
             </div>
           </div>
         </div>
 
         <!-- TAB 3: Escalation Queue -->
-        <div id="mcontent-escalation" class="hidden glass-card rounded-2xl p-5 h-[520px] overflow-y-auto">
-          <h3 class="text-base font-bold text-white font-heading mb-4">Live Escalation & Support Requests</h3>
+        <div id="mcontent-escalations" class="hidden glass-panel rounded-3xl p-6 h-[540px] overflow-y-auto border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white font-heading">Parent & Teacher Escalation Queue</h3>
+            <span class="text-xs text-rose-400 bg-rose-950/40 border border-rose-500/30 px-3 py-1 rounded-full">1 Active Ticket</span>
+          </div>
+
           <div class="space-y-3 text-xs">
-            <div class="p-3.5 rounded-xl bg-gray-800/80 border border-emerald-500/40">
-              <div class="flex justify-between items-start">
-                <div>
-                  <span class="font-semibold text-white">Callback Request — Mr. Amit Patel (Parent)</span>
-                  <p class="text-[10px] text-gray-400">Student: Rahul Patel (Grade 10-A) • Target: Class Teacher</p>
-                </div>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase">CONFIRMED</span>
+            <div class="p-4 rounded-2xl bg-gray-900/80 border border-white/10 flex justify-between items-start">
+              <div>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">PARENT TICKET #TK-101</span>
+                <h4 class="text-sm font-bold text-white mt-1">Mr. Amit Patel (Parent of Rahul Patel)</h4>
+                <p class="text-gray-400 text-xs mt-0.5">Requested callback regarding Term 2 fee payment structure and transportation fee waiver.</p>
               </div>
-              <p class="text-gray-300 mt-2">"Requesting a quick call regarding Rahul science project group allocation."</p>
-              <div class="mt-2 text-[10px] text-amber-400">Dispatch Log: Callback scheduled for Aug 16 at 4:00 PM with Mrs. Anjali Verma.</div>
+              <button onclick="alert('Dispatching callback notice to parent...')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition">Resolve Ticket</button>
             </div>
           </div>
         </div>
@@ -272,207 +334,318 @@
   </main>
 
   <script>
-    const isSingleOrigin = window.location.port === "7860" || window.location.port === "8000" || window.location.hostname.includes("huggingface.co") || window.location.hostname.includes("hf.space") || window.location.port === "";
-    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
-    let token = "";
-    let autoVoice = true;
-    let sessionId = "sess_mgmt_" + Math.random().toString(36).substring(7);
-    let selectedLanguage = "en";
-
-    window.addEventListener("DOMContentLoaded", async () => {
-      initMgmtAvatarAnimation();
-      await authenticatePrincipal();
-      setupMgmtSpeech();
-    });
-
-    async function authenticatePrincipal() {
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/mock-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: "principal", language: selectedLanguage })
-        });
-        const data = await res.json();
-        token = data.access_token;
-      } catch (err) {
-        console.warn("Using local fallback:", err);
-      }
-    }
-
+    const API_BASE = window.location.origin;
+    let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
+    let isLiveVoiceActive = false;
+    let recognition = null;
     let isSpeaking = false;
-    let mouthOpening = 0;
+    let silenceTimer = null;
 
-    function initMgmtAvatarAnimation() {
-      const canvas = document.getElementById("managementAvatarCanvas");
-      const ctx = canvas.getContext("2d");
+    document.getElementById("languageSelect").value = selectedLanguage;
 
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2 + 10;
-
-        // Head Base
-        ctx.fillStyle = "#F5D0A9";
-        ctx.beginPath();
-        ctx.arc(cx, cy, 65, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Distinguished Silver-Streaked Hair
-        ctx.fillStyle = "#475569";
-        ctx.beginPath();
-        ctx.arc(cx, cy - 25, 68, Math.PI, Math.PI * 2);
-        ctx.fill();
-
-        // Formal Eyeglasses
-        ctx.strokeStyle = "#D97706";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.roundRect(cx - 36, cy - 18, 26, 18, 4);
-        ctx.roundRect(cx + 10, cy - 18, 26, 18, 4);
-        ctx.moveTo(cx - 10, cy - 9);
-        ctx.lineTo(cx + 10, cy - 9);
-        ctx.stroke();
-
-        // Eyes
-        ctx.fillStyle = "#0F172A";
-        ctx.beginPath();
-        ctx.arc(cx - 24, cy - 9, 4, 0, Math.PI * 2);
-        ctx.arc(cx + 24, cy - 9, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Mouth
-        if (isSpeaking) {
-          mouthOpening = 3 + Math.abs(Math.sin(Date.now() * 0.015)) * 12;
-        } else {
-          mouthOpening = 3;
-        }
-        ctx.fillStyle = "#BE123C";
-        ctx.beginPath();
-        ctx.ellipse(cx, cy + 28, 12, mouthOpening, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        requestAnimationFrame(draw);
-      }
-      draw();
+    function onLanguageChange(lang) {
+      selectedLanguage = lang;
+      localStorage.setItem("preferred_lang", lang);
     }
 
-    function speakMgmtText(text) {
-      if (!autoVoice || !window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95;
-      utterance.pitch = 0.95;
+    function switchMTab(tab) {
+      ['chat', 'finance', 'escalations'].forEach(t => {
+        const btn = document.getElementById(`mtab-${t}`);
+        const content = document.getElementById(`mcontent-${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 py-2.5 rounded-xl font-semibold transition bg-amber-600 text-black shadow-lg shadow-amber-600/20";
+          content.classList.remove('hidden');
+        } else {
+          btn.className = "flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white";
+          content.classList.add('hidden');
+        }
+      });
+    }
 
-      const ind = document.getElementById("mgmtSpeakingIndicator");
-      utterance.onstart = () => { isSpeaking = true; ind.classList.remove("hidden"); };
-      utterance.onend = () => { isSpeaking = false; ind.classList.add("hidden"); };
-      utterance.onerror = () => { isSpeaking = false; ind.classList.add("hidden"); };
+    function setAvatarState(state) {
+      const dot = document.getElementById('aiStateDot');
+      const label = document.getElementById('aiStateLabel');
+      const mouth = document.getElementById('avatarMouth');
+      const waves = document.getElementById('liveAudioWaveforms');
+      const outerRing = document.getElementById('voiceRingOuter');
+      const innerRing = document.getElementById('voiceRingInner');
+
+      if (state === 'listening') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping';
+        label.innerText = 'Listening to leadership briefing...';
+        outerRing.classList.remove('hidden');
+        innerRing.classList.remove('hidden');
+        waves.innerHTML = `
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+        `;
+        mouth.setAttribute('rx', '7');
+        mouth.setAttribute('ry', '2');
+        mouth.classList.remove('mouth-speaking');
+      } else if (state === 'thinking') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse';
+        label.innerText = 'Auditing Institutional SQL Database...';
+        outerRing.classList.add('hidden');
+        innerRing.classList.remove('hidden');
+        waves.innerHTML = `<span class="text-[11px] text-purple-400 animate-pulse font-medium">Querying 19 relational tables...</span>`;
+        mouth.classList.remove('mouth-speaking');
+      } else if (state === 'speaking') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+        label.innerText = 'Athena Speaking...';
+        outerRing.classList.remove('hidden');
+        innerRing.classList.remove('hidden');
+        mouth.classList.add('mouth-speaking');
+        waves.innerHTML = `
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+          <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+        `;
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        label.innerText = 'Management Assistant Ready';
+        outerRing.classList.add('hidden');
+        innerRing.classList.add('hidden');
+        mouth.classList.remove('mouth-speaking');
+        waves.innerHTML = `
+          <div class="w-1 bg-amber-400/50 rounded-full h-2"></div>
+          <div class="w-1 bg-amber-400/50 rounded-full h-4"></div>
+          <div class="w-1 bg-amber-400/50 rounded-full h-2"></div>
+          <div class="w-1 bg-amber-400/50 rounded-full h-5"></div>
+          <div class="w-1 bg-amber-400/50 rounded-full h-3"></div>
+        `;
+      }
+    }
+
+    function toggleContinuousLiveVoice() {
+      if (isLiveVoiceActive) {
+        stopContinuousLiveVoice();
+      } else {
+        startContinuousLiveVoice();
+      }
+    }
+
+    function startContinuousLiveVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+        return;
+      }
+
+      isLiveVoiceActive = true;
+      document.getElementById('topLiveBtnLabel').innerText = "Live Connected";
+      document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-rose-500/30 transition animate-pulse";
+      document.getElementById('liveMicIcon').className = "fa-solid fa-phone-slash";
+      document.getElementById('liveVoiceBar').classList.remove('hidden');
+      document.getElementById('liveSubtext').innerText = "Executive voice live • Speak commands";
+
+      initSpeechRecognition();
+    }
+
+    function stopContinuousLiveVoice() {
+      isLiveVoiceActive = false;
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      document.getElementById('topLiveBtnLabel').innerText = "Go Live Voice";
+      document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-400 text-black flex items-center justify-center font-bold text-sm shadow-lg shadow-amber-500/30 transition";
+      document.getElementById('liveMicIcon').className = "fa-solid fa-microphone";
+      document.getElementById('liveVoiceBar').classList.add('hidden');
+      document.getElementById('liveSubtext').innerText = "Hands-free continuous conversation";
+      setAvatarState('idle');
+    }
+
+    function initSpeechRecognition() {
+      if (!isLiveVoiceActive) return;
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      const langMap = {
+        'en': 'en-IN', 'hinglish': 'hi-IN', 'hi': 'hi-IN', 'gu': 'gu-IN',
+        'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'bn': 'bn-IN',
+        'pa': 'pa-IN', 'kn': 'kn-IN', 'ml': 'ml-IN', 'ur': 'ur-PK'
+      };
+      recognition.lang = langMap[selectedLanguage] || 'en-IN';
+
+      setAvatarState('listening');
+      document.getElementById('liveVoiceStatusText').innerText = "Listening to leadership brief... Speak anytime!";
+
+      let finalTranscript = "";
+
+      recognition.onresult = (event) => {
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        const currentSaid = finalTranscript || interimTranscript;
+        if (currentSaid) {
+          document.getElementById('liveVoiceStatusText').innerText = `Brief: "${currentSaid}"`;
+          
+          clearTimeout(silenceTimer);
+          silenceTimer = setTimeout(() => {
+            if (currentSaid.trim().length > 0 && isLiveVoiceActive && !isSpeaking) {
+              try { recognition.stop(); } catch(e) {}
+              sendManagementPrompt(currentSaid.trim(), true);
+              finalTranscript = "";
+            }
+          }, 1400);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error !== 'no-speech' && isLiveVoiceActive) {
+          console.warn("Speech recognition notice:", event.error);
+        }
+      };
+
+      recognition.onend = () => {
+        if (isLiveVoiceActive && !isSpeaking) {
+          try { recognition.start(); } catch(e) {}
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch(e) {
+        console.warn("Recognition already active");
+      }
+    }
+
+    function speakAssistantResponse(text) {
+      if (!window.speechSynthesis) return;
+
+      window.speechSynthesis.cancel();
+      isSpeaking = true;
+      setAvatarState('speaking');
+
+      const cleanVoiceText = text.replace(/\*\*/g, '').replace(/•/g, '').replace(/#/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanVoiceText);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const indianVoice = voices.find(v => v.lang.includes('IN') || v.name.includes('India') || v.name.includes('Google'));
+      if (indianVoice) utterance.voice = indianVoice;
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        if (isLiveVoiceActive) {
+          setAvatarState('listening');
+          document.getElementById('liveVoiceStatusText').innerText = "Listening to leadership brief... Speak anytime!";
+          initSpeechRecognition();
+        } else {
+          setAvatarState('idle');
+        }
+      };
+
+      utterance.onerror = () => {
+        isSpeaking = false;
+        if (isLiveVoiceActive) initSpeechRecognition();
+        else setAvatarState('idle');
+      };
+
       window.speechSynthesis.speak(utterance);
     }
 
-    function setupMgmtSpeech() {
-      const micBtn = document.getElementById("mgmtMicBtn");
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
-
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      micBtn.onclick = () => {
-        micBtn.classList.add("animate-pulse", "bg-rose-600");
-        recognition.start();
-      };
-      recognition.onresult = (e) => {
-        document.getElementById("mgmtChatInput").value = e.results[0][0].transcript;
-        handleMgmtChatSubmit(new Event("submit"));
-      };
-      recognition.onend = () => micBtn.classList.remove("animate-pulse", "bg-rose-600");
-    }
-
-    async function handleMgmtChatSubmit(e) {
-      if (e) e.preventDefault();
-      const input = document.getElementById("mgmtChatInput");
-      const msg = input.value.trim();
-      if (!msg) return;
-      input.value = "";
-
-      appendMgmtMessage("user", msg);
-
-      try {
-        const res = await fetch(`${API_BASE}/api/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-          body: JSON.stringify({ message: msg, session_id: sessionId, language: selectedLanguage, voice_response_requested: autoVoice })
-        });
-        const data = await res.json();
-        appendMgmtMessage("assistant", data.response_text, data.suggested_actions);
-        speakMgmtText(data.response_text);
-      } catch (err) {
-        let fb = "The overall school attendance is currently 92.4%. Class-wise breakdown: Grade 10-A: 94.2%, Grade 10-B: 92.8%, Grade 9-A: 91.5%, Grade 9-B: 91.0%.";
-        appendMgmtMessage("assistant", fb);
-        speakMgmtText(fb);
-      }
-    }
-
-    function appendMgmtMessage(role, text, actions = null) {
-      const feed = document.getElementById("mgmtChatFeed");
-      const isUser = role === "user";
-      const wrapper = document.createElement("div");
+    function appendMessage(role, text) {
+      const feed = document.getElementById('managementChatFeed');
+      const isUser = role === 'user';
+      
+      const wrapper = document.createElement('div');
       wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+      
+      const formatted = text.replace(/\n/g, '<br/>');
 
-      let actionsHtml = "";
-      if (actions && actions.length > 0) {
-        actionsHtml = `<div class="mt-3 pt-2 border-t border-gray-700/60 flex flex-wrap gap-1.5">` +
-          actions.map(a => `<button onclick="sendMgmtPrompt('${a.label}')" class="px-2.5 py-1 rounded-lg bg-amber-600/30 hover:bg-amber-600 text-amber-200 border border-amber-500/40 text-[10px] font-medium transition">${a.label}</button>`).join('') +
-          `</div>`;
+      if (isUser) {
+        wrapper.innerHTML = `
+          <div class="bg-gradient-to-r from-amber-600 to-purple-600 text-white rounded-2xl rounded-tr-none p-3.5 max-w-[85%] text-xs leading-relaxed shadow-md">
+            <p>${formatted}</p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            RS
+          </div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 flex items-center justify-center text-black text-xs font-bold shrink-0 shadow">
+            XYZ
+          </div>
+          <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
+            <p>${formatted}</p>
+          </div>
+        `;
       }
-
-      wrapper.innerHTML = isUser ? `
-        <div class="bg-amber-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] text-xs leading-relaxed shadow">
-          ${text}
-        </div>
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-          RS
-        </div>
-      ` : `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-          XYZ
-        </div>
-        <div class="bg-gray-800/90 border border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] text-xs leading-relaxed text-gray-200">
-          <p>${text}</p>
-          ${actionsHtml}
-        </div>
-      `;
 
       feed.appendChild(wrapper);
       feed.scrollTop = feed.scrollHeight;
     }
 
-    function sendMgmtPrompt(prompt) {
-      document.getElementById("mgmtChatInput").value = prompt;
-      handleMgmtChatSubmit(new Event("submit"));
+    async function sendManagementPrompt(msg, fromVoice = false) {
+      if (!msg || !msg.trim()) return;
+      appendMessage('user', msg);
+      setAvatarState('thinking');
+
+      const principalPayload = {
+        message: msg,
+        language: selectedLanguage,
+        user: {
+          user_id: "usr_principal_01",
+          name: "Dr. Rajesh Sharma",
+          role: "principal",
+          preferred_language: selectedLanguage
+        }
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(principalPayload)
+        });
+
+        const data = await res.json();
+        const replyText = data.response_text || "Executive query completed.";
+        appendMessage('assistant', replyText);
+
+        if (fromVoice || isLiveVoiceActive) {
+          speakAssistantResponse(replyText);
+        } else {
+          setAvatarState('idle');
+        }
+
+      } catch (err) {
+        console.error("Chat error:", err);
+        const fallback = "Total fee collection is ₹1,85,000 against ₹2,30,000 billed (80.4% efficiency).";
+        appendMessage('assistant', fallback);
+        if (fromVoice || isLiveVoiceActive) speakAssistantResponse(fallback);
+        else setAvatarState('idle');
+      }
     }
 
-    function switchMTab(tab) {
-      ['chat', 'attendance', 'escalation'].forEach(t => {
-        document.getElementById(`mcontent-${t}`).classList.add("hidden");
-        document.getElementById(`mtab-${t}`).className = "flex-1 py-2 rounded-xl font-medium transition text-gray-400 hover:text-white";
-      });
-      document.getElementById(`mcontent-${tab}`).classList.remove("hidden");
-      document.getElementById(`mtab-${tab}`).className = "flex-1 py-2 rounded-xl font-medium transition bg-amber-600 text-white shadow";
+    function handleManagementChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('managementChatInput');
+      const val = input.value.trim();
+      if (val) {
+        sendManagementPrompt(val, false);
+        input.value = "";
+      }
     }
-
-    document.getElementById("mgmtVoiceToggle").onclick = () => {
-      autoVoice = !autoVoice;
-      document.getElementById("mVoiceStatus").textContent = autoVoice ? "ON" : "OFF";
-      document.getElementById("mVoiceStatus").className = autoVoice ? "ml-1 text-amber-400 font-semibold" : "ml-1 text-gray-500 font-semibold";
-    };
-
-    document.getElementById("languageSelect").onchange = (e) => {
-      selectedLanguage = e.target.value;
-      authenticatePrincipal();
-    };
   </script>
 </body>
 </html>

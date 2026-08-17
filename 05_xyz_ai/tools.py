@@ -53,8 +53,13 @@ def tool_get_attendance(
             target_id = std["id"]
         elif user.role == "teacher":
             check_rbac_permission("teacher", "attendance", "read_class")
-            std = validate_teacher_class_ownership(user.user_id, student_name=student_name)
-            target_id = std["id"]
+            if student_name or student_id:
+                std = validate_teacher_class_ownership(user.user_id, student_name=student_name)
+                target_id = std["id"]
+                return ERPAttendanceService.get_student_attendance(target_id)
+            else:
+                cls_info = validate_teacher_class_ownership(user.user_id)
+                return ERPAttendanceService.get_class_attendance_summary(class_id=cls_info["id"])
         elif user.role == "principal":
             check_rbac_permission("principal", "attendance", "read_all")
             # If no student specified, return overall analytics
