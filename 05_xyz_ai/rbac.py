@@ -78,13 +78,16 @@ def validate_parent_student_ownership(
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Support portal aliases seamlessly
+    effective_parent_id = "usr_parent_amit" if parent_user_id == "usr_parent_01" else parent_user_id
+
     cursor.execute("""
         SELECT s.id, s.name, s.roll_number, s.class_id, c.name as class_name
         FROM parent_student_links psl
         JOIN students s ON s.id = psl.student_id
         JOIN classes c ON c.id = s.class_id
-        WHERE psl.parent_user_id = ?
-    """, (parent_user_id,))
+        WHERE psl.parent_user_id = ? OR psl.parent_user_id = ?
+    """, (parent_user_id, effective_parent_id))
     linked_children = [dict(r) for r in cursor.fetchall()]
     conn.close()
 

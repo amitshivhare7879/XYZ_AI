@@ -58,6 +58,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import time
+
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start_time = time.time()
+    path = request.url.path
+    method = request.method
+    
+    response = await call_next(request)
+    duration_ms = round((time.time() - start_time) * 1000, 1)
+    
+    status_code = response.status_code
+    status_icon = "🟢" if status_code < 400 else "🔴"
+    
+    if path.startswith("/api/") or path == "/chat":
+        print(f"{status_icon} [{method}] {path} -> {status_code} ({duration_ms}ms)", flush=True)
+        
+    return response
+
 @app.on_event("startup")
 def startup_db_check():
     """Ensures database schema and mock records are initialized on server startup."""
@@ -84,8 +103,10 @@ def startup_db_check():
         except Exception as se:
             print(f"[Startup Seeding Error]: {se}")
 
-# Mount all 4 Portals & Unified Login for single-origin deployment (e.g. Hugging Face Spaces / Docker)
+# Mount all 4 Portals, Unified Login & Shared Assets for single-origin deployment
 root_dir = Path(__file__).parent.parent
+if (root_dir / "shared").exists():
+    app.mount("/shared", StaticFiles(directory=str(root_dir / "shared")), name="shared")
 if (root_dir / "01_student_portal").exists():
     app.mount("/student", StaticFiles(directory=str(root_dir / "01_student_portal"), html=True), name="student")
 if (root_dir / "02_parent_portal").exists():
@@ -269,6 +290,31 @@ async def chat_endpoint(
         language=req.language or calling_user.preferred_language,
         voice_requested=req.voice_response_requested
     )
+
+@app.get("/api/chat/history")
+def get_chat_history_endpoint(
+    session_id: Optional[str] = None,
+    user_id: Optional[str] = None
+):
+    """Fetches chronological conversation history from SQLite/PostgreSQL database."""
+    from shared.database import get_conversation_history, get_user_recent_session
+    messages = []
+    if session_id:
+        messages = get_conversation_history(session_id, limit=50)
+        
+    # If no messages found for this session_id but user_id is provided, restore latest user session
+    if not messages and user_id:
+        recent = get_user_recent_session(user_id)
+        if recent:
+            active_sid = recent.get("session_id")
+            if active_sid:
+                session_id = active_sid
+                messages = get_conversation_history(session_id, limit=50)
+
+    return {
+        "session_id": session_id,
+        "messages": messages
+    }
 
 # 3. Voice Pipeline Endpoints
 @app.post("/api/voice/transcribe")

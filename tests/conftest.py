@@ -13,8 +13,8 @@ sys.path.insert(0, str(ROOT_DIR / "05_xyz_ai"))
 import pytest
 from shared.seed_data import generate_seed_data
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def reset_database_state():
-    """Resets the mock database to clean seed state before each test."""
+    """Seeds the mock database to clean state for test run."""
     generate_seed_data()
     yield

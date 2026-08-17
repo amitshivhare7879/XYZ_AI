@@ -33,7 +33,11 @@ ENV/
 *.sqlite
 *.sqlite3
 *.db-journal
+*.db-shm
+*.db-wal
 shared/*.db
+shared/*.db-shm
+shared/*.db-wal
 
 # IDEs & System
 .vscode/

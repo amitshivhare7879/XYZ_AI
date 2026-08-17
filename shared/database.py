@@ -68,8 +68,9 @@ def get_db_connection(db_file: Optional[str] = None):
     Returns a unified connection object with row indexing and auto-adapting query syntax.
     """
     if db_file:
-        conn = sqlite3.connect(db_file, check_same_thread=False)
+        conn = sqlite3.connect(db_file, timeout=20.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA busy_timeout = 5000;")
         conn.execute("PRAGMA foreign_keys = ON;")
         return UniversalConnection(conn, is_postgres=False)
 
@@ -84,8 +85,9 @@ def get_db_connection(db_file: Optional[str] = None):
             print(f"[Warning] Failed to connect to PostgreSQL ({e}), falling back to SQLite.")
 
     path = str(DB_PATH)
-    conn = sqlite3.connect(path, check_same_thread=False)
+    conn = sqlite3.connect(path, timeout=20.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout = 5000;")
     conn.execute("PRAGMA foreign_keys = ON;")
     return UniversalConnection(conn, is_postgres=False)
 
@@ -93,8 +95,10 @@ def init_db(db_file: Optional[str] = None):
     """Initializes database schema for SQLite or PostgreSQL."""
     path = db_file or str(DB_PATH)
     # If explicitly pointing to SQLite file or fallback
-    conn = sqlite3.connect(path, check_same_thread=False)
+    conn = sqlite3.connect(path, timeout=30.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA busy_timeout = 30000;")
     conn.execute("PRAGMA foreign_keys = ON;")
     cursor = conn.cursor()
 
@@ -314,6 +318,102 @@ def init_db(db_file: Optional[str] = None):
 
     conn.commit()
     conn.close()
+
+def save_conversation_turn(session_id: str, user_id: str, user_msg: str, assistant_reply: str, language: str = 'en', tools: list = None):
+    """Persists conversational message turn into database for cross-refresh persistence."""
+    try:
+        import uuid
+        import json
+        conn = get_db_connection()
+        c = conn.cursor()
+        
+        # 1. Ensure conversation session exists
+        c.execute("""
+            INSERT OR IGNORE INTO conversation_sessions (id, user_id, session_token, language)
+            VALUES (?, ?, ?, ?);
+        """, (session_id, user_id, session_id, language))
+        
+        # 2. Insert user message
+        user_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
+        c.execute("""
+            INSERT INTO conversation_messages (id, session_id, role, content, tool_calls)
+            VALUES (?, ?, 'user', ?, NULL);
+        """, (user_msg_id, session_id, user_msg))
+        
+        # 3. Insert assistant message
+        asst_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
+        tools_json = json.dumps(tools) if tools else None
+        c.execute("""
+            INSERT INTO conversation_messages (id, session_id, role, content, tool_calls)
+            VALUES (?, ?, 'assistant', ?, ?);
+        """, (asst_msg_id, session_id, assistant_reply, tools_json))
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[DB Notice] save_conversation_turn error: {e}")
+
+def get_conversation_history(session_id: str, limit: int = 50) -> list:
+    """Retrieves chronological message history for a session."""
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("""
+            SELECT role, content, tool_calls, created_at
+            FROM conversation_messages
+            WHERE session_id = ?
+            ORDER BY created_at ASC
+            LIMIT ?;
+        """, (session_id, limit))
+        rows = c.fetchall()
+        conn.close()
+        
+        history = []
+        for r in rows:
+            if isinstance(r, dict):
+                role = r.get("role")
+                content = r.get("content")
+                created_at = r.get("created_at")
+            else:
+                role = r[0]
+                content = r[1]
+                created_at = r[3]
+            history.append({
+                "role": role,
+                "content": content,
+                "created_at": str(created_at)
+            })
+        return history
+    except Exception as e:
+        print(f"[DB Notice] get_conversation_history error: {e}")
+        return []
+
+def get_user_recent_session(user_id: str) -> Optional[dict]:
+    """Retrieves the most recent session for a given user."""
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("""
+            SELECT id, language, created_at
+            FROM conversation_sessions
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            LIMIT 1;
+        """, (user_id,))
+        row = c.fetchone()
+        conn.close()
+        if row:
+            if isinstance(row, dict):
+                sid = row.get("id")
+                lang = row.get("language")
+            else:
+                sid = row[0]
+                lang = row[1]
+            return {"session_id": sid, "language": lang}
+        return None
+    except Exception as e:
+        print(f"[DB Notice] get_user_recent_session error: {e}")
+        return None
 
 if __name__ == "__main__":
     init_db()

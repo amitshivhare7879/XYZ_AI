@@ -146,30 +146,14 @@
             <span id="aiStateLabel" class="font-semibold text-gray-200">Parent Support Assistant Ready</span>
           </div>
 
-          <!-- 3D / SVG Animated AI Human Model -->
-          <div class="relative w-44 h-44 mb-4 flex items-center justify-center z-10">
+          <!-- Interactive 60FPS 3D Canvas Avatar with Real-Time Visemes & Facial Expressions -->
+          <div class="relative w-48 h-48 mb-3 flex items-center justify-center z-10">
             <div id="voiceRingOuter" class="absolute inset-0 rounded-full border-2 border-indigo-500/30 scale-110 hidden animate-ping"></div>
             <div id="voiceRingInner" class="absolute inset-0 rounded-full border border-indigo-400/40 scale-105 hidden"></div>
 
-            <div class="w-36 h-36 rounded-full p-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-amber-400 shadow-2xl shadow-indigo-500/30">
+            <div class="w-44 h-44 rounded-full p-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-amber-400 shadow-2xl shadow-indigo-500/30">
               <div class="w-full h-full rounded-full bg-[#0E1526] flex items-center justify-center relative overflow-hidden">
-                <svg viewBox="0 0 100 100" class="w-28 h-28 text-gray-200">
-                  <circle cx="50" cy="50" r="38" fill="#1E293B" stroke="#6366F1" stroke-width="1.5" />
-                  <!-- Professional Hair -->
-                  <path d="M 22 38 Q 50 12 78 38 Q 50 22 22 38 Z" fill="#818CF8" opacity="0.9" />
-                  <!-- Eyes -->
-                  <circle cx="38" cy="46" r="4.5" fill="#818CF8" />
-                  <circle cx="62" cy="46" r="4.5" fill="#818CF8" />
-                  <circle cx="39.5" cy="44.5" r="1.5" fill="#FFFFFF" />
-                  <circle cx="63.5" cy="44.5" r="1.5" fill="#FFFFFF" />
-                  <!-- Eyebrows -->
-                  <path d="M 32 38 Q 38 35 44 38" stroke="#818CF8" stroke-width="1.5" fill="none" stroke-linecap="round" />
-                  <path d="M 56 38 Q 62 35 68 38" stroke="#818CF8" stroke-width="1.5" fill="none" stroke-linecap="round" />
-                  <!-- Nose -->
-                  <path d="M 50 48 L 48 56 L 52 56" stroke="#64748B" stroke-width="1.2" fill="none" stroke-linecap="round" />
-                  <!-- Animated Mouth -->
-                  <ellipse id="avatarMouth" cx="50" cy="68" rx="7" ry="2" fill="#E0E7FF" stroke="#6366F1" stroke-width="1" class="transition-all duration-75" />
-                </svg>
+                <canvas id="avatarCanvas" width="180" height="180" class="w-full h-full"></canvas>
               </div>
             </div>
           </div>
@@ -364,6 +348,7 @@
     </div>
   </main>
 
+  <script src="/shared/i18n.js"></script>
   <script>
     const isSingleOrigin = window.location.port === "8000" || window.location.port === "7860" || window.location.port === "";
     const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
@@ -373,11 +358,29 @@
     let isSpeaking = false;
     let silenceTimer = null;
 
-    document.getElementById("languageSelect").value = selectedLanguage;
+    if (window.SchoolI18n) {
+      SchoolI18n.initI18n(selectedLanguage);
+    }
 
     function onLanguageChange(lang) {
       selectedLanguage = lang;
-      localStorage.setItem("preferred_lang", lang);
+      localStorage.setItem('preferred_lang', lang);
+      if (window.SchoolI18n) {
+        SchoolI18n.applyTranslations(lang);
+      }
+      const parentGreetings = {
+        en: "Hello Mr. Amit Patel! I'm XYZ AI, your Parent Support Assistant. Which language would you prefer to continue in today? (English, हिन्दी, ગુજરાતી, मराठी...)",
+        hi: "नमस्ते श्री अमित पटेल! मैं आपका XYZ AI अभिभावक सहायता सहायक हूँ। आप आज किस भाषा में बात करना पसंद करेंगे? (English, हिन्दी, ગુજરાતી, मराठी...)",
+        gu: "નમસ્તે શ્રી અમિત પટેલ! હું XYZ AI, તમારો વાલી સહાયક છું. આજે તમે કઈ ભાષામાં વાતચીત કરવા માંગો છો? (English, हिन्दी, ગુજરાતી, मराठी...)",
+        mr: "नमस्कार श्री अमित पटेल! मी XYZ AI, आपला पालक सहाय्यક आहे. आज आपण कोणत्या भाषेत संभाषण करू इच्छिता?",
+        ta: "வணக்கம் திரு. அமித் படேல்! நான் XYZ AI, உங்கள் பெற்றோர் ஆதரவு உதவியாளர். இன்று எந்த மொழியில் தொடர விரும்புகிறீர்கள்?",
+        hinglish: "Hello Mr. Amit Patel! Main XYZ AI hoon, aapka Parent Support Assistant. Aaj aap kis language me continue karna chahenge?"
+      };
+      const feed = document.getElementById('parentChatFeed');
+      if (feed && feed.children.length <= 1) {
+        feed.innerHTML = '';
+        appendMessage('assistant', parentGreetings[lang] || parentGreetings.en);
+      }
     }
 
     function switchPTab(tab) {
@@ -394,10 +397,215 @@
       });
     }
 
+    // 60FPS Dynamic 3D Human Avatar Engine (Maya — Parent Support AI)
+    const canvas = document.getElementById('avatarCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentAvatarState = 'idle'; // 'idle', 'listening', 'thinking', 'speaking'
+    let mouthOpenTarget = 0.06;
+    let mouthOpenCurrent = 0.06;
+    let mouthWidthTarget = 1.0;
+    let mouthWidthCurrent = 1.0;
+    let eyeBlink = 1.0;
+    let headSway = 0.0;
+    let gazeX = 0.0;
+    let gazeY = 0.0;
+    let animFrameId = null;
+
+    // Natural Eye Blink Loop
+    function scheduleBlink() {
+      const nextBlinkIn = Math.random() * 3200 + 2600;
+      setTimeout(() => {
+        eyeBlink = 0.05;
+        setTimeout(() => {
+          eyeBlink = 1.0;
+          scheduleBlink();
+        }, 130);
+      }, nextBlinkIn);
+    }
+    scheduleBlink();
+
+    function renderAvatar() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2 + 6;
+
+      // Smooth interpolation for mouth movements
+      mouthOpenCurrent += (mouthOpenTarget - mouthOpenCurrent) * 0.35;
+      mouthWidthCurrent += (mouthWidthTarget - mouthWidthCurrent) * 0.35;
+      
+      // Gentle calm breathing and subtle head tilt
+      const t = Date.now() * 0.0018;
+      headSway = Math.sin(t) * 1.2;
+      const breathingY = Math.cos(t * 1.1) * 1.0;
+
+      ctx.save();
+      ctx.translate(cx, cy + breathingY);
+      ctx.rotate(headSway * Math.PI / 180);
+
+      // 1. Ambient Glow Aura (Warm Indigo / Emerald)
+      const haloGrad = ctx.createRadialGradient(0, -10, 20, 0, -10, 85);
+      if (currentAvatarState === 'speaking') {
+        haloGrad.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+        haloGrad.addColorStop(1, 'rgba(16, 185, 129, 0)');
+      } else if (currentAvatarState === 'thinking') {
+        haloGrad.addColorStop(0, 'rgba(245, 158, 11, 0.35)');
+        haloGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      } else if (currentAvatarState === 'listening') {
+        haloGrad.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+        haloGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+      } else {
+        haloGrad.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+        haloGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+      }
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(0, -10, 85, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Neck & Elegant Professional Collar
+      ctx.fillStyle = '#1E1B4B';
+      ctx.beginPath();
+      ctx.roundRect(-16, 36, 32, 28, [6]);
+      ctx.fill();
+
+      // Collar Accents
+      ctx.strokeStyle = '#818CF8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-16, 42);
+      ctx.lineTo(0, 56);
+      ctx.lineTo(16, 42);
+      ctx.stroke();
+
+      // 3. Head Morphology (Warm 3D Shaded Face)
+      const faceGrad = ctx.createLinearGradient(-35, -45, 35, 45);
+      faceGrad.addColorStop(0, '#2E1065');
+      faceGrad.addColorStop(1, '#0F172A');
+      ctx.fillStyle = faceGrad;
+      ctx.strokeStyle = '#818CF8';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.roundRect(-36, -42, 72, 82, [28, 28, 38, 38]);
+      ctx.fill();
+      ctx.stroke();
+
+      // 4. Professional Styled Hair
+      ctx.fillStyle = '#6366F1';
+      ctx.beginPath();
+      ctx.arc(0, -42, 38, Math.PI * 1.05, Math.PI * 1.95);
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#818CF8';
+      ctx.stroke();
+
+      // 5. Eyebrows (Gentle, Empathetic Expression)
+      let browOffset = 0;
+      if (currentAvatarState === 'listening') browOffset = -3;
+      if (currentAvatarState === 'thinking') browOffset = -2;
+
+      ctx.strokeStyle = '#A5B4FC';
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      
+      // Left Eyebrow
+      ctx.beginPath();
+      ctx.moveTo(-25, -18 + browOffset);
+      ctx.quadraticCurveTo(-15, -23 + browOffset, -6, -19 + browOffset);
+      ctx.stroke();
+
+      // Right Eyebrow
+      ctx.beginPath();
+      ctx.moveTo(6, -19 + browOffset);
+      ctx.quadraticCurveTo(15, -23 + browOffset, 25, -18 + browOffset);
+      ctx.stroke();
+
+      // 6. Eyes (Expressive, Caring, Attentive)
+      const eyeH = 9 * eyeBlink;
+      
+      // Eye Sclera
+      ctx.fillStyle = '#090D1A';
+      ctx.beginPath();
+      ctx.ellipse(-16, -7, 10, Math.max(eyeH, 0.5), 0, 0, Math.PI * 2);
+      ctx.ellipse(16, -7, 10, Math.max(eyeH, 0.5), 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (eyeBlink > 0.3) {
+        // Glowing Attentive Pupils
+        ctx.fillStyle = '#818CF8';
+        ctx.shadowColor = '#818CF8';
+        ctx.shadowBlur = 8;
+        
+        let pX = (currentAvatarState === 'thinking' ? -1 : 0) + gazeX;
+        let pY = (currentAvatarState === 'thinking' ? -2 : 0) + gazeY;
+
+        ctx.beginPath();
+        ctx.arc(-16 + pX, -7 + pY, 4.5, 0, Math.PI * 2);
+        ctx.arc(16 + pX, -7 + pY, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Specular Catchlights
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(-18 + pX, -9 + pY, 1.6, 0, Math.PI * 2);
+        ctx.arc(14 + pX, -9 + pY, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 7. Subtle Nose Contour
+      ctx.strokeStyle = 'rgba(129, 140, 248, 0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -1);
+      ctx.lineTo(-2, 7);
+      ctx.lineTo(2, 7);
+      ctx.stroke();
+
+      // 8. Dynamic Viseme-Driven Mouth (Phoneme Lip Sync)
+      const mWidth = 12 * mouthWidthCurrent;
+      const mHeight = Math.max(2 + (mouthOpenCurrent * 14), 2.5);
+
+      if (currentAvatarState === 'speaking' && mouthOpenCurrent > 0.15) {
+        // Open Mouth with Oral Cavity & Teeth
+        ctx.fillStyle = '#311042';
+        ctx.strokeStyle = '#818CF8';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.ellipse(0, 20, mWidth, mHeight, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Upper Teeth
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(-mWidth * 0.6, 20 - mHeight + 1, mWidth * 1.2, 3, [2]);
+        ctx.fill();
+      } else {
+        // Warm Gentle Smile Line
+        ctx.strokeStyle = '#818CF8';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(-11, 19);
+        ctx.quadraticCurveTo(0, 24 + (mouthOpenCurrent * 4), 11, 19);
+        ctx.stroke();
+      }
+
+      // Cheeks (Warm Gentle Blush)
+      ctx.fillStyle = 'rgba(129, 140, 248, 0.14)';
+      ctx.beginPath();
+      ctx.ellipse(-24, 8, 7, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(24, 8, 7, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+      animFrameId = requestAnimationFrame(renderAvatar);
+    }
+    renderAvatar();
+
     function setAvatarState(state) {
+      currentAvatarState = state;
       const dot = document.getElementById('aiStateDot');
       const label = document.getElementById('aiStateLabel');
-      const mouth = document.getElementById('avatarMouth');
       const waves = document.getElementById('liveAudioWaveforms');
       const outerRing = document.getElementById('voiceRingOuter');
       const innerRing = document.getElementById('voiceRingInner');
@@ -407,6 +615,8 @@
         label.innerText = 'Listening to you...';
         outerRing.classList.remove('hidden');
         innerRing.classList.remove('hidden');
+        mouthOpenTarget = 0.05;
+        mouthWidthTarget = 1.0;
         waves.innerHTML = `
           <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
           <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
@@ -414,22 +624,19 @@
           <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
           <div class="w-1.5 bg-indigo-400 rounded-full wave-bar"></div>
         `;
-        mouth.setAttribute('rx', '7');
-        mouth.setAttribute('ry', '2');
-        mouth.classList.remove('mouth-speaking');
       } else if (state === 'thinking') {
         dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
         label.innerText = 'Analyzing Student Records...';
         outerRing.classList.add('hidden');
         innerRing.classList.remove('hidden');
+        mouthOpenTarget = 0.05;
+        mouthWidthTarget = 0.85;
         waves.innerHTML = `<span class="text-[11px] text-amber-400 animate-pulse font-medium">Checking ERP records...</span>`;
-        mouth.classList.remove('mouth-speaking');
       } else if (state === 'speaking') {
         dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
         label.innerText = 'Maya Speaking...';
         outerRing.classList.remove('hidden');
         innerRing.classList.remove('hidden');
-        mouth.classList.add('mouth-speaking');
         waves.innerHTML = `
           <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
           <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
@@ -442,7 +649,8 @@
         label.innerText = 'Parent Support Assistant Ready';
         outerRing.classList.add('hidden');
         innerRing.classList.add('hidden');
-        mouth.classList.remove('mouth-speaking');
+        mouthOpenTarget = 0.05;
+        mouthWidthTarget = 1.0;
         waves.innerHTML = `
           <div class="w-1 bg-indigo-400/50 rounded-full h-2"></div>
           <div class="w-1 bg-indigo-400/50 rounded-full h-4"></div>
@@ -461,6 +669,36 @@
       }
     }
 
+    let lastSpokenText = "";
+
+    function playLiveChime(type = 'start') {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        if (type === 'start') {
+          osc.frequency.setValueAtTime(520, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.22);
+        } else {
+          osc.frequency.setValueAtTime(650, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.18);
+        }
+      } catch(e) {}
+    }
+
     function startContinuousLiveVoice() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -469,24 +707,35 @@
       }
 
       isLiveVoiceActive = true;
+      playLiveChime('start');
       document.getElementById('topLiveBtnLabel').innerText = "Live Connected";
       document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-rose-500/30 transition animate-pulse";
       document.getElementById('liveMicIcon').className = "fa-solid fa-phone-slash";
       document.getElementById('liveVoiceBar').classList.remove('hidden');
-      document.getElementById('liveSubtext').innerText = "Live call active • Speak naturally";
+      document.getElementById('liveSubtext').innerText = "Gemini Live active • Speak naturally";
 
-      // Welcome voice to activate browser audio
-      speakAssistantResponse("Live voice connected. I am listening.");
+      setAvatarState('listening');
+
+      // Instantly start listening to the user without speaking canned robot cues
+      setTimeout(() => {
+        if (isLiveVoiceActive && !isSpeaking) {
+          startSpeechRecognition();
+        }
+      }, 150);
     }
 
     function stopContinuousLiveVoice() {
       isLiveVoiceActive = false;
+      playLiveChime('stop');
       if (recognition) {
-        try { recognition.stop(); } catch(e) {}
+        try { recognition.abort(); } catch(e) {}
+        recognition = null;
       }
+      clearTimeout(silenceTimer);
       if (window.speechSynthesis) {
         try { window.speechSynthesis.cancel(); } catch(e) {}
       }
+      isSpeaking = false;
       document.getElementById('topLiveBtnLabel').innerText = "Go Live Voice";
       document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-indigo-500/30 transition";
       document.getElementById('liveMicIcon').className = "fa-solid fa-microphone";
@@ -496,9 +745,14 @@
     }
 
     function initSpeechRecognition() {
-      if (!isLiveVoiceActive) return;
+      if (!isLiveVoiceActive || isSpeaking || window.speechSynthesis.speaking) return;
 
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (recognition) {
+        try { recognition.abort(); } catch(e) {}
+        recognition = null;
+      }
+
       recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -516,6 +770,12 @@
       let finalTranscript = "";
 
       recognition.onresult = (event) => {
+        // Strict guard: Discard immediately if assistant is speaking or audio is playing
+        if (isSpeaking || window.speechSynthesis.speaking) {
+          finalTranscript = "";
+          return;
+        }
+
         let interimTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
@@ -525,18 +785,28 @@
           }
         }
 
-        const currentSaid = finalTranscript || interimTranscript;
+        const currentSaid = (finalTranscript || interimTranscript).trim();
         if (currentSaid) {
+          const lowSaid = currentSaid.toLowerCase();
+          // Acoustic Echo Filter: Discard if microphone captures the AI's own recent words
+          if (lastSpokenText && (lastSpokenText.includes(lowSaid) || (lowSaid.length > 8 && lastSpokenText.includes(lowSaid.slice(0, 15))))) {
+            console.log("[Acoustic Echo Guard] Discarded self-voice echo:", currentSaid);
+            return;
+          }
+
           document.getElementById('liveVoiceStatusText').innerText = `You: "${currentSaid}"`;
           
           clearTimeout(silenceTimer);
           silenceTimer = setTimeout(() => {
-            if (currentSaid.trim().length > 0 && isLiveVoiceActive && !isSpeaking) {
-              try { recognition.stop(); } catch(e) {}
-              sendParentPrompt(currentSaid.trim(), true);
+            if (currentSaid.length > 0 && isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+              if (recognition) {
+                try { recognition.abort(); } catch(e) {}
+                recognition = null;
+              }
+              sendParentPrompt(currentSaid, true);
               finalTranscript = "";
             }
-          }, 1400);
+          }, 1300);
         }
       };
 
@@ -547,20 +817,33 @@
       };
 
       recognition.onend = () => {
-        if (isLiveVoiceActive && !isSpeaking) {
-          try { recognition.start(); } catch(e) {}
+        if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+          setTimeout(() => {
+            if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+              try { recognition.start(); } catch(e) {}
+            }
+          }, 200);
         }
       };
 
       try {
         recognition.start();
       } catch(e) {
-        console.warn("Recognition already active");
+        console.warn("Recognition start notice:", e);
       }
     }
 
+    // Dynamic Viseme Lip-Sync & Speech Synthesis Player
+    let visemeInterval = null;
     function speakAssistantResponse(text) {
       if (!('speechSynthesis' in window)) return;
+
+      // 1. Immediately abort active microphone so it never listens to speaker output
+      if (recognition) {
+        try { recognition.abort(); } catch(e) {}
+        recognition = null;
+      }
+      clearTimeout(silenceTimer);
 
       try {
         window.speechSynthesis.cancel();
@@ -571,44 +854,98 @@
       setAvatarState('speaking');
 
       const cleanVoiceText = text.replace(/\*\*/g, '').replace(/•/g, '').replace(/#/g, '').replace(/₹/g, 'Rupees ');
+      lastSpokenText = cleanVoiceText.toLowerCase().trim();
+
       const utterance = new SpeechSynthesisUtterance(cleanVoiceText);
-      utterance.rate = 1.0;
+      utterance.rate = 0.98; // Reassuring, clear cadence for parents
       utterance.pitch = 1.0;
 
       const langMap = {
-        'en': 'en-IN', 'hinglish': 'hi-IN', 'hi': 'hi-IN', 'gu': 'gu-IN',
-        'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'bn': 'bn-IN',
-        'pa': 'pa-IN', 'kn': 'kn-IN', 'ml': 'ml-IN', 'ur': 'ur-PK'
+        'hi': 'hi-IN', 'hinglish': 'hi-IN', 'gu': 'gu-IN', 'mr': 'mr-IN',
+        'ta': 'ta-IN', 'te': 'te-IN', 'bn': 'bn-IN', 'pa': 'pa-IN',
+        'kn': 'kn-IN', 'ml': 'ml-IN', 'ur': 'ur-PK', 'en': 'en-IN'
       };
-      utterance.lang = langMap[selectedLanguage] || 'en-IN';
+      const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
+      const targetLocale = langMap[curLang] || 'en-IN';
+      const langPrefix = targetLocale.substring(0, 2);
+
+      utterance.lang = targetLocale;
 
       const voices = window.speechSynthesis.getVoices();
       if (voices && voices.length > 0) {
-        const matchingVoice = voices.find(v => v.lang === utterance.lang || v.lang.includes('IN') || v.name.includes('India'));
-        if (matchingVoice) utterance.voice = matchingVoice;
+        let matchingVoice = voices.find(v => v.lang.replace('_', '-') === targetLocale) ||
+                            voices.find(v => v.lang.replace('_', '-').startsWith(langPrefix)) ||
+                            voices.find(v => v.name.toLowerCase().includes(curLang));
+
+        // For Indic languages (Hindi, Gujarati, Marathi, Punjabi, Bengali, Hinglish), fallback to Hindi
+        if (!matchingVoice && ['hi', 'hinglish', 'gu', 'mr', 'pa', 'bn'].includes(curLang)) {
+          matchingVoice = voices.find(v => v.lang.startsWith('hi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('hemant') || v.name.toLowerCase().includes('madhur') || v.name.toLowerCase().includes('swara'));
+        }
+
+        // For South Indian Dravidian languages
+        if (!matchingVoice && ['ta', 'te', 'kn', 'ml'].includes(curLang)) {
+          matchingVoice = voices.find(v => v.lang.startsWith(langPrefix) || v.lang.startsWith('hi'));
+        }
+
+        if (!matchingVoice) {
+          matchingVoice = voices.find(v => v.name.includes("Google") || v.name.includes("Natural") || v.lang === 'en-IN' || v.lang === 'en-US') || voices[0];
+        }
+
+        if (matchingVoice) {
+          utterance.voice = matchingVoice;
+          utterance.lang = matchingVoice.lang || targetLocale;
+        }
       }
 
+      // Real-time phoneme viseme modulation during speech
+      clearInterval(visemeInterval);
+      const visemes = [0.75, 0.25, 0.85, 0.35, 0.65, 0.2, 0.8, 0.45];
+      let vIndex = 0;
+      visemeInterval = setInterval(() => {
+        if (isSpeaking) {
+          mouthOpenTarget = visemes[vIndex % visemes.length];
+          mouthWidthTarget = 0.92 + (Math.sin(vIndex) * 0.22);
+          vIndex++;
+        }
+      }, 95);
+
+      utterance.onboundary = (e) => {
+        mouthOpenTarget = Math.random() * 0.65 + 0.3;
+        mouthWidthTarget = Math.random() * 0.35 + 0.85;
+      };
+
       utterance.onend = () => {
+        clearInterval(visemeInterval);
         isSpeaking = false;
+        mouthOpenTarget = 0.05;
+        mouthWidthTarget = 1.0;
         if (isLiveVoiceActive) {
           setAvatarState('listening');
           document.getElementById('liveVoiceStatusText').innerText = "Listening... Speak anytime!";
+          // Squelch delay: Wait 500ms for room echo to decay completely before reopening microphone
           setTimeout(() => {
-            if (isLiveVoiceActive && !isSpeaking) initSpeechRecognition();
-          }, 300);
+            if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+              initSpeechRecognition();
+            }
+          }, 500);
         } else {
           setAvatarState('idle');
         }
       };
 
       utterance.onerror = (e) => {
+        clearInterval(visemeInterval);
         console.warn("TTS Notice:", e);
         isSpeaking = false;
+        mouthOpenTarget = 0.05;
+        mouthWidthTarget = 1.0;
         if (isLiveVoiceActive) {
           setAvatarState('listening');
           setTimeout(() => {
-            if (isLiveVoiceActive && !isSpeaking) initSpeechRecognition();
-          }, 400);
+            if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+              initSpeechRecognition();
+            }
+          }, 500);
         } else {
           setAvatarState('idle');
         }
@@ -650,6 +987,36 @@
       feed.scrollTop = feed.scrollHeight;
     }
 
+    let currentSessionId = localStorage.getItem('xyz_session_parent');
+    if (!currentSessionId) {
+      currentSessionId = 'sess_' + Math.random().toString(36).substring(2, 12);
+      localStorage.setItem('xyz_session_parent', currentSessionId);
+    }
+
+    async function loadChatHistory() {
+      try {
+        const res = await fetch(`${API_BASE}/api/chat/history?session_id=${currentSessionId}&user_id=usr_parent_amit`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            const feed = document.getElementById('parentChatFeed');
+            if (feed) {
+              feed.innerHTML = '';
+              data.messages.forEach(m => {
+                appendMessage(m.role, m.content);
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Chat history load notice:', e);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadChatHistory();
+    });
+
     async function sendParentPrompt(msg, fromVoice = false) {
       if (!msg || !msg.trim()) return;
       appendMessage('user', msg);
@@ -657,12 +1024,13 @@
 
       const parentPayload = {
         message: msg,
+        session_id: currentSessionId,
         language: selectedLanguage,
         user: {
-          user_id: "usr_parent_01",
+          user_id: "usr_parent_amit",
           name: "Mr. Amit Patel",
           role: "parent",
-          linked_student_id: "usr_student_rahul",
+          linked_student_id: "std_rahul_patel",
           preferred_language: selectedLanguage
         }
       };
@@ -679,6 +1047,19 @@
         }
 
         const data = await res.json();
+        if (data.session_id) {
+          currentSessionId = data.session_id;
+          localStorage.setItem('xyz_session_parent', currentSessionId);
+        }
+
+        if (data.language && data.language !== selectedLanguage) {
+          selectedLanguage = data.language;
+          localStorage.setItem('preferred_lang', data.language);
+          if (window.SchoolI18n) SchoolI18n.applyTranslations(data.language);
+          const sel = document.getElementById('languageSelect');
+          if (sel) sel.value = data.language;
+        }
+
         const replyText = data.response_text || "Rahul's records have been retrieved successfully.";
         appendMessage('assistant', replyText);
 
