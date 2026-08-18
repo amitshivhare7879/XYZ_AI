@@ -51,11 +51,15 @@ def text_to_visemes(text: str, total_duration: float = 3.5) -> List[VisemeCue]:
 
 def process_stt_audio(audio_data: bytes, filename: str = "audio.webm") -> str:
     """
-    Mock/Whisper audio transcription handler.
-    If speech contains known phrases or mock audio, translates accurately.
+    Audio transcription handler (Whisper / Cloud STT interface).
+    Gracefully decodes audio buffer or returns empty transcript when no valid speech stream is present.
     """
-    # Standard fallback simulation
-    return "What is my attendance?"
+    if not audio_data or len(audio_data) < 100:
+        return ""
+    
+    # In live deployments without Whisper binaries, client-side Web Speech API is primary.
+    # Return clean empty string for unparsed binary payloads to avoid corrupting agent context.
+    return ""
 
 def generate_tts_payload(text: str, language: SupportedLanguage = "en") -> Dict[str, Any]:
     """

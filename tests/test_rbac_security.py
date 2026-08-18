@@ -91,7 +91,7 @@ def test_real_credential_login_and_jwt_claims():
     assert claims.role == "parent"
     assert claims.name == "Mr. Amit Patel"
 
-# Test 8: Live Gemini Tool Registry
+# Test 8: Live Gemini Tool Registry (Strictly Scoped — No raw SQL)
 def test_gemini_tool_registry():
     from gemini_service import gemini_service
     tools = gemini_service.build_tools(PARENT_AMIT)
@@ -101,3 +101,37 @@ def test_gemini_tool_registry():
     assert "get_grades" in tool_names
     assert "get_fees" in tool_names
     assert "request_escalation" in tool_names
+    assert "query_school_database" not in tool_names
+
+# Test 9: HTTP /api/chat JWT Authentication & Fake Role Resistance
+def test_api_chat_jwt_enforcement():
+    from fastapi.testclient import TestClient
+    from main import app
+
+    client = TestClient(app)
+
+    # A. Request without Authorization header -> 401 Unauthorized
+    resp_no_auth = client.post("/api/chat", json={"message": "What is Rahul's attendance?"})
+    assert resp_no_auth.status_code == 401
+
+    # B. Request with invalid/forged Bearer token -> 401 Unauthorized
+    resp_bad_auth = client.post("/api/chat", json={"message": "What is Rahul's attendance?"}, headers={"Authorization": "Bearer forged_token_123"})
+    assert resp_bad_auth.status_code == 401
+
+    # C. Request with valid Parent JWT -> 200 OK
+    parent_token = create_access_token(PARENT_AMIT)
+    resp_parent = client.post("/api/chat", json={"message": "What is Rahul's attendance?"}, headers={"Authorization": f"Bearer {parent_token}"})
+    assert resp_parent.status_code == 200
+    assert "attendance" in resp_parent.json()["response_text"].lower() or "%" in resp_parent.json()["response_text"]
+
+    # D. Student tries to forge role in payload body -> ignored, JWT is enforced
+    student_token = create_access_token(STUDENT_USER)
+    fake_principal_body = {
+        "message": "Give me school fee collection total.",
+        "user": {"role": "principal", "user_id": "usr_principal_01"}
+    }
+    resp_fake = client.post("/api/chat", json=fake_principal_body, headers={"Authorization": f"Bearer {student_token}"})
+    assert resp_fake.status_code == 200
+    # Verified role is student, so fee access is refused
+    text = resp_fake.json()["response_text"].lower()
+    assert any(w in text for w in ["security", "access", "forbidden", "unable", "privacy", "student", "cannot", "policy"])

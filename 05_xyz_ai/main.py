@@ -264,7 +264,7 @@ async def chat_endpoint(
     """
     Main AI conversation endpoint.
     Orchestrates 4 personas, application-layer RBAC, slot filling, and 11-language generation.
-    Authenticates via Authorization header, embedded portal user, or demo fallback.
+    Authenticates strictly via verified cryptographic JWT Bearer Token in Authorization header.
     """
     calling_user = None
     if authorization and authorization.startswith("Bearer "):
@@ -272,26 +272,17 @@ async def chat_endpoint(
         try:
             from auth import decode_access_token
             calling_user = decode_access_token(token)
-        except Exception:
-            calling_user = None
-            
-    if not calling_user and req.user:
-        try:
-            u_role = req.user.get("role", "parent")
-            if u_role not in ["student", "parent", "teacher", "principal"]:
-                u_role = "parent"
-            calling_user = UserTokenPayload(
-                user_id=req.user.get("user_id", "usr_demo"),
-                email=req.user.get("email", "demo@school.edu"),
-                name=req.user.get("name", "Demo User"),
-                role=u_role,
-                preferred_language=req.user.get("preferred_language", req.language or "en")
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid or expired authorization token: {e}"
             )
-        except Exception as ue:
-            print(f"[Chat Auth Warning] Error parsing user payload: {ue}")
-
+            
     if not calling_user:
-        calling_user = DEMO_ACCOUNTS.get("parent")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization required. Please provide a valid 'Authorization: Bearer <token>' header."
+        )
 
     return await ConversationOrchestrator.process_message(
         message=req.message,

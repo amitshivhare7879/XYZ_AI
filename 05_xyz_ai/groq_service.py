@@ -163,23 +163,6 @@ GROQ_TOOLS_SCHEMA = [
                 "required": ["target_entity", "reason"]
             }
         }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "query_school_database",
-            "description": "Execute any read-only SQL query against the 19 interconnected school ERP database tables (exams, homework, teachers, timetable, notices, students, events, attendance, grades, fee_invoices, etc.).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "sql_query": {
-                        "type": "string",
-                        "description": "A valid read-only SQLite/PostgreSQL SELECT statement to query school records."
-                    }
-                },
-                "required": ["sql_query"]
-            }
-        }
     }
 ]
 
@@ -229,11 +212,6 @@ class GroqService:
                     target_entity=args.get("target_entity", "teacher"),
                     reason=args.get("reason", "Parent inquiry"),
                     student_name=args.get("student_name")
-                )
-            elif tool_name == "query_school_database":
-                res = tool_query_database(
-                    user=user,
-                    sql_query=args.get("sql_query", "")
                 )
             else:
                 res = {"error": f"Unknown tool: {tool_name}"}

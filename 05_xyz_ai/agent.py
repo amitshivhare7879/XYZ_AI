@@ -201,7 +201,7 @@ def get_time_based_greeting() -> str:
         return "Good evening"
 
 SCHEMA_MAP_CONTEXT = """
-INTERCONNECTED DATABASE SCHEMA (You can query ANY of these tables using query_school_database(sql_query="SELECT ...")):
+INTERCONNECTED SCHOOL ERP DATABASE SCHEMA:
 - users (id, auth_id, email, name, role, phone, preferred_language) -- [Roles: 'student', 'parent', 'teacher', 'principal']
 - classes (id, name, grade, section, academic_year) -- [e.g. 'Grade 10-A', 'Grade 12 Science (PCMB)']
 - subjects (id, code, name, department) -- [e.g. 'Mathematics', 'General Science', 'Physics']
@@ -262,7 +262,8 @@ def sanitize_ai_output(text: str) -> str:
         return text
     cleaned = re.sub(r'<(function|tool_call|invoke)>.*?</\1>', '', text, flags=re.DOTALL | re.IGNORECASE)
     cleaned = re.sub(r'</?(function|tool_call|invoke)[^>]*>', '', cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r'[a-zA-Z_0-9]+\([^)]*\)', '', cleaned)
+    cleaned = re.sub(r'tool_[a-zA-Z0-9_]+\([^)]*\)', '', cleaned)
+    cleaned = re.sub(r'function_[a-zA-Z0-9_]+\([^)]*\)', '', cleaned)
     cleaned = re.sub(r'\s{2,}', ' ', cleaned)
     cleaned = re.sub(r'\s+([.,!?])', r'\1', cleaned)
     return cleaned.strip()
@@ -353,14 +354,6 @@ class ConversationOrchestrator:
         voice_requested: bool = False
     ) -> ChatResponse:
         sid, state = get_session(session_id, user)
-        detected_lang = detect_message_language(message)
-        lang = language or detected_lang or user.preferred_language or "en"
-        lang_code = lang.value if hasattr(lang, 'value') else str(lang)
-        msg_clean = message.strip()
-        msg_lower = msg_clean.lower()
-        executed_tools = []
-        suggested_actions = []
-
         context = state.setdefault("context", {
             "active_student_name": None,
             "active_topic": None,
@@ -368,6 +361,13 @@ class ConversationOrchestrator:
             "active_date": None,
             "last_data": {}
         })
+        detected_lang = detect_message_language(message)
+        lang = language or detected_lang or context.get("preferred_language") or user.preferred_language or "en"
+        lang_code = lang.value if hasattr(lang, 'value') else str(lang)
+        msg_clean = message.strip()
+        msg_lower = msg_clean.lower()
+        executed_tools = []
+        suggested_actions = []
 
         # Initialize student name for parents or students
         if not context.get("active_student_name"):
@@ -398,21 +398,44 @@ class ConversationOrchestrator:
         selected_lang_code = None
         
         LANG_KEYWORDS = {
-            "hi": ["hindi", "हिन्दी", "हिंदी", "hindi me", "in hindi", "hindi please", "hindi language"],
-            "gu": ["gujarati", "ગુજરાતી", "gujrati", "gujarati ma", "in gujarati", "gujarati please", "gujarati language"],
-            "mr": ["marathi", "मराठी", "marathi madhe", "in marathi", "marathi please", "marathi language"],
-            "ta": ["tamil", "தமிழ்", "tamilil", "in tamil", "tamil please", "tamil language"],
-            "te": ["telugu", "తెలుగు", "in telugu", "telugu please"],
-            "bn": ["bengali", "বাংলা", "in bengali", "bangla"],
-            "pa": ["punjabi", "ਪੰਜਾਬੀ", "in punjabi"],
-            "hinglish": ["hinglish", "hinglish me", "in hinglish"],
-            "en": ["english", "in english", "english please", "angrezi"]
+            "hi": ["hindi", "हिन्दी", "हिंदी", "hndi", "hinfi", "himdi", "hindu", "hindii", "hindi me", "in hindi", "hindi please", "hindi language"],
+            "gu": ["gujarati", "ગુજરાતી", "gujrati", "gujrat", "gujarathi", "gujti", "gujju", "gujarati ma", "in gujarati", "gujarati please", "gujarati language"],
+            "mr": ["marathi", "मराठी", "marthi", "marati", "marathii", "marathi madhe", "in marathi", "marathi please", "marathi language"],
+            "ta": ["tamil", "தமிழ்", "tamizh", "tamli", "tamilil", "in tamil", "tamil please", "tamil language"],
+            "te": ["telugu", "తెలుగు", "telgu", "telegu", "in telugu", "telugu please"],
+            "bn": ["bengali", "বাংলা", "bangla", "bengli", "in bengali"],
+            "pa": ["punjabi", "ਪੰਜਾਬੀ", "panjabi", "in punjabi"],
+            "hinglish": ["hinglish", "hinglis", "hingish", "hinlish", "hinglish me", "in hinglish"],
+            "en": ["english", "engish", "engilsh", "englsih", "in english", "english please", "angrezi"]
         }
+
+        def _levenshtein(s1: str, s2: str) -> int:
+            if len(s1) < len(s2):
+                return _levenshtein(s2, s1)
+            if len(s2) == 0:
+                return len(s1)
+            previous_row = range(len(s2) + 1)
+            for i, c1 in enumerate(s1):
+                current_row = [i + 1]
+                for j, c2 in enumerate(s2):
+                    insertions = previous_row[j + 1] + 1
+                    deletions = current_row[j] + 1
+                    substitutions = previous_row[j] + (c1 != c2)
+                    current_row.append(min(insertions, deletions, substitutions))
+                previous_row = current_row
+            return previous_row[-1]
         
         for lcode, aliases in LANG_KEYWORDS.items():
             if clean_no_punct in aliases or any(alias == msg_lower or f"talk in {alias}" in msg_lower or f"speak in {alias}" in msg_lower or f"continue in {alias}" in msg_lower for alias in aliases):
                 selected_lang_code = lcode
                 break
+            if len(clean_no_punct) >= 3 and len(clean_no_punct) <= 12:
+                for alias in aliases:
+                    if len(alias) >= 4 and _levenshtein(clean_no_punct, alias) <= 1:
+                        selected_lang_code = lcode
+                        break
+                if selected_lang_code:
+                    break
                 
         is_subject_context = context.get("active_topic") in ["exams", "academics", "homework"] and clean_no_punct in ["english", "hindi", "maths", "mathematics", "science"]
         if selected_lang_code and not is_subject_context:
@@ -872,7 +895,15 @@ class ConversationOrchestrator:
         is_attendance_query = any(w in msg_lower for w in [
             "attendance", "present", "absent", "school yesterday", "come to school", "came to school", 
             "days", "school aya", "school aaya", "school aayi", "school gaya", "kal school", "hajiri",
-            "હાજરી", "હાજર", "ગેરહાજર", "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "उपस्थिती", "उपस्थित", "अनुपस्थित", "வருகை",
+            "હાજરી", "હાજર", "ગેરહાજર",
+            "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "उपस्थिती", "उपस्थित", "अनुपस्थित",
+            "வருகை", "வராதவர்",
+            "హాజరు", "గైర్హాజరు", "హాజరయ్యారు",
+            "উপস্থিতি", "অনুপস্থিত", "উপস্থিত",
+            "ਹਾਜ਼ਰੀ", "ਗ਼ੈਰਹਾਜ਼ਰ", "ਹਾਜ਼ਰ",
+            "ಹಾಜರಾತಿ", "ಗೈರುಹಾಜರಿ", "ಹಾಜರಿದ್ದಾರೆ",
+            "ഹാജർ", "ഹാജരായില്ല", "ഹാജരുണ്ട്",
+            "حاضری", "غیر حاضر", "حاضر",
             "प्रेसेंट", "प्रेजेंट", "प्रेजन", "एब्सेंट", "बच्चे", "कितने बच्चे", "विद्यार्थी", "छात्र", "छात्रों", "kitne bacche",
             "kitne student", "aaj kitne", "kitne bache", "present hain", "aaye hain"
         ])
@@ -902,7 +933,8 @@ class ConversationOrchestrator:
                 return reply, suggested_actions, executed_tools
 
             # Retrieve attendance
-            res = tool_get_attendance(user=user, student_name=active_student)
+            target_student = mentioned_student if user.role in ["principal", "teacher"] else (mentioned_student or active_student)
+            res = tool_get_attendance(user=user, student_name=target_student)
             executed_tools.append("tool_get_attendance")
             context["last_data"] = res
 
@@ -910,9 +942,9 @@ class ConversationOrchestrator:
                 reply = res.get("message", "Permission Denied.")
                 return reply, suggested_actions, executed_tools
 
-            if "overall_percentage" in res:
+            if "overall_attendance_percentage" in res or "overall_percentage" in res:
                 # Principal Analytics
-                pct = res.get("overall_percentage", 0.0)
+                pct = res.get("overall_attendance_percentage") or res.get("overall_percentage", 0.0)
                 breakdown = res.get("class_breakdown", [])
                 cls_summary = ", ".join([f"{c['class_name']}: {c['class_percentage']}%" for c in breakdown[:4]])
                 reply = (f"**School-Wide Attendance Overview**: The overall student attendance across all grades is currently **{pct}%**. "
@@ -1059,7 +1091,19 @@ class ConversationOrchestrator:
             return reply, suggested_actions, executed_tools
 
         # 4. General Fee Balance / Dues Query
-        if any(w in msg_lower for w in ["fee", "fees", "dues", "payment", "invoice", "receipt", "paid", "balance", "cost", "બિલ", "ફી", "ભરાઈ", "કુલ ફી", "फीस", "शुल्क", "भरपाई", "कलेक्शन", "பணம்", "கட்டணம்", "pending fee", "pending fees", "kitni fees", "kitni fee"]):
+        is_fee_query = any(w in msg_lower for w in [
+            "fee", "fees", "dues", "payment", "invoice", "receipt", "paid", "balance", "cost", "pending fee", "pending fees", "kitni fees", "kitni fee",
+            "બિલ", "ફી", "ભરાઈ", "કુલ ફી", "બાકી ફી", "ફીસ",
+            "फीस", "शुल्क", "भरपाई", "कलेक्शन", "बकाया", "भुगतान",
+            "பணம்", "கட்டணம்", "நிலுவை",
+            "రశీదు", "ఫీజు", "బకాయి", "చెల్లింపు",
+            "ফি", "বকেয়া", "পেমেন্ট", "খরচ",
+            "ਫ਼ੀਸ", "ਬਕਾਇਆ", "ਭੁਗਤਾਨ",
+            "ಶುಲ್ಕ", "ಬಾಕಿ", "ಪಾವತಿ",
+            "ഫീസ്", "കുടിശ്ശിക", "പേയ്‌മെന്റ്",
+            "فیس", "واجب الادا", "ادائیگی"
+        ])
+        if is_fee_query:
             context["active_topic"] = "fees"
             res = tool_get_fees(user=user, student_name=active_student)
             executed_tools.append("tool_get_fees")
@@ -1222,7 +1266,20 @@ class ConversationOrchestrator:
         # -------------------------------------------------------------------
         # I. Timetable, Homework, and Routine
         # -------------------------------------------------------------------
-        if any(w in msg_lower for w in ["timetable", "schedule", "class", "period", "routine", "lecture", "homework", "assignment"]):
+        is_timetable_query = any(w in msg_lower for w in [
+            "timetable", "schedule", "class", "period", "routine", "lecture", "homework", "assignment",
+            "ટાઇમ ટેબલ", "ટાઈમ ટેબલ", "ટાઇમટેબલ", "સમય પત્રક", "સમયપત્રક", "સમયસારણી", "ટાઇમ", "તાસ", "લેક્ચર",
+            "टाइम टेबल", "समय सारणी", "कक्षा", "पीरियड", "रूटीन", "लेक्चर", "होमवर्क", "असाइनमेंट",
+            "वेळापत्रक", "तासिका",
+            "நேர அட்டவணை", "பாடவேளை", "டைம் டேபிள்",
+            "టైమ్‌టేబుల్", "షెడ్యూల్", "పీరియడ్",
+            "রুটিন", "সময়সূচী", "ক্লাস রুটিন",
+            "ਸਮਾਂ ਸਾਰਣੀ", "ਟਾਈਮਟੇਬਲ", "ਕਲਾਸ ਸ਼ਡਿਊਲ",
+            "ವೇಳಾಪಟ್ಟಿ", "ಟೈಮ್‌ಟೇಬಲ್", "ತರಗತಿ ವೇಳಾಪಟ್ಟಿ",
+            "ടൈംടേബിൾ", "ഷെഡ്യൂൾ", "ക്ലാസ് റൂട്ടീൻ",
+            "ٹائم ٹیبل", "شیڈول", "کلاس شیڈول"
+        ])
+        if is_timetable_query:
             context["active_topic"] = "timetable"
             res = tool_get_timetable(user=user)
             executed_tools.append("tool_get_timetable")
@@ -1250,7 +1307,19 @@ class ConversationOrchestrator:
         # -------------------------------------------------------------------
         # J. Notices, Circulars, and Calendar Events
         # -------------------------------------------------------------------
-        if any(w in msg_lower for w in ["notice", "announcement", "circular", "event", "holiday", "ptm", "calendar"]):
+        is_notice_query = any(w in msg_lower for w in [
+            "notice", "announcement", "circular", "event", "holiday", "ptm", "calendar",
+            "સૂચના", "પરિપત્ર", "રજા", "કાર્યક્રમ", "મીટિંગ",
+            "सूचना", "अवकाश", "परिपत्र", "सुट्टी", "कार्यक्रम",
+            "சுற்றறிக்கை", "அறிவிப்பு", "விடுமுறை",
+            "నోటీస్", "ప్రకటన", "సెలవు",
+            "বিজ্ঞপ্তি", "ছুটি",
+            "ਨੋਟਿਸ", "ਛੁੱਟੀ",
+            "ಪ್ರಕಟಣೆ", "ರಜೆ",
+            "അറിയിപ്പ്", "അവധി",
+            "نوٹس", "چھٹی", "اعلان"
+        ])
+        if is_notice_query:
             context["active_topic"] = "notices"
             res = tool_get_notices(user=user)
             executed_tools.append("tool_get_notices")

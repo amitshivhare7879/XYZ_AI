@@ -122,24 +122,64 @@
       }, 25);
     }
 
-    speak(text, onComplete) {
+    speak(text, onComplete, lang = null) {
       this.setState('speaking');
       
-      // Real-time dynamic phoneme modulation during speech
+      let cleanVoiceText = text ? text : "";
+      cleanVoiceText = cleanVoiceText.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+      cleanVoiceText = cleanVoiceText.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '');
+      cleanVoiceText = cleanVoiceText.replace(/\*\*/g, '').replace(/\*/g, '').replace(/###?/g, '').replace(/__?/g, '').replace(/~~/g, '').replace(/`/g, '');
+      cleanVoiceText = cleanVoiceText.replace(/[•▪▫◆◇✓✔✕✖►▶★☆💡📧📘🔬📖💻🌍💳🏦📱]/g, ' ');
+      cleanVoiceText = cleanVoiceText.replace(/₹\s?/g, 'Rupees ').replace(/\$\s?/g, 'Dollars ');
+      cleanVoiceText = cleanVoiceText.replace(/\s+/g, ' ').trim();
+
       clearInterval(this.visemeInterval);
-      const visemes = [0.8, 0.25, 0.9, 0.4, 0.7, 0.2, 0.85, 0.5];
-      let vIndex = 0;
+
+      // Acoustic Cadence Engine: Parse text into tokens with pauses for commas, periods, and line breaks
+      const tokens = cleanVoiceText.split(/(\s+|[.,!?:;\n।])/).filter(t => t.length > 0);
+      let tIdx = 0;
+      let pauseRemaining = 0;
 
       this.visemeInterval = setInterval(() => {
-        if (this.state === 'speaking') {
-          this.mouthOpenTarget = visemes[vIndex % visemes.length];
-          this.mouthWidthTarget = 0.9 + (Math.sin(vIndex * 1.5) * 0.25);
-          this.headTiltTarget = Math.sin(vIndex * 0.5) * 0.04;
-          vIndex++;
+        if (this.state !== 'speaking') {
+          clearInterval(this.visemeInterval);
+          return;
         }
-      }, 90);
 
-      const cleanVoiceText = text.replace(/\*\*/g, '').replace(/•/g, '').replace(/#/g, '').replace(/₹/g, 'Rupees ');
+        if (pauseRemaining > 0) {
+          // Resting mouth during natural punctuation/breathing breaks
+          pauseRemaining -= 80;
+          this.mouthOpenTarget = 0.04;
+          this.mouthWidthTarget = 1.0;
+          this.headTiltTarget = Math.sin(this.time * 0.5) * 0.01;
+          return;
+        }
+
+        if (tIdx < tokens.length) {
+          const tok = tokens[tIdx++];
+          if ([',', ':', ';', '-'].includes(tok)) {
+            // Short clause pause (~180ms)
+            pauseRemaining = 180;
+            this.mouthOpenTarget = 0.04;
+            this.mouthWidthTarget = 1.0;
+          } else if (['.', '!', '?', '\n', '।'].includes(tok)) {
+            // Full sentence break (~380ms) with gentle head reset
+            pauseRemaining = 380;
+            this.mouthOpenTarget = 0.03;
+            this.mouthWidthTarget = 1.0;
+            this.headTiltTarget = 0;
+          } else if (tok.trim().length > 0) {
+            // Phoneme modulation for active word: vowels open wider, consonants narrow
+            const hasVowel = /[aeiouAEIOU\u0904-\u0914\u0985-\u0994\u0A05-\u0A14\u0A85-\u0A94\u0C05-\u0C14\u0B85-\u0B94\u0D05-\u0D14]/.test(tok);
+            this.mouthOpenTarget = hasVowel ? (0.65 + Math.random() * 0.3) : (0.25 + Math.random() * 0.25);
+            this.mouthWidthTarget = 0.95 + (Math.sin(tIdx * 1.8) * 0.22);
+            this.headTiltTarget = Math.sin(tIdx * 0.6) * 0.035;
+          }
+        } else {
+          // Loop natural rhythm until audio ends
+          tIdx = 0;
+        }
+      }, 80);
       if (!('speechSynthesis' in window)) {
         setTimeout(() => {
           this.stopSpeaking();

@@ -88,12 +88,6 @@ class GeminiService:
             res = tool_request_escalation(user=user, target_entity=target_entity, reason=reason, student_name=student_name if student_name else None)
             return json.dumps(res)
 
-        def query_school_database(sql_query: str) -> str:
-            """Execute any read-only SQL query across all 19 interconnected tables in the school ERP database."""
-            from tools import tool_query_database
-            res = tool_query_database(user=user, sql_query=sql_query)
-            return json.dumps(res)
-
         return [
             get_attendance,
             mark_attendance,
@@ -103,8 +97,7 @@ class GeminiService:
             get_timetable,
             get_notices,
             submit_leave,
-            request_escalation,
-            query_school_database
+            request_escalation
         ]
 
     def _sync_generate(self, model_name: str, full_system_prompt: str, tools: list, chat_history: list, message: str) -> Tuple[str, List[str]]:

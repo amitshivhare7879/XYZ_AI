@@ -326,12 +326,17 @@ def save_conversation_turn(session_id: str, user_id: str, user_msg: str, assista
         import json
         conn = get_db_connection()
         c = conn.cursor()
-        
-        # 1. Ensure conversation session exists
+        # 1. Ensure conversation session exists (safely checking user reference)
+        valid_user_id = None
+        if user_id:
+            c.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+            if c.fetchone():
+                valid_user_id = user_id
+
         c.execute("""
             INSERT OR IGNORE INTO conversation_sessions (id, user_id, session_token, language)
             VALUES (?, ?, ?, ?);
-        """, (session_id, user_id, session_id, language))
+        """, (session_id, valid_user_id, session_id, language))
         
         # 2. Insert user message
         user_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
