@@ -260,6 +260,32 @@ def translate_template_patterns(text: str, target_lang: str) -> str:
         elif target_lang == "ur":
             return f"**اسکول کی مجموعی حاضری کا جائزہ**: تمام کلاسوں میں طلباء کی کل حاضری اس وقت **{pct}** ہے۔ کلاس وار تفصیلات: {cls_summary}۔ کیا آپ 85 فیصد سے کم حاضری والی کلاسوں کی فہرست دیکھنا چاہتے ہیں؟"
 
+    # Pattern 10: Class Enrollment & Student Roster
+    m10 = re.search(r'There are \*\*(\d+) students\*\* enrolled in \*\*([^*]+)\*\*: (.*?)\. Would you like to check today\'s attendance or the academic schedule for this class\?', text, re.DOTALL)
+    if m10:
+        cnt, cname, names = m10.groups()
+        if target_lang == 'gu':
+            return f'**{cname}** માં કુલ **{cnt} વિદ્યાર્થીઓ** નોંધાયેલા છે: {names}. શું તમે આ વર્ગની આજની હાજરી અથવા સમયપત્રક તપાસવા માંગો છો?'
+        elif target_lang == 'hi':
+            return f'**{cname}** में कुल **{cnt} विद्यार्थी** नामांकित हैं: {names}। क्या आप इस कक्षा की आज की उपस्थिति या समय सारणी देखना चाहते हैं?'
+        elif target_lang == 'mr':
+            return f'**{cname}** मध्ये एकूण **{cnt} विद्यार्थी** नोंदणीकृत आहेत: {names}. आपण या वर्गाची आजची उपस्थिती किंवा वेळापत्रक तपासू इच्छिता?'
+        elif target_lang == 'hinglish':
+            return f'**{cname}** me total **{cnt} students** enrolled hain: {names}. Kya aap is class ki aaj ki attendance ya timetable check karna chahte hain?'
+
+    # Pattern 11: School-Wide Enrollment
+    m11 = re.search(r'\*\*School-Wide Enrollment\*\*: There are currently \*\*(\d+) students\*\* enrolled across the institution\. Class breakdown: \*\*(.*?)\*\*\. Would you like to view attendance or student records for a specific class\?', text, re.DOTALL)
+    if m11:
+        tot, breakdown = m11.groups()
+        if target_lang == 'gu':
+            return f'**શાળા-વ્યાપી નોંધણી**: સંસ્થામાં હાલમાં કુલ **{tot} વિદ્યાર્થીઓ** નોંધાયેલા છે. વર્ગવાર વિગત: **{breakdown}**. શું તમે કોઈ ચોક્કસ વર્ગની હાજरी અથવા વિદ્યાર્થી રેકોર્ડ જોવા માંગો છો?'
+        elif target_lang == 'hi':
+            return f'**स्कूल-स्तरीय कुल नामांकन**: विद्यालय में वर्तमान में कुल **{tot} विद्यार्थी** नामांकित हैं। कक्षावार विवरण: **{breakdown}**। क्या आप किसी विशिष्ट कक्षा की उपस्थिति या रिकॉर्ड देखना चाहते हैं?'
+        elif target_lang == 'mr':
+            return f'**शाळा एकूण प्रवेश**: संस्थेत सध्या एकूण **{tot} विद्यार्थी** शिकत आहेत. वर्गनिहाय तपशील: **{breakdown}**.'
+        elif target_lang == 'hinglish':
+            return f'**School-Wide Enrollment**: School me abhi total **{tot} students** enrolled hain. Class breakdown: **{breakdown}**. Kya aap kisi specific class ki attendance ya student records dekhna chahte hain?'
+
     return text
 
 
