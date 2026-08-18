@@ -270,7 +270,7 @@
                 XYZ
               </div>
               <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
-                <p>Hello Rahul! Which language do you prefer?</p>
+                <p>Hello Rahul! I am your <strong>Student Academic Assistant</strong>. I can help you with your class timetable, homework assignments, exam syllabus, and study doubts. You can continue in any language. How can I help you today?</p>
               </div>
             </div>
           </div>
@@ -301,8 +301,8 @@
           <form id="studentChatForm" onsubmit="handleStudentChatSubmit(event)" class="flex items-center space-x-2 mt-1">
             <input type="text" id="studentChatInput" placeholder="Ask anything in English, Hinglish, or any Indian language..." class="flex-1 bg-[#090E1B] border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
             
-            <button type="button" onclick="toggleContinuousLiveVoice()" title="Toggle Gemini Live Voice" class="px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-cyan-400 border border-white/10 text-xs font-semibold flex items-center transition">
-              <i class="fa-solid fa-microphone"></i>
+            <button type="button" id="chatMicBtn" onclick="toggleInputDictation()" title="Speech to Text Dictation" class="px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-cyan-400 border border-white/10 text-xs font-semibold flex items-center transition">
+              <i id="chatMicIcon" class="fa-solid fa-microphone"></i>
             </button>
 
             <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold flex items-center transition shadow-lg shadow-cyan-500/25">
@@ -412,40 +412,59 @@
     const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
     let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
     let isLiveVoiceActive = false;
-    let isSpeaking = false;
-    let silenceTimer = null;
     let recognition = null;
+    let isSpeaking = false;
+    let isDictating = false;
+    let dictationRecognition = null;
+    let dictationSilenceTimer = null;
+    let silenceTimer = null;
+    let hasLiveGreetingSpoken = false;
+    let lastSpokenText = "";
+    let lastSpeechEndTime = 0;
+
+    let currentSessionId = localStorage.getItem('active_chat_session_student') || localStorage.getItem('xyz_session_student');
+    if (!currentSessionId) {
+      currentSessionId = 'sess_student_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+      localStorage.setItem('active_chat_session_student', currentSessionId);
+      localStorage.setItem('xyz_session_student', currentSessionId);
+    }
+
+    const studentGreetings = {
+      en: "Hello Rahul Patel! I am Aria, your AI Study Companion & Academic Tutor. I can help you solve homework doubts, prepare for CBSE Board exams, review flashcards, or track your assignments. You can continue in any language. What subject would you like to explore today?",
+      hi: "नमस्ते राहुल पटेल! मैं आरिया हूँ, आपकी एआई स्टडी कंपैनियन और ट्यूटर। मैं होमवर्क डाउट्स सुलझाने, सीबीएसई बोर्ड परीक्षा की तैयारी और असाइनमेंट में आपकी मदद कर सकती हूँ। आप किसी भी भाषा में बातचीत जारी रख सकते हैं। आज आप क्या पढ़ना चाहेंगे?",
+      gu: "નમસ્તે રાહુલ પટેલ! હું આરિયા છું, તમારી એઆઈ સ્ટડી સાથી. હોમવર્ક, સીબીએસઈ બોર્ડ તૈયારી અને અસાઇનમેન્ટ્સમાં હું મદદ કરી શકું છું. તમે કોઈપણ ભાષામાં વાતચીત કરી શકો છો. આજે આપણે શું શીખીશું?",
+      mr: "नमस्कार राहुल पटेल! मी आर्या आहे, तुझी एआय स्टडी साथी. अभ्यास, परीक्षा तयारी आणि असाइनमेंट्स सोडवण्यात मी तुला मदत करू शकते. तू कोणत्याही भाषेत बोलू शकतोस. आज आपण काय शिकायचे?",
+      ta: "வணக்கம் ராகுல் படேல்! நான் ஆரியா, உங்கள் கல்வித் துணைவி. வீட்டுப்பாடங்கள் மற்றும் தேர்வுத் தயாரிப்பில் உதவ நான் தயாராக உள்ளேன். நீங்கள் எந்த மொழியிலும் தொடரலாம். இன்று என்ன படிக்கலாம்?",
+      hinglish: "Hello Rahul! Main Aria hoon, aapki AI Study Companion. Homework doubts solve karne, CBSE prep ya assignments me help ke liye ready hoon. Aap kisi bhi language me continue kar sakte ho. Aaj kya padhna hai?"
+    };
+
     function onLanguageChange(lang) {
       selectedLanguage = lang;
       localStorage.setItem('preferred_lang', lang);
       if (window.SchoolI18n) {
         SchoolI18n.applyTranslations(lang);
       }
-      const greetings = {
-        en: "Hello Rahul! Which language do you prefer? (English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu...)",
-        hi: "नमस्ते राहुल! आप किस भाषा में बात करना पसंद करेंगे?",
-        gu: "નમસ્તે રાહુલ! તમે કઈ ભાષા પસંદ કરો છો?",
-        mr: "नमस्कार राहुल! तुला कोणती भाषा आवडेल?",
-        ta: "வணக்கம் ராகுல்! எந்த மொழியை விரும்புகிறீர்கள்?",
-        hinglish: "Hello Rahul! Aap kis language me baat karna prefer karenge?"
-      };
       const feed = document.getElementById('studentChatFeed');
-      if (feed && feed.children.length <= 1) {
+      const userMsgs = feed ? feed.querySelectorAll('.user-bubble, [data-role="user"]').length : 0;
+      if (feed && userMsgs === 0) {
         feed.innerHTML = '';
-        appendMessage('assistant', greetings[lang] || greetings.en);
+        const welcome = studentGreetings[lang] || studentGreetings.en;
+        appendMessage('assistant', welcome);
       }
     }
 
     function switchSTab(tab) {
-      ['chat', 'schedule', 'homework'].forEach(t => {
+      ['chat', 'hw', 'flashcards'].forEach(t => {
         const btn = document.getElementById(`stab-${t}`);
         const content = document.getElementById(`scontent-${t}`);
-        if (t === tab) {
-          btn.className = "flex-1 py-2.5 rounded-xl font-semibold transition bg-cyan-600 text-white shadow-lg shadow-cyan-600/20";
-          content.classList.remove('hidden');
-        } else {
-          btn.className = "flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white";
-          content.classList.add('hidden');
+        if (btn && content) {
+          if (t === tab) {
+            btn.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center space-x-2";
+            content.classList.remove('hidden');
+          } else {
+            btn.className = "px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition flex items-center space-x-2";
+            content.classList.add('hidden');
+          }
         }
       });
     }
@@ -899,14 +918,7 @@
       }
     }
 
-    function toggleContinuousLiveVoice() {
-      if (isLiveVoiceActive) {
-        stopContinuousLiveVoice();
-      } else {
-        startContinuousLiveVoice();
-      }
-    }
-
+    
     function playLiveChime(type = 'start') {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -914,6 +926,7 @@
         const ctx = new AudioCtx();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+        osc.type = 'sine';
         if (type === 'start') {
           osc.frequency.setValueAtTime(520, ctx.currentTime);
           osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.12);
@@ -924,51 +937,205 @@
           osc.start();
           osc.stop(ctx.currentTime + 0.22);
         } else {
-          osc.frequency.setValueAtTime(650, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 0.12);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+          osc.frequency.setValueAtTime(780, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 0.14);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start();
-          osc.stop(ctx.currentTime + 0.18);
+          osc.stop(ctx.currentTime + 0.22);
         }
       } catch(e) {}
     }
 
-    function startContinuousLiveVoice() {
+    async function ensureMicPermission() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach(t => t.stop());
+          return true;
+        } catch (e) {
+          console.warn("Microphone access denied:", e);
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Chat Box Input Dictation (Speech to Text Only - Types & Sends Text Chat Without Audio Response)
+    async function toggleInputDictation() {
+      if (isLiveVoiceActive) {
+        stopContinuousLiveVoice();
+      }
+
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
         alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
         return;
       }
 
+      const micBtn = document.getElementById('chatMicBtn');
+      const inputEl = document.getElementById('studentChatInput');
+
+      if (isDictating) {
+        stopInputDictation();
+        return;
+      }
+
+      await ensureMicPermission();
+
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+      }
+
+      try {
+        dictationRecognition = new SpeechRecognition();
+        dictationRecognition.continuous = false;
+        dictationRecognition.interimResults = true;
+
+        const langLocaleMap = {
+          'en': 'en-IN', 'hi': 'hi-IN', 'hinglish': 'hi-IN', 'gu': 'gu-IN',
+          'mr': 'mr-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'bn': 'bn-IN',
+          'pa': 'pa-IN', 'kn': 'kn-IN', 'ml': 'ml-IN', 'ur': 'ur-PK'
+        };
+        const activeLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
+        dictationRecognition.lang = langLocaleMap[activeLang] || 'en-IN';
+
+        dictationRecognition.onstart = () => {
+          isDictating = true;
+          if (micBtn) {
+            micBtn.className = "px-3.5 py-3 rounded-xl bg-rose-600 text-white border border-rose-500 text-xs font-semibold flex items-center transition animate-pulse shadow-lg shadow-rose-500/30";
+          }
+          if (inputEl) {
+            inputEl.placeholder = "Listening... Speak now";
+          }
+        };
+
+        dictationRecognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+
+          const currentText = finalTranscript || interimTranscript;
+          if (inputEl && currentText) {
+            inputEl.value = currentText;
+          }
+
+          const cleanedSpoken = (finalTranscript || interimTranscript).toLowerCase().trim();
+          if (lastSpokenText && cleanedSpoken.length > 5 && (lastSpokenText.includes(cleanedSpoken) || cleanedSpoken.includes(lastSpokenText))) {
+            console.log("Echo filter: Suppressed self-echo audio transcription.");
+            return;
+          }
+
+          if (finalTranscript.trim().length > 0) {
+            clearTimeout(dictationSilenceTimer);
+            const toSend = finalTranscript.trim();
+            stopInputDictation();
+            if (inputEl) inputEl.value = '';
+            sendStudentPrompt(toSend, false);
+          } else if (interimTranscript.trim().length > 0) {
+            clearTimeout(dictationSilenceTimer);
+            dictationSilenceTimer = setTimeout(() => {
+              if (isDictating && interimTranscript.trim().length > 0) {
+                const toSend = interimTranscript.trim();
+                stopInputDictation();
+                if (inputEl) inputEl.value = '';
+                sendStudentPrompt(toSend, false);
+              }
+            }, 1400);
+          }
+        };
+
+        dictationRecognition.onerror = (event) => {
+          console.warn("Dictation Error:", event.error);
+          stopInputDictation();
+        };
+
+        dictationRecognition.onend = () => {
+          if (isDictating) {
+            stopInputDictation();
+          }
+        };
+
+        dictationRecognition.start();
+      } catch(e) {
+        console.warn("Dictation Exception:", e);
+        stopInputDictation();
+      }
+    }
+
+    function stopInputDictation() {
+      isDictating = false;
+      clearTimeout(dictationSilenceTimer);
+      if (dictationRecognition) {
+        try { dictationRecognition.abort(); } catch(e) {}
+        dictationRecognition = null;
+      }
+      const micBtn = document.getElementById('chatMicBtn');
+      const inputEl = document.getElementById('studentChatInput');
+      if (micBtn) {
+        micBtn.className = "px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-cyan-400 border border-white/10 text-xs font-semibold flex items-center transition";
+      }
+      if (inputEl) {
+        inputEl.placeholder = "Ask anything in English, Hinglish, or any Indian language...";
+      }
+    }
+
+    // Continuous Live Voice Call Mode (Two-Way Conversational Duplex)
+    function toggleContinuousLiveVoice() {
+      if (isLiveVoiceActive) {
+        stopContinuousLiveVoice();
+      } else {
+        startContinuousLiveVoice();
+      }
+    }
+
+    async function startContinuousLiveVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+        return;
+      }
+
+      if (isDictating) {
+        stopInputDictation();
+      }
+
+      await ensureMicPermission();
+
       isLiveVoiceActive = true;
       playLiveChime('start');
-      document.getElementById('topLiveBtnLabel').innerText = "Live Connected";
-      document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-rose-500/30 transition animate-pulse";
-      document.getElementById('liveMicIcon').className = "fa-solid fa-phone-slash";
-      document.getElementById('liveVoiceBar').classList.remove('hidden');
-      document.getElementById('liveSubtext').innerText = "Gemini Live active • Speak naturally";
+      const topLabel = document.getElementById('topLiveBtnLabel');
+      if (topLabel) topLabel.innerText = "Live Connected";
+      const toggleBtn = document.getElementById('liveMicToggleBtn');
+      if (toggleBtn) toggleBtn.className = "w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-rose-500/30 transition animate-pulse";
+      const micIcon = document.getElementById('liveMicIcon');
+      if (micIcon) micIcon.className = "fa-solid fa-phone-slash";
+      const voiceBar = document.getElementById('liveVoiceBar');
+      if (voiceBar) voiceBar.classList.remove('hidden');
+      const subText = document.getElementById('liveSubtext');
+      if (subText) subText.innerText = "Gemini Live active • Speak naturally";
 
-      const langGreetings = {
-        en: "Hello Rahul! Welcome to XYZ AI Student Portal. Which language do you prefer to speak in? You can choose English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu, and more.",
-        hi: "नमस्ते राहुल! XYZ AI स्टूडेंट पोर्टल में आपका स्वागत है। आप मुझसे अपनी पढ़ाई, टाइम टेबल या उपस्थिति के बारे में पूछ सकते हैं।",
-        gu: "નમસ્તે રાહુલ! XYZ AI સ્ટુડન્ટ પોર્ટલમાં તમારું સ્વાગત છે. તમે તમારા ટાઇમટેબલ, પરીક્ષા કે હાજરી વિશે પૂછી શકો છો.",
-        mr: "नमस्कार राहुल! XYZ AI स्टुडंट पोर्टलवर आपले स्वागत आहे. आपण आपल्या वेळापत्रक, परीक्षा किंवा उपस्थितीबद्दल विचारू शकता.",
-        ta: "வணக்கம் ராகுல்! XYZ AI மாணவர் போர்ட்டலுக்கு வரவேற்கிறோம். உங்கள் அட்டவணை, தேர்வுகள் அல்லது வருகை குறித்து கேட்கலாம்.",
-        te: "నమస్కారం రాహుల్! XYZ AI స్టూడెంట్ పోర్టల్‌కి స్వాగతం. మీ టైమ్‌టేబుల్, పరీక్షలు లేదా హాజరు గురించి అడగవచ్చు.",
-        bn: "নমস্কার রাহুল! XYZ AI স্টুডেন্ট পোর্টালে স্বাগতম। আপনি আপনার রুটিন, পরীক্ষা বা উপস্থিতি সম্পর্কে জিজ্ঞাসা করতে পারেন.",
-        pa: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਰਾహుਲ! XYZ AI ਸਟੂਡੈਂਟ ਪੋਰਟਲ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ। ਤੁਸੀਂ ਆਪਣੇ ਟਾਈਮਟੇਬਲ ਜਾਂ ਹਾਜ਼ਰੀ ਬਾਰੇ ਪੁੱਛ ਸਕਦੇ ਹੋ.",
-        kn: "ನಮಸ್ಕಾರ ರಾಹುಲ್! XYZ AI ವಿದ್ಯಾರ್ಥಿ ಪೋರ್ಟಲ್‌ಗೆ ಸುಸ್ವಾಗತ. ನಿಮ್ಮ ವೇಳಾಪಟ್ಟಿ ಅಥವಾ ಹಾಜರಾತಿ ಬಗ್ಗೆ ಕೇಳಬಹುದು.",
-        ml: "നമസ്കാരം രാഹുൽ! XYZ AI സ്റ്റുഡന്റ് പോർട്ടലിലേക്ക് സ്വാഗതം. ടൈംടേബിൾ അല്ലെങ്കിൽ ഹാജർ വിവരങ്ങൾ ചോദിക്കാം.",
-        ur: "ہیلو راہل! XYZ AI اسٹوڈنٹ پورٹل میں خوش آمدید۔ آپ اپنے ٹائم ٹیبل یا حاضری کے بارے میں پوچھ سکتے ہیں۔",
-        hinglish: "Hello Rahul! XYZ AI Student Portal me aapka welcome hai. Aap apne timetable, exam ya attendance ke bare me puch sakte hain."
-      };
-      const curL = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
-      const firstGreeting = langGreetings[curL] || langGreetings.en;
-      appendMessage('assistant', firstGreeting);
-      speakAssistantResponse(firstGreeting);
+      const feed = document.getElementById('studentChatFeed');
+      const hasUserMessages = feed && (feed.querySelectorAll('.user-bubble, [data-role="user"]').length > 0 || feed.innerText.includes('You:'));
+
+      if (!hasUserMessages && !hasLiveGreetingSpoken) {
+        hasLiveGreetingSpoken = true;
+        const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
+        const welcome = studentGreetings[curLang] || studentGreetings.en;
+        speakAssistantResponse(welcome);
+      } else {
+        initSpeechRecognition();
+      }
     }
 
     function stopContinuousLiveVoice() {
@@ -983,21 +1150,35 @@
         try { window.speechSynthesis.cancel(); } catch(e) {}
       }
       isSpeaking = false;
-      document.getElementById('topLiveBtnLabel').innerText = "Go Live Voice";
-      document.getElementById('liveMicToggleBtn').className = "w-10 h-10 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center font-bold text-sm shadow-lg shadow-cyan-500/30 transition";
-      document.getElementById('liveMicIcon').className = "fa-solid fa-microphone";
-      document.getElementById('liveVoiceBar').classList.add('hidden');
-      document.getElementById('liveSubtext').innerText = "Hands-free continuous conversation";
+      const topLabel = document.getElementById('topLiveBtnLabel');
+      if (topLabel) topLabel.innerText = "Go Live Voice";
+      const toggleBtn = document.getElementById('liveMicToggleBtn');
+      if (toggleBtn) toggleBtn.className = "w-10 h-10 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center font-bold text-sm shadow-lg shadow-cyan-500/30 transition";
+      const micIcon = document.getElementById('liveMicIcon');
+      if (micIcon) micIcon.className = "fa-solid fa-microphone";
+      const voiceBar = document.getElementById('liveVoiceBar');
+      if (voiceBar) voiceBar.classList.add('hidden');
+      const subText = document.getElementById('liveSubtext');
+      if (subText) subText.innerText = "Hands-free continuous conversation";
       setAvatarState('idle');
     }
 
-    function initSpeechRecognition() {
-      if (!isLiveVoiceActive || isSpeaking || window.speechSynthesis.speaking) return;
+    async function initSpeechRecognition() {
+      if (!isLiveVoiceActive) return;
+      if (isSpeaking || (window.speechSynthesis && window.speechSynthesis.speaking)) return;
+      if (Date.now() - lastSpeechEndTime < 450) {
+        setTimeout(initSpeechRecognition, 450);
+        return;
+      }
 
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) return;
 
       try {
+        if (isSpeaking || (window.speechSynthesis && window.speechSynthesis.speaking)) {
+          return;
+        }
+
         if (recognition) {
           try { recognition.abort(); } catch(e) {}
           recognition = null;
@@ -1017,10 +1198,17 @@
 
         recognition.onstart = () => {
           setAvatarState('listening');
-          document.getElementById('liveVoiceStatusText').innerText = "Listening... Speak naturally";
+          const statusEl = document.getElementById('liveVoiceStatusText');
+          if (statusEl) statusEl.innerText = "Listening... Speak naturally";
+          const micIcon = document.getElementById('liveMicIcon');
+          if (micIcon) micIcon.classList.add('animate-pulse');
         };
 
         recognition.onresult = (event) => {
+          // Mute and ignore if assistant is speaking or echo cooldown is active
+          if (isSpeaking || (window.speechSynthesis && window.speechSynthesis.speaking) || (Date.now() - lastSpeechEndTime < 500)) {
+            return;
+          }
           let interimTranscript = '';
           let finalTranscript = '';
 
@@ -1032,42 +1220,55 @@
             }
           }
 
+          const spokenText = finalTranscript || interimTranscript;
+          const inputEl = document.getElementById('studentChatInput');
+          if (inputEl && spokenText) {
+            inputEl.value = spokenText;
+          }
+
+          const statusEl = document.getElementById('liveVoiceStatusText');
+          if (statusEl && spokenText) {
+            statusEl.innerText = `"${spokenText}"`;
+          }
+
           if (finalTranscript.trim().length > 0) {
             clearTimeout(silenceTimer);
-            document.getElementById('liveVoiceStatusText').innerText = `"${finalTranscript.trim()}"`;
             try { recognition.abort(); } catch(e) {}
             recognition = null;
-            sendVoiceMessage(finalTranscript.trim());
+            sendStudentPrompt(finalTranscript.trim(), true);
           } else if (interimTranscript.trim().length > 0) {
-            document.getElementById('liveVoiceStatusText').innerText = `"${interimTranscript.trim()}..."`;
             mouthOpenTarget = 0.35 + Math.random() * 0.4;
             clearTimeout(silenceTimer);
             silenceTimer = setTimeout(() => {
               if (interimTranscript.trim().length > 0 && isLiveVoiceActive) {
                 try { recognition.abort(); } catch(e) {}
                 recognition = null;
-                sendVoiceMessage(interimTranscript.trim());
+                sendStudentPrompt(interimTranscript.trim(), true);
               }
             }, 1200);
           }
         };
 
         recognition.onerror = (event) => {
-          if (event.error === 'no-speech' || event.error === 'network') {
-            if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
-              setTimeout(() => {
-                if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
-                  initSpeechRecognition();
-                }
-              }, 400);
-            }
+          console.warn("Speech Rec Error:", event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            alert("Microphone access was denied. Please allow microphone permissions in your browser.");
+            stopContinuousLiveVoice();
+            return;
+          }
+          if (isLiveVoiceActive && !isSpeaking) {
+            setTimeout(() => {
+              if (isLiveVoiceActive && !isSpeaking) {
+                initSpeechRecognition();
+              }
+            }, 500);
           }
         };
 
         recognition.onend = () => {
-          if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+          if (isLiveVoiceActive && !isSpeaking) {
             setTimeout(() => {
-              if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+              if (isLiveVoiceActive && !isSpeaking) {
                 initSpeechRecognition();
               }
             }, 300);
@@ -1077,68 +1278,28 @@
         recognition.start();
       } catch(e) {
         console.warn("Speech Rec Exception:", e);
-      }
-    }
-
-    async function sendVoiceMessage(msg) {
-      if (!msg || !msg.trim()) return;
-      if (isSpeaking) return;
-
-      appendMessage('user', msg);
-      setAvatarState('thinking');
-      document.getElementById('liveVoiceStatusText').innerText = "Aria is thinking...";
-
-      const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
-      const token = localStorage.getItem("auth_token") || await getAuthToken();
-
-      try {
-        const payload = {
-          message: msg,
-          session_id: currentSessionId,
-          language: curLang,
-          voice_requested: true,
-          user: {
-            user_id: "usr_student_01",
-            name: "Rahul Patel",
-            role: "student",
-            preferred_language: curLang
+        setTimeout(() => {
+          if (isLiveVoiceActive && !isSpeaking) {
+            initSpeechRecognition();
           }
-        };
-
-        const res = await fetch(`${API_BASE}/api/chat`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : ""
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        const data = await res.json();
-
-        currentSessionId = data.session_id || currentSessionId;
-        appendMessage('assistant', data.response_text);
-        speakAssistantResponse(data.response_text);
-      } catch(e) {
-        const errText = "I encountered a network difficulty reaching the school database. Please check connection.";
-        appendMessage('assistant', errText);
-        speakAssistantResponse(errText);
+        }, 600);
       }
     }
 
-    // Dynamic Viseme Lip-Sync & Speech Synthesis Player
-    let visemeInterval = null;
-    let lastSpokenText = '';
     function speakAssistantResponse(text) {
-      if (!('speechSynthesis' in window)) return;
+      if (!window.speechSynthesis) return;
 
-      // 1. Immediately abort active microphone so it never listens to speaker output
+      // 1. Immediately abort active microphone recognition to prevent hearing itself
       if (recognition) {
         try { recognition.abort(); } catch(e) {}
         recognition = null;
       }
+      if (dictationRecognition) {
+        try { dictationRecognition.abort(); } catch(e) {}
+        dictationRecognition = null;
+      }
       clearTimeout(silenceTimer);
+      clearTimeout(dictationSilenceTimer);
 
       try {
         window.speechSynthesis.cancel();
@@ -1152,10 +1313,9 @@
       lastSpokenText = cleanVoiceText.toLowerCase().trim();
 
       const utterance = new SpeechSynthesisUtterance(cleanVoiceText);
-      utterance.rate = 0.90; // Smooth natural Indian cadence
-      utterance.pitch = 1.0; // Warm natural pitch
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05;
 
-      // Check if text contains native Indic/Urdu Unicode characters
       const hasIndicChars = /[\u0900-\u0D7F\u0600-\u06FF]/.test(cleanVoiceText);
       const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
 
@@ -1177,125 +1337,52 @@
       utterance.lang = targetLocale;
       const langPrefix = targetLocale.substring(0, 2);
 
-      // Natural Human Voice Selection: Prioritize Neural, Natural, and Google voices
       const voices = window.speechSynthesis.getVoices();
       if (voices && voices.length > 0) {
         let matchingVoice = null;
         if (hasIndicChars) {
-          matchingVoice = voices.find(v => (v.name.includes("Swara") || v.name.includes("Neerja") || v.name.includes("Kalpana") || v.name.includes("Heera")) && (v.lang.startsWith("hi") || v.lang.startsWith("en-IN") || v.lang.replace('_', '-').startsWith(langPrefix))) ||
-                          voices.find(v => v.name.includes("Google") && (v.lang.startsWith("hi") || v.lang.replace('_', '-').startsWith(langPrefix))) ||
-                          voices.find(v => v.name.includes("Natural") && (v.lang.startsWith("hi") || v.lang.replace('_', '-').startsWith(langPrefix))) ||
-                          voices.find(v => v.lang.replace('_', '-') === targetLocale && !v.name.toLowerCase().includes("male") && !v.name.toLowerCase().includes("hemant") && !v.name.toLowerCase().includes("madhur") && !v.name.toLowerCase().includes("david")) ||
-                          voices.find(v => v.lang.startsWith("hi") && !v.name.toLowerCase().includes("hemant") && !v.name.toLowerCase().includes("madhur")) ||
-                          voices.find(v => v.lang.startsWith(langPrefix)) ||
-                          voices.find(v => v.lang === 'en-IN' || v.name.includes("India"));
-        } else {
-          matchingVoice = voices.find(v => (v.name.includes("Neerja") || v.name.includes("Swara") || v.name.includes("Heera") || v.name.includes("Kalpana"))) ||
-                          voices.find(v => (v.name.includes("Natural") || v.name.includes("Online") || v.name.includes("Google")) && (v.lang === 'en-IN' || v.name.includes("India"))) ||
-                          voices.find(v => (v.lang === 'en-IN' || v.name.includes("India")) && !v.name.toLowerCase().includes("ravi") && !v.name.toLowerCase().includes("prabhat")) ||
-                          voices.find(v => v.name.includes("Google UK English Female") || v.name.includes("Zira") || v.name.includes("Jenny")) ||
-                          voices.find(v => v.lang.startsWith('en')) ||
-                          voices[0];
+          matchingVoice = voices.find(v => v.lang && (v.lang.toLowerCase() === targetLocale.toLowerCase() || v.lang.toLowerCase().startsWith(langPrefix)));
         }
-        if (matchingVoice) {
-          utterance.voice = matchingVoice;
-          utterance.lang = matchingVoice.lang || targetLocale;
+        if (!matchingVoice) {
+          matchingVoice = voices.find(v => v.lang && (v.lang.includes('en-IN') || v.lang.includes('hi-IN') || v.name.includes('India') || v.name.includes('Indian')));
         }
+        if (!matchingVoice) {
+          matchingVoice = voices.find(v => (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google UK English Female') || v.name.includes('Natural') || v.name.includes('Jenny')));
+        }
+        if (matchingVoice) utterance.voice = matchingVoice;
       }
 
-      // Acoustic Cadence Engine: Parse text into tokens with pauses for commas, periods, and line breaks
-      clearInterval(visemeInterval);
-      const tokens = cleanVoiceText.split(/(\s+|[.,!?:;\n।])/).filter(t => t.length > 0);
-      let tIdx = 0;
-      let pauseRemaining = 0;
-
-      visemeInterval = setInterval(() => {
-        if (!isSpeaking) {
-          clearInterval(visemeInterval);
-          return;
-        }
-
-        if (pauseRemaining > 0) {
-          pauseRemaining -= 80;
-          mouthOpenTarget = 0.03;
-          mouthWidthTarget = 1.0;
-          return;
-        }
-
-        if (tIdx < tokens.length) {
-          const tok = tokens[tIdx++];
-          if ([',', ':', ';', '-'].includes(tok)) {
-            pauseRemaining = 160;
-            mouthOpenTarget = 0.03;
-            mouthWidthTarget = 1.0;
-          } else if (['.', '!', '?', '\n', '।'].includes(tok)) {
-            pauseRemaining = 320;
-            mouthOpenTarget = 0.03;
-            mouthWidthTarget = 1.0;
-          } else if (tok.trim().length > 0) {
-            const hasWideVowel = /[aAoOआओऔઆઓઔఆఓஆஒ]/.test(tok);
-            const hasSmileVowel = /[eEiIईएऐઈએઐ]/.test(tok);
-            if (hasWideVowel) {
-              mouthOpenTarget = 0.35 + Math.random() * 0.08;
-              mouthWidthTarget = 1.02;
-            } else if (hasSmileVowel) {
-              mouthOpenTarget = 0.24 + Math.random() * 0.06;
-              mouthWidthTarget = 1.18;
-            } else {
-              mouthOpenTarget = 0.13 + Math.random() * 0.05;
-              mouthWidthTarget = 0.96;
-            }
-          }
-        } else {
-          tIdx = 0;
-        }
-      }, 80);
-
-      utterance.onboundary = (e) => {
-        const charAt = cleanVoiceText[e.charIndex];
-        if (charAt && [',', '.', '!', '?', ';', '।'].includes(charAt)) {
-          mouthOpenTarget = 0.03;
-          mouthWidthTarget = 1.0;
-        } else {
-          mouthOpenTarget = Math.random() * 0.20 + 0.14;
-          mouthWidthTarget = Math.random() * 0.14 + 0.95;
+      utterance.onboundary = (event) => {
+        if (event.name === 'word') {
+          mouthOpenTarget = 0.35 + Math.random() * 0.55;
+          mouthWidthTarget = 0.85 + Math.random() * 0.3;
         }
       };
 
       utterance.onend = () => {
-        clearInterval(visemeInterval);
         isSpeaking = false;
-        mouthOpenTarget = 0.05;
-        mouthWidthTarget = 1.0;
+        lastSpeechEndTime = Date.now();
+        setAvatarState('idle');
         if (isLiveVoiceActive) {
-          setAvatarState('listening');
-          document.getElementById('liveVoiceStatusText').innerText = "Listening... Speak anytime!";
-          // Squelch delay: Wait 500ms for room echo to decay completely before reopening microphone
+          // Acoustic echo cooldown period: wait 500ms before re-enabling mic
           setTimeout(() => {
-            if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+            if (isLiveVoiceActive && !isSpeaking && !(window.speechSynthesis && window.speechSynthesis.speaking)) {
               initSpeechRecognition();
             }
           }, 500);
-        } else {
-          setAvatarState('idle');
         }
       };
 
-      utterance.onerror = (e) => {
-        clearInterval(visemeInterval);
-        console.warn("TTS Notice:", e);
+      utterance.onerror = (err) => {
+        console.warn("Speech Synthesis Error:", err);
         isSpeaking = false;
-        mouthOpenTarget = 0.05;
-        mouthWidthTarget = 1.0;
+        setAvatarState('idle');
         if (isLiveVoiceActive) {
-          setAvatarState('listening');
           setTimeout(() => {
-            if (isLiveVoiceActive && !isSpeaking && !window.speechSynthesis.speaking) {
+            if (isLiveVoiceActive && !isSpeaking) {
               initSpeechRecognition();
             }
-          }, 500);
-        } else {
-          setAvatarState('idle');
+          }, 400);
         }
       };
 
@@ -1304,39 +1391,41 @@
 
     function appendMessage(role, text) {
       const feed = document.getElementById('studentChatFeed');
-      const isUser = role === 'user';
-      
-      const wrapper = document.createElement('div');
-      wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
-      
+      if (!feed) return;
+
+      const isUser = (role === 'user');
+      const bubble = document.createElement('div');
+      bubble.className = `flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`;
+      bubble.setAttribute('data-role', role);
+
       const formatted = text.replace(/\n/g, '<br/>');
 
       if (isUser) {
-        wrapper.innerHTML = `
-          <div class="bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl rounded-tr-none p-3.5 max-w-[85%] text-xs leading-relaxed shadow-md">
+        bubble.innerHTML = `
+          <div class="user-bubble max-w-[85%] rounded-2xl px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs leading-relaxed shadow-lg shadow-cyan-500/20 border border-cyan-400/30">
+            <div class="flex items-center space-x-1.5 mb-1 opacity-75">
+              <i class="fa-solid fa-user-graduate text-[10px]"></i>
+              <span class="text-[10px] font-semibold">You (Rahul Patel)</span>
+            </div>
             <p>${formatted}</p>
-          </div>
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-            RP
           </div>
         `;
       } else {
-        wrapper.innerHTML = `
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow">
-            XYZ
-          </div>
-          <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
+        bubble.innerHTML = `
+          <div class="assistant-bubble max-w-[85%] rounded-2xl px-4 py-3 bg-gray-900/90 text-gray-100 text-xs leading-relaxed border border-white/10 shadow-xl backdrop-blur-md">
+            <div class="flex items-center space-x-1.5 mb-1.5 text-cyan-400">
+              <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+              <span class="text-[10px] font-bold tracking-wide">Aria • AI Study Companion</span>
+            </div>
             <p>${formatted}</p>
           </div>
         `;
       }
 
-      feed.appendChild(wrapper);
+      feed.appendChild(bubble);
       feed.scrollTop = feed.scrollHeight;
     }
 
-    
-    // Gemini-Style Session Management & Database History Engine
     function generateNewSessionId() {
       return "sess_student_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
     }
@@ -1344,6 +1433,8 @@
     function startFreshNewChat() {
       currentSessionId = generateNewSessionId();
       localStorage.setItem('active_chat_session_student', currentSessionId);
+      localStorage.setItem('xyz_session_student', currentSessionId);
+      hasLiveGreetingSpoken = false;
       
       const feed = document.getElementById('studentChatFeed');
       if (feed) {
@@ -1356,17 +1447,8 @@
       const dropdown = document.getElementById('sessionHistoryDropdown');
       if (dropdown) dropdown.classList.add('hidden');
 
-      const greetings = {
-        en: "Hello Rahul Patel! Welcome to XYZ AI Student Companion. Which language would you prefer for our conversation? We support English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu, and more.",
-        hi: "नमस्ते! XYZ AI में आपका स्वागत है। आप किस भाषा में बातचीत करना पसंद करेंगे? (English, हिन्दी, ગુજરાતી, मराठी...)",
-        gu: "નમસ્તે! XYZ AI માં આપનું સ્વાગત છે. આપ કઈ ભાષામાં વાતચીત કરવા માંગો છો? (English, हिन्दी, ગુજરાતી, मराठी...)",
-        mr: "नमस्कार! XYZ AI मध्ये आपले स्वागत आहे. आपण कोणत्या भाषेत संभाषण करू इच्छिता?",
-        ta: "வணக்கம்! XYZ AI-க்கு வரவேற்கிறோம். நீங்கள் எந்த மொழியில் உரையாட விரும்புகிறீர்கள்?",
-        hinglish: "Hello! XYZ AI me aapka welcome hai. Aap kis language me continue karna chahenge?"
-      };
-
       const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
-      const welcome = greetings[curLang] || greetings.en;
+      const welcome = studentGreetings[curLang] || studentGreetings.en;
       appendMessage('assistant', welcome);
     }
 
@@ -1389,7 +1471,7 @@
       listContainer.innerHTML = '<div class="p-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading past chats...</div>';
 
       try {
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token") || localStorage.getItem("xyz_token");
         const res = await fetch(`${API_BASE}/api/chat/sessions?user_id=usr_student_01`, {
           headers: {
             "Authorization": token ? `Bearer ${token}` : ""
@@ -1442,7 +1524,7 @@
 
     async function resumePastSession(sessionId, title) {
       try {
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token") || localStorage.getItem("xyz_token");
         const res = await fetch(`${API_BASE}/api/chat/history?session_id=${encodeURIComponent(sessionId)}&user_id=usr_student_01`, {
           headers: {
             "Authorization": token ? `Bearer ${token}` : ""
@@ -1454,6 +1536,8 @@
 
         currentSessionId = sessionId;
         localStorage.setItem('active_chat_session_student', currentSessionId);
+        localStorage.setItem('xyz_session_student', currentSessionId);
+        hasLiveGreetingSpoken = true;
 
         const feed = document.getElementById('studentChatFeed');
         if (feed) {
@@ -1481,7 +1565,7 @@
     async function deleteSession(sessionId, e) {
       if (e) e.stopPropagation();
       try {
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token") || localStorage.getItem("xyz_token");
         await fetch(`${API_BASE}/api/chat/session/${encodeURIComponent(sessionId)}`, {
           method: "DELETE",
           headers: {
@@ -1498,7 +1582,6 @@
       }
     }
 
-    // Close session history menu when clicking outside
     document.addEventListener('click', (e) => {
       const dropdown = document.getElementById('sessionHistoryDropdown');
       const btn = document.getElementById('sessionHistoryMenuBtn');
@@ -1507,14 +1590,8 @@
       }
     });
 
-    let currentSessionId = localStorage.getItem('xyz_session_student');
-    if (!currentSessionId) {
-      currentSessionId = 'sess_' + Math.random().toString(36).substring(2, 12);
-      localStorage.setItem('xyz_session_student', currentSessionId);
-    }
-
     async function getAuthToken() {
-      let token = localStorage.getItem('xyz_token');
+      let token = localStorage.getItem('xyz_token') || localStorage.getItem('auth_token');
       if (!token) {
         try {
           const authRes = await fetch(`${API_BASE}/api/auth/mock-login`, {
@@ -1526,6 +1603,7 @@
             const d = await authRes.json();
             token = d.access_token;
             localStorage.setItem('xyz_token', token);
+            localStorage.setItem('auth_token', token);
             if (d.user) localStorage.setItem('xyz_user', JSON.stringify(d.user));
           }
         } catch(e) {
@@ -1539,7 +1617,7 @@
       try {
         const token = await getAuthToken();
         const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-        const res = await fetch(`${API_BASE}/api/chat/history?session_id=${currentSessionId}&user_id=usr_student_rahul`, { headers });
+        const res = await fetch(`${API_BASE}/api/chat/history?session_id=${currentSessionId}&user_id=usr_student_01`, { headers });
         if (res.ok) {
           const data = await res.json();
           if (data.messages && data.messages.length > 0) {
@@ -1549,6 +1627,14 @@
               data.messages.forEach(m => {
                 appendMessage(m.role, m.content);
               });
+              hasLiveGreetingSpoken = true;
+            }
+          } else {
+            const feed = document.getElementById('studentChatFeed');
+            if (feed && feed.children.length === 0) {
+              const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
+              const welcome = studentGreetings[curLang] || studentGreetings.en;
+              appendMessage('assistant', welcome);
             }
           }
         }
@@ -1585,7 +1671,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": token ? `Bearer ${token}` : ""
           },
           body: JSON.stringify(studentPayload)
         });
@@ -1598,6 +1684,7 @@
         if (data.session_id) {
           currentSessionId = data.session_id;
           localStorage.setItem('xyz_session_student', currentSessionId);
+          localStorage.setItem('active_chat_session_student', currentSessionId);
         }
 
         if (data.language && data.language !== selectedLanguage) {
@@ -1608,7 +1695,7 @@
           if (sel) sel.value = data.language;
         }
 
-        const replyText = data.response_text || "Your records have been retrieved successfully.";
+        const replyText = data.response_text || "Here is the explanation for your query.";
         appendMessage('assistant', replyText);
 
         if (fromVoice || isLiveVoiceActive) {
@@ -1619,7 +1706,7 @@
 
       } catch (err) {
         console.error("Chat error:", err);
-        const fallback = "Your attendance is 91.2% with 83 present days. All records are up to date!";
+        const fallback = "Let's review the key concepts for Class 10 Physics & Mathematics.";
         appendMessage('assistant', fallback);
         if (fromVoice || isLiveVoiceActive) speakAssistantResponse(fallback);
         else setAvatarState('idle');
