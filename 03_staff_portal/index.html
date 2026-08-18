@@ -86,8 +86,247 @@
 
       <div class="flex items-center space-x-3">
         <!-- Gemini Live Voice Button -->
-        <button type="button" id="chatMicBtn" onclick="toggleInputDictation()" title="Speech to Text Dictation" class="px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-emerald-400 border border-white/10 text-xs font-semibold flex items-center transition">
-              <i id="chatMicIcon" class="fa-solid fa-microphone"></i>
+        <button id="topLiveVoiceBtn" onclick="toggleContinuousLiveVoice()" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-600/20 hover:from-emerald-500/30 hover:to-teal-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-lg shadow-emerald-500/10 transition">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <i class="fa-solid fa-waveform-lines mr-1"></i>
+          <span id="topLiveBtnLabel">Go Live Voice</span>
+        </button>
+
+        <!-- Language Selector with Hinglish -->
+        <div class="flex items-center space-x-2 bg-gray-900/90 border border-white/10 px-3 py-1.5 rounded-xl text-xs">
+          <i class="fa-solid fa-language text-emerald-400"></i>
+          <select id="languageSelect" onchange="onLanguageChange(this.value)" class="bg-transparent text-gray-200 text-xs focus:outline-none cursor-pointer">
+            <option value="en" class="bg-gray-900 text-white">English</option>
+            <option value="hinglish" class="bg-gray-900 text-white">Hinglish (Hindi + Eng)</option>
+            <option value="hi" class="bg-gray-900 text-white">हिन्दी (Hindi)</option>
+            <option value="gu" class="bg-gray-900 text-white">ગુજરાતી (Gujarati)</option>
+            <option value="ta" class="bg-gray-900 text-white">தமிழ் (Tamil)</option>
+            <option value="te" class="bg-gray-900 text-white">తెలుగు (Telugu)</option>
+            <option value="mr" class="bg-gray-900 text-white">मराठी (Marathi)</option>
+            <option value="bn" class="bg-gray-900 text-white">বাংলা (Bengali)</option>
+            <option value="pa" class="bg-gray-900 text-white">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="kn" class="bg-gray-900 text-white">ಕನ್ನಡ (Kannada)</option>
+            <option value="ml" class="bg-gray-900 text-white">മലയാളം (Malayalam)</option>
+            <option value="ur" class="bg-gray-900 text-white">اردو (Urdu)</option>
+          </select>
+        </div>
+
+        <!-- Switch User / Logout -->
+        <a href="/" title="Switch User / Sign Out" class="flex items-center space-x-1.5 bg-gray-900 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/40 text-gray-400 hover:text-rose-300 px-3 py-1.5 rounded-xl text-xs transition">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span class="hidden sm:inline">Switch</span>
+        </a>
+
+        <!-- Teacher Profile -->
+        <div class="flex items-center space-x-2.5 border-l border-white/10 pl-3">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow">
+            AV
+          </div>
+          <div class="hidden sm:block text-left">
+            <p class="text-xs font-semibold text-white">Mrs. Anjali Verma</p>
+            <p class="text-[10px] text-emerald-400">Class Teacher (10-A)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Top Classroom Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-emerald-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Class 10-A Attendance</p>
+        <h3 class="text-2xl font-bold text-white mt-1 font-heading">100% Present</h3>
+        <span class="text-[11px] text-emerald-400 flex items-center mt-1"><i class="fa-solid fa-circle-check mr-1.5"></i> All 8 students present on last session</span>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-cyan-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Class Academic Average</p>
+        <h3 class="text-2xl font-bold text-cyan-300 mt-1 font-heading">88.4%</h3>
+        <span class="text-[11px] text-cyan-400 flex items-center mt-1"><i class="fa-solid fa-chart-simple mr-1.5"></i> Mathematics Class Score</span>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Pending Leave Notes</p>
+        <h3 class="text-2xl font-bold text-amber-300 mt-1 font-heading">1 Note</h3>
+        <span class="text-[11px] text-amber-400 flex items-center mt-1"><i class="fa-solid fa-envelope-open mr-1.5"></i> Rahul Patel (Family Event)</span>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-purple-500 glass-card-hover">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Next Period Class</p>
+        <h3 class="text-lg font-bold text-purple-300 mt-1 font-heading">Math • Grade 10-A</h3>
+        <span class="text-[11px] text-purple-400 flex items-center mt-1"><i class="fa-solid fa-clock mr-1.5"></i> Period 1 • 08:30 - 09:15 AM</span>
+      </div>
+    </div>
+
+    <!-- Central Workspace: 3D AI Human Avatar (Left) + Teacher Chat Hub (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT COLUMN: AI Teaching Assistant Avatar & Classroom Quick Actions -->
+      <div class="lg:col-span-5 flex flex-col space-y-4">
+        
+        <!-- Interactive Speaking AI Avatar Card -->
+        <div class="glass-panel rounded-3xl p-6 relative overflow-hidden border border-white/10 flex flex-col items-center text-center">
+          
+          <div id="avatarHalo" class="absolute -top-10 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl avatar-halo-pulse pointer-events-none"></div>
+
+          <div class="flex items-center space-x-2 bg-gray-900/90 border border-white/10 px-3 py-1 rounded-full text-xs mb-4 z-10">
+            <span id="aiStateDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="aiStateLabel" class="font-semibold text-gray-200">Teaching Assistant Ready</span>
+          </div>
+
+          <!-- Interactive 60FPS 3D Canvas Avatar with Real-Time Visemes & Facial Expressions -->
+          <div class="relative w-48 h-48 mb-3 flex items-center justify-center z-10">
+            <div id="voiceRingOuter" class="absolute inset-0 rounded-full border-2 border-emerald-500/30 scale-110 hidden animate-ping"></div>
+            <div id="voiceRingInner" class="absolute inset-0 rounded-full border border-emerald-400/40 scale-105 hidden"></div>
+
+            <div class="w-44 h-44 rounded-full p-1 bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-400 shadow-2xl shadow-emerald-500/30">
+              <div class="w-full h-full rounded-full bg-[#09151A] flex items-center justify-center relative overflow-hidden">
+                <canvas id="avatarCanvas" width="180" height="180" class="w-full h-full"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="z-10">
+            <h4 class="text-base font-bold text-white font-heading">Professor Orion — Teaching AI</h4>
+            <p class="text-xs text-gray-400 mt-0.5">Classroom Operations & Roster Automation Engine</p>
+          </div>
+
+          <div id="liveAudioWaveforms" class="flex items-center justify-center space-x-1.5 h-8 my-3 z-10">
+            <div class="w-1 bg-emerald-400 rounded-full h-2"></div>
+            <div class="w-1 bg-emerald-400 rounded-full h-4"></div>
+            <div class="w-1 bg-emerald-400 rounded-full h-2"></div>
+            <div class="w-1 bg-emerald-400 rounded-full h-5"></div>
+            <div class="w-1 bg-emerald-400 rounded-full h-3"></div>
+          </div>
+
+          <div class="w-full bg-[#0A1618]/80 border border-white/10 p-3 rounded-2xl flex items-center justify-between mt-2 z-10">
+            <div class="text-left">
+              <span class="text-[11px] font-semibold text-gray-300 block">Gemini Live Duplex Mode</span>
+              <span id="liveSubtext" class="text-[10px] text-gray-500">Hands-free continuous voice commands</span>
+            </div>
+            
+            <button id="liveMicToggleBtn" onclick="toggleContinuousLiveVoice()" class="w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center font-bold text-sm shadow-lg shadow-emerald-500/30 transition">
+              <i id="liveMicIcon" class="fa-solid fa-microphone"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Administrative Escalation to Principal -->
+        <div class="glass-panel rounded-3xl p-5 border border-white/10">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider font-heading flex items-center">
+              <i class="fa-solid fa-building-user text-emerald-400 mr-2"></i> Principal Support & Admin
+            </h4>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full">Available</span>
+          </div>
+
+          <p class="text-xs text-gray-400 mb-3">Submit urgent administrative tickets, leave requisitions, or schedule academic conferences directly with the Principal's office.</p>
+
+          <button onclick="sendTeacherPrompt('I need administrative support from the Principal regarding classroom supplies.')" class="w-full py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-200 text-xs font-semibold transition flex items-center justify-center">
+            <i class="fa-solid fa-paper-plane mr-2"></i> Log Ticket with Principal
+          </button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Interactive Teacher Chat & Class Roster Hub -->
+      <div class="lg:col-span-7 flex flex-col space-y-4">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1.5 p-1.5 bg-[#0A1A1A] rounded-2xl border border-white/10 text-xs">
+          <button onclick="switchTTab('chat')" id="ttab-chat" class="flex-1 py-2.5 rounded-xl font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
+            <i class="fa-solid fa-comments mr-1.5"></i> Teaching Assistant
+          </button>
+          <button onclick="switchTTab('roster')" id="ttab-roster" class="flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-users mr-1.5"></i> Class 10-A Roster
+          </button>
+          <button onclick="switchTTab('submissions')" id="ttab-submissions" class="flex-1 py-2.5 rounded-xl font-semibold transition text-gray-400 hover:text-white">
+            <i class="fa-solid fa-clipboard-check mr-1.5"></i> Homework Submissions
+          </button>
+        </div>
+
+        <!-- TAB 1: Live Interactive Chat Feed -->
+        <div id="tcontent-chat" class="glass-panel rounded-3xl p-5 flex flex-col h-[540px] border border-white/10">
+          
+                    <!-- Session Header: Gemini-Style New Chat & Three Dots History Menu -->
+          <div class="flex items-center justify-between pb-2.5 mb-2 border-b border-white/10 text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-medium flex items-center shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                <span id="activeSessionBadgeText">Active Chat</span>
+              </span>
+            </div>
+            
+            <div class="flex items-center space-x-2 relative">
+              <button onclick="startFreshNewChat()" title="Start New Chat" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-medium transition flex items-center shadow-sm active:scale-95">
+                <i class="fa-solid fa-plus mr-1.5 text-[10px]"></i> New Chat
+              </button>
+
+              <button onclick="toggleSessionHistoryDropdown()" id="sessionHistoryMenuBtn" title="Previous Chats History" class="w-8 h-8 rounded-xl bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition active:scale-95">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+
+              <!-- Glassmorphic Dropdown for Previous Chats -->
+              <div id="sessionHistoryDropdown" class="hidden absolute right-0 top-10 w-80 bg-[#120B20]/95 border border-white/20 rounded-2xl shadow-2xl z-50 p-3.5 backdrop-blur-2xl space-y-2.5">
+                <div class="flex items-center justify-between pb-2 border-b border-white/10">
+                  <span class="font-bold text-white text-xs flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-1.5 text-emerald-400"></i> Previous Chats
+                  </span>
+                  <button onclick="toggleSessionHistoryDropdown()" class="text-gray-400 hover:text-white text-xs p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+                <div id="sessionHistoryList" class="max-h-64 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin text-[11px]">
+                  <div class="p-4 text-center text-gray-400 text-xs">Loading past chats...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+<div id="teacherChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow">
+                XYZ
+              </div>
+              <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
+                <p>Welcome Mrs. Anjali Verma! <strong>Teaching Assistant ready</strong>. You can mark daily attendance by voice/text (e.g. <em>"Mark Rahul absent today"</em>), check class rosters, or review homework submissions. How can I assist you?</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="liveVoiceBar" class="hidden py-2 px-3 my-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300 animate-pulse">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-waveform-lines"></i>
+              <span id="liveVoiceStatusText">Listening to voice command... Speak anytime!</span>
+            </div>
+            <button onclick="stopContinuousLiveVoice()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">End Call</button>
+          </div>
+
+          <!-- Quick Action Prompt Chips -->
+          <div class="py-2.5 flex items-center space-x-2 overflow-x-auto no-scrollbar text-[11px]" style="scrollbar-width: none; -ms-overflow-style: none; border-t border-white/10 mt-1">
+            <button onclick="sendTeacherPrompt('how many students present today')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-emerald-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-user-check mr-1"></i> "How many students present today?"
+            </button>
+            <button onclick="sendTeacherPrompt('Show attendance summary for Grade 10-A')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-emerald-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-clipboard-user mr-1"></i> "Grade 10-A Attendance"
+            </button>
+            <button onclick="sendTeacherPrompt('Mark Rahul absent today.')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-emerald-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-user-xmark mr-1"></i> "Mark Rahul absent today"
+            </button>
+            <button onclick="sendTeacherPrompt('I need administrative support from the Principal.')" class="px-3 py-1.5 rounded-full bg-gray-800/80 hover:bg-gray-700 text-emerald-300 border border-white/10 shrink-0 transition">
+              <i class="fa-solid fa-ticket mr-1"></i> "Principal Support"
+            </button>
+          </div>
+
+          <!-- Chat Input Form with Mic Button -->
+          <form id="teacherChatForm" onsubmit="handleTeacherChatSubmit(event)" class="flex items-center space-x-2 mt-1">
+            <input type="text" id="teacherChatInput" placeholder="Mark attendance, query class scores, or speak in Hindi/Gujarati/Hinglish..." class="flex-1 bg-[#09151A] border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+            
+            <button type="button" onclick="toggleContinuousLiveVoice()" title="Toggle Gemini Live Voice" class="px-3.5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-emerald-400 border border-white/10 text-xs font-semibold flex items-center transition">
+              <i class="fa-solid fa-microphone"></i>
             </button>
 
             <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black text-xs font-bold flex items-center transition shadow-lg shadow-emerald-500/25">
@@ -731,6 +970,7 @@
       return true;
     }
 
+    // Chat Box Input Dictation (Speech to Text Only - Types & Sends Text Chat Without Audio Response)
     async function toggleInputDictation() {
       if (isLiveVoiceActive) {
         stopContinuousLiveVoice();
@@ -797,12 +1037,6 @@
             inputEl.value = currentText;
           }
 
-          const cleanedSpoken = (finalTranscript || interimTranscript).toLowerCase().trim();
-          if (lastSpokenText && cleanedSpoken.length > 5 && (lastSpokenText.includes(cleanedSpoken) || cleanedSpoken.includes(lastSpokenText))) {
-            console.log("Echo filter: Suppressed self-echo audio transcription.");
-            return;
-          }
-
           if (finalTranscript.trim().length > 0) {
             clearTimeout(dictationSilenceTimer);
             const toSend = finalTranscript.trim();
@@ -857,6 +1091,7 @@
       }
     }
 
+    // Continuous Live Voice Call Mode (Two-Way Conversational Duplex)
     function toggleContinuousLiveVoice() {
       if (isLiveVoiceActive) {
         stopContinuousLiveVoice();
@@ -971,10 +1206,10 @@
         };
 
         recognition.onresult = (event) => {
-          // Mute and ignore if assistant is speaking or echo cooldown is active
           if (isSpeaking || (window.speechSynthesis && window.speechSynthesis.speaking) || (Date.now() - lastSpeechEndTime < 500)) {
             return;
           }
+
           let interimTranscript = '';
           let finalTranscript = '';
 
@@ -995,6 +1230,12 @@
           const statusEl = document.getElementById('liveVoiceStatusText');
           if (statusEl && spokenText) {
             statusEl.innerText = `"${spokenText}"`;
+          }
+
+          const cleanedSpoken = (finalTranscript || interimTranscript).toLowerCase().trim();
+          if (lastSpokenText && cleanedSpoken.length > 5 && (lastSpokenText.includes(cleanedSpoken) || cleanedSpoken.includes(lastSpokenText))) {
+            console.log("Echo filter: Suppressed self-echo audio transcription.");
+            return;
           }
 
           if (finalTranscript.trim().length > 0) {
@@ -1055,7 +1296,6 @@
     function speakAssistantResponse(text) {
       if (!window.speechSynthesis) return;
 
-      // 1. Immediately abort active microphone recognition to prevent hearing itself
       if (recognition) {
         try { recognition.abort(); } catch(e) {}
         recognition = null;
@@ -1130,7 +1370,6 @@
         lastSpeechEndTime = Date.now();
         setAvatarState('idle');
         if (isLiveVoiceActive) {
-          // Acoustic echo cooldown period: wait 500ms before re-enabling mic
           setTimeout(() => {
             if (isLiveVoiceActive && !isSpeaking && !(window.speechSynthesis && window.speechSynthesis.speaking)) {
               initSpeechRecognition();
