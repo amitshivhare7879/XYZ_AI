@@ -336,16 +336,23 @@ def save_conversation_turn(session_id: str, user_id: str, user_msg: str, assista
         c.execute("""
             INSERT OR IGNORE INTO conversation_sessions (id, user_id, session_token, language)
             VALUES (?, ?, ?, ?);
-        """, (session_id, valid_user_id, session_id, language))
+        """, (session_id, valid_user_id or user_id or 'usr_guest', session_id, language))
         
-        # 2. Insert user message
+        # 2. Update session language and timestamp
+        c.execute("""
+            UPDATE conversation_sessions
+            SET language = ?
+            WHERE id = ?;
+        """, (language, session_id))
+        
+        # 3. Insert user message
         user_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
         c.execute("""
             INSERT INTO conversation_messages (id, session_id, role, content, tool_calls)
             VALUES (?, ?, 'user', ?, NULL);
         """, (user_msg_id, session_id, user_msg))
         
-        # 3. Insert assistant message
+        # 4. Insert assistant message
         asst_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
         tools_json = json.dumps(tools) if tools else None
         c.execute("""
@@ -392,6 +399,68 @@ def get_conversation_history(session_id: str, limit: int = 50) -> list:
     except Exception as e:
         print(f"[DB Notice] get_conversation_history error: {e}")
         return []
+
+def get_user_conversation_sessions(user_id: str, limit: int = 30) -> list:
+    """Retrieves list of previous chat sessions for a user with preview titles."""
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("""
+            SELECT s.id as session_id, s.language, s.created_at,
+                   (SELECT content FROM conversation_messages WHERE session_id = s.id AND role = 'user' ORDER BY created_at ASC LIMIT 1) as title,
+                   (SELECT content FROM conversation_messages WHERE session_id = s.id ORDER BY created_at DESC LIMIT 1) as last_message,
+                   (SELECT COUNT(*) FROM conversation_messages WHERE session_id = s.id) as message_count
+            FROM conversation_sessions s
+            WHERE s.user_id = ? OR s.id LIKE ?
+            ORDER BY s.created_at DESC
+            LIMIT ?;
+        """, (user_id, f"%{user_id}%", limit))
+        rows = c.fetchall()
+        conn.close()
+        
+        sessions = []
+        for r in rows:
+            if isinstance(r, dict):
+                sid = r.get("session_id")
+                lang = r.get("language")
+                created = r.get("created_at")
+                title = r.get("title") or "New Conversation"
+                last_msg = r.get("last_message") or ""
+                cnt = r.get("message_count") or 0
+            else:
+                sid, lang, created, title, last_msg, cnt = r[0], r[1], r[2], r[3] or "New Conversation", r[4] or "", r[5] or 0
+            
+            # Clean preview title length
+            clean_title = (title[:48] + "...") if len(title) > 48 else title
+            sessions.append({
+                "session_id": sid,
+                "language": lang or "en",
+                "title": clean_title,
+                "last_message": last_msg[:60] if last_msg else "",
+                "message_count": cnt,
+                "created_at": str(created)
+            })
+        return sessions
+    except Exception as e:
+        print(f"[DB Notice] get_user_conversation_sessions error: {e}")
+        return []
+
+def delete_conversation_session(session_id: str, user_id: str = None) -> bool:
+    """Deletes a conversation session and all its messages."""
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("DELETE FROM conversation_messages WHERE session_id = ?", (session_id,))
+        if user_id:
+            c.execute("DELETE FROM conversation_sessions WHERE id = ? AND (user_id = ? OR user_id IS NULL)", (session_id, user_id))
+        else:
+            c.execute("DELETE FROM conversation_sessions WHERE id = ?", (session_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"[DB Notice] delete_conversation_session error: {e}")
+        return False
 
 def get_user_recent_session(user_id: str) -> Optional[dict]:
     """Retrieves the most recent session for a given user."""

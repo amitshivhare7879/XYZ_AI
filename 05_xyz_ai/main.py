@@ -24,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from auth import (
     create_access_token,
     get_current_user,
+    get_current_user_optional,
     require_role
 )
 from agent import ConversationOrchestrator
@@ -316,6 +317,46 @@ def get_chat_history_endpoint(
         "session_id": session_id,
         "messages": messages
     }
+
+@app.get("/api/chat/sessions")
+def list_chat_sessions_endpoint(
+    user_id: Optional[str] = None,
+    user: Optional[UserTokenPayload] = Depends(get_current_user_optional)
+):
+    """Lists past conversation sessions for the authenticated user."""
+    from shared.database import get_user_conversation_sessions
+    target_uid = user.user_id if user else (user_id or "usr_guest")
+    sessions = get_user_conversation_sessions(target_uid, limit=30)
+    return {
+        "user_id": target_uid,
+        "sessions": sessions
+    }
+
+@app.post("/api/chat/session/new")
+def start_new_session_endpoint(
+    language: Optional[SupportedLanguage] = "en",
+    user: Optional[UserTokenPayload] = Depends(get_current_user_optional)
+):
+    """Initializes a new distinct session token for a fresh consultation."""
+    import uuid
+    role_prefix = user.role if user else "guest"
+    new_sid = f"sess_{role_prefix}_{uuid.uuid4().hex[:12]}"
+    return {
+        "session_id": new_sid,
+        "language": language or "en",
+        "status": "ready"
+    }
+
+@app.delete("/api/chat/session/{session_id}")
+def delete_chat_session_endpoint(
+    session_id: str,
+    user: Optional[UserTokenPayload] = Depends(get_current_user_optional)
+):
+    """Deletes a chat session and its stored conversation messages."""
+    from shared.database import delete_conversation_session
+    uid = user.user_id if user else None
+    deleted = delete_conversation_session(session_id, user_id=uid)
+    return {"status": "deleted" if deleted else "not_found", "session_id": session_id}
 
 # 3. Voice Pipeline Endpoints
 @app.post("/api/voice/transcribe")

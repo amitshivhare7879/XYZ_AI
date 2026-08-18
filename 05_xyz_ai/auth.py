@@ -124,6 +124,24 @@ async def get_current_user(
         )
     return decode_access_token(token)
 
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    authorization: Optional[str] = Header(None)
+) -> Optional[UserTokenPayload]:
+    """FastAPI dependency to extract user if token is provided, without throwing 401."""
+    token = None
+    if credentials:
+        token = credentials.credentials
+    elif authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+
+    if not token:
+        return None
+    try:
+        return decode_access_token(token)
+    except Exception:
+        return None
+
 def require_role(*allowed_roles: UserRole):
     """Dependency factory ensuring current user has one of the allowed roles."""
     def role_checker(user: UserTokenPayload = Depends(get_current_user)) -> UserTokenPayload:

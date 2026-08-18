@@ -228,7 +228,42 @@
         <!-- TAB 1: Live Interactive Chat Feed -->
         <div id="mcontent-chat" class="glass-panel rounded-3xl p-5 flex flex-col h-[540px] border border-white/10">
           
-          <div id="managementChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin">
+                    <!-- Session Header: Gemini-Style New Chat & Three Dots History Menu -->
+          <div class="flex items-center justify-between pb-2.5 mb-2 border-b border-white/10 text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/20 font-medium flex items-center shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span>
+                <span id="activeSessionBadgeText">Active Chat</span>
+              </span>
+            </div>
+            
+            <div class="flex items-center space-x-2 relative">
+              <button onclick="startFreshNewChat()" title="Start New Chat" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-medium transition flex items-center shadow-sm active:scale-95">
+                <i class="fa-solid fa-plus mr-1.5 text-[10px]"></i> New Chat
+              </button>
+
+              <button onclick="toggleSessionHistoryDropdown()" id="sessionHistoryMenuBtn" title="Previous Chats History" class="w-8 h-8 rounded-xl bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white border border-white/10 flex items-center justify-center transition active:scale-95">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+
+              <!-- Glassmorphic Dropdown for Previous Chats -->
+              <div id="sessionHistoryDropdown" class="hidden absolute right-0 top-10 w-80 bg-[#120B20]/95 border border-white/20 rounded-2xl shadow-2xl z-50 p-3.5 backdrop-blur-2xl space-y-2.5">
+                <div class="flex items-center justify-between pb-2 border-b border-white/10">
+                  <span class="font-bold text-white text-xs flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-1.5 text-amber-400"></i> Previous Chats
+                  </span>
+                  <button onclick="toggleSessionHistoryDropdown()" class="text-gray-400 hover:text-white text-xs p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+                <div id="sessionHistoryList" class="max-h-64 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin text-[11px]">
+                  <div class="p-4 text-center text-gray-400 text-xs">Loading past chats...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+<div id="managementChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin">
             <div class="flex items-start space-x-3">
               <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 flex items-center justify-center text-black text-xs font-bold shrink-0 shadow">
                 XYZ
@@ -1215,6 +1250,178 @@
       feed.appendChild(wrapper);
       feed.scrollTop = feed.scrollHeight;
     }
+
+    
+    // Gemini-Style Session Management & Database History Engine
+    function generateNewSessionId() {
+      return "sess_principal_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    }
+
+    function startFreshNewChat() {
+      currentSessionId = generateNewSessionId();
+      localStorage.setItem('active_chat_session_principal', currentSessionId);
+      
+      const feed = document.getElementById('managementChatFeed');
+      if (feed) {
+        feed.innerHTML = '';
+      }
+      
+      const badge = document.getElementById('activeSessionBadgeText');
+      if (badge) badge.innerText = 'New Conversation';
+      
+      const dropdown = document.getElementById('sessionHistoryDropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+
+      const greetings = {
+        en: "Good day, Dr. Rajesh Sharma! Welcome to XYZ AI Executive Portal. Which language would you prefer for our conversation? We support English, Hindi, Hinglish, Gujarati, Marathi, Tamil, Telugu, and more.",
+        hi: "नमस्ते! XYZ AI में आपका स्वागत है। आप किस भाषा में बातचीत करना पसंद करेंगे? (English, हिन्दी, ગુજરાતી, मराठी...)",
+        gu: "નમસ્તે! XYZ AI માં આપનું સ્વાગત છે. આપ કઈ ભાષામાં વાતચીત કરવા માંગો છો? (English, हिन्दी, ગુજરાતી, मराठी...)",
+        mr: "नमस्कार! XYZ AI मध्ये आपले स्वागत आहे. आपण कोणत्या भाषेत संभाषण करू इच्छिता?",
+        ta: "வணக்கம்! XYZ AI-க்கு வரவேற்கிறோம். நீங்கள் எந்த மொழியில் உரையாட விரும்புகிறீர்கள்?",
+        hinglish: "Hello! XYZ AI me aapka welcome hai. Aap kis language me continue karna chahenge?"
+      };
+
+      const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
+      const welcome = greetings[curLang] || greetings.en;
+      appendMessage('assistant', welcome);
+    }
+
+    function toggleSessionHistoryDropdown() {
+      const dropdown = document.getElementById('sessionHistoryDropdown');
+      if (!dropdown) return;
+      
+      const isHidden = dropdown.classList.contains('hidden');
+      if (isHidden) {
+        dropdown.classList.remove('hidden');
+        loadSessionHistoryList();
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    }
+
+    async function loadSessionHistoryList() {
+      const listContainer = document.getElementById('sessionHistoryList');
+      if (!listContainer) return;
+      listContainer.innerHTML = '<div class="p-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading past chats...</div>';
+
+      try {
+        const token = localStorage.getItem("auth_token");
+        const res = await fetch(`${API_BASE}/api/chat/sessions?user_id=usr_principal_01`, {
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+        if (!res.ok) throw new Error("Failed to load sessions");
+        const data = await res.json();
+        const sessions = data.sessions || [];
+
+        if (sessions.length === 0) {
+          listContainer.innerHTML = '<div class="p-4 text-center text-gray-400 text-xs">No previous chats stored yet. Start chatting!</div>';
+          return;
+        }
+
+        listContainer.innerHTML = '';
+        sessions.forEach(sess => {
+          const isCurrent = sess.session_id === currentSessionId;
+          const div = document.createElement('div');
+          div.className = `p-2.5 rounded-xl border transition flex items-center justify-between group cursor-pointer ${isCurrent ? 'bg-amber-500/20 border-amber-500/40 text-white' : 'bg-gray-800/60 hover:bg-gray-800 border-white/5 text-gray-300 hover:text-white'}`;
+          
+          div.onclick = (e) => {
+            if (e.target.closest('.delete-sess-btn')) return;
+            resumePastSession(sess.session_id, sess.title);
+          };
+
+          const timeStr = sess.created_at ? new Date(sess.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+
+          div.innerHTML = `
+            <div class="flex-1 min-w-0 pr-2">
+              <div class="font-semibold text-xs truncate flex items-center">
+                ${isCurrent ? '<i class="fa-solid fa-circle text-[7px] text-amber-400 mr-1.5"></i>' : '<i class="fa-regular fa-message mr-1.5 text-gray-400"></i>'}
+                ${sess.title || 'Conversation'}
+              </div>
+              <div class="text-[10px] text-gray-400 mt-0.5 flex items-center space-x-2">
+                <span>${timeStr}</span>
+                <span>•</span>
+                <span>${sess.message_count || 0} messages</span>
+              </div>
+            </div>
+            <button class="delete-sess-btn text-gray-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition opacity-0 group-hover:opacity-100" title="Delete chat" onclick="deleteSession('${sess.session_id}', event)">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          `;
+          listContainer.appendChild(div);
+        });
+      } catch (err) {
+        listContainer.innerHTML = '<div class="p-4 text-center text-rose-400 text-xs">Could not load chats. Check connection.</div>';
+      }
+    }
+
+    async function resumePastSession(sessionId, title) {
+      try {
+        const token = localStorage.getItem("auth_token");
+        const res = await fetch(`${API_BASE}/api/chat/history?session_id=${encodeURIComponent(sessionId)}&user_id=usr_principal_01`, {
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+        if (!res.ok) throw new Error("Could not retrieve history");
+        const data = await res.json();
+        const messages = data.messages || [];
+
+        currentSessionId = sessionId;
+        localStorage.setItem('active_chat_session_principal', currentSessionId);
+
+        const feed = document.getElementById('managementChatFeed');
+        if (feed) {
+          feed.innerHTML = '';
+          if (messages.length === 0) {
+            appendMessage('assistant', 'Continuing past session...');
+          } else {
+            messages.forEach(m => {
+              appendMessage(m.role, m.content);
+            });
+          }
+          feed.scrollTop = feed.scrollHeight;
+        }
+
+        const badge = document.getElementById('activeSessionBadgeText');
+        if (badge) badge.innerText = (title && title.length > 20) ? title.substring(0, 20) + '...' : (title || 'Past Chat');
+
+        const dropdown = document.getElementById('sessionHistoryDropdown');
+        if (dropdown) dropdown.classList.add('hidden');
+      } catch (err) {
+        console.error("Resume session error:", err);
+      }
+    }
+
+    async function deleteSession(sessionId, e) {
+      if (e) e.stopPropagation();
+      try {
+        const token = localStorage.getItem("auth_token");
+        await fetch(`${API_BASE}/api/chat/session/${encodeURIComponent(sessionId)}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+        if (currentSessionId === sessionId) {
+          startFreshNewChat();
+        } else {
+          loadSessionHistoryList();
+        }
+      } catch(err) {
+        console.error("Delete session error:", err);
+      }
+    }
+
+    // Close session history menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('sessionHistoryDropdown');
+      const btn = document.getElementById('sessionHistoryMenuBtn');
+      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target) && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+      }
+    });
 
     let currentSessionId = localStorage.getItem('xyz_session_principal');
     if (!currentSessionId) {
