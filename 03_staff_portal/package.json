@@ -1,9 +1,0 @@
-{
-  "name": "staff-portal",
-  "version": "1.0.0",
-  "description": "XYZ AI — School ERP Staff & Teacher Portal with Conversational Attendance Marker",
-  "scripts": {
-    "dev": "npx serve -s . -p 3003",
-    "start": "npx serve -s . -p 3003"
-  }
-}

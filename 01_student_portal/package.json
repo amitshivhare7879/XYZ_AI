@@ -1,9 +1,0 @@
-{
-  "name": "student-portal",
-  "version": "1.0.0",
-  "description": "XYZ AI — School ERP Student Portal with AI Study Assistant and 3D Avatar",
-  "scripts": {
-    "dev": "npx serve -s . -p 3001",
-    "start": "npx serve -s . -p 3001"
-  }
-}
