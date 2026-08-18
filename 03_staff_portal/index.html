@@ -470,8 +470,8 @@
       const cy = canvas.height / 2 + 8;
 
       // Smooth organic mouth interpolation
-      mouthOpenCurrent += (mouthOpenTarget - mouthOpenCurrent) * 0.16;
-      mouthWidthCurrent += (mouthWidthTarget - mouthWidthCurrent) * 0.16;
+      mouthOpenCurrent += (mouthOpenTarget - mouthOpenCurrent) * 0.18;
+      mouthWidthCurrent += (mouthWidthTarget - mouthWidthCurrent) * 0.18;
       
       // Natural human breathing & head sway
       const t = Date.now() * 0.0016;
@@ -727,31 +727,37 @@
       ctx.lineTo(1.2, 14);
       ctx.stroke();
 
-      // 11. Photorealistic Human Lips & Subtle Phoneme Viseme Mouth
-      const mWidth = 10.8 * (0.96 + mouthWidthCurrent * 0.08);
-      const mHeight = Math.max(1.0 + (mouthOpenCurrent * 4.2), 1.4);
+      // 11. Photorealistic Human Lips & Phoneme Viseme Mouth (Slightly Wider & Bigger Aperture)
+      const mWidth = 12.8 * (0.95 + mouthWidthCurrent * 0.10);
+      const mHeight = Math.max(1.5 + (mouthOpenCurrent * 6.8), 1.8);
 
-      if (currentAvatarState === 'speaking' && mouthOpenCurrent > 0.06) {
-        // Deep Oral Cavity Aperture (Subtle & Natural)
-        ctx.fillStyle = '#420A12';
+      if (currentAvatarState === 'speaking' && mouthOpenCurrent > 0.05) {
+        // Deep Oral Cavity Aperture
+        ctx.fillStyle = '#3B0810';
         ctx.beginPath();
         ctx.ellipse(0, 19, mWidth, mHeight, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Upper Pearlescent Teeth (Subtle glimpse)
+        // Upper Pearlescent Teeth
         ctx.fillStyle = '#FAF6F0';
         ctx.beginPath();
-        ctx.roundRect(-mWidth * 0.55, 19 - mHeight + 0.3, mWidth * 1.1, Math.min(mHeight * 0.85, 2.0), [1]);
+        ctx.roundRect(-mWidth * 0.55, 19 - mHeight + 0.4, mWidth * 1.1, Math.min(mHeight * 0.75, 2.6), [1.2]);
+        ctx.fill();
+
+        // Lower Tongue Floor
+        ctx.fillStyle = '#B34758';
+        ctx.beginPath();
+        ctx.ellipse(0, 19 + mHeight * 0.35, mWidth * 0.5, mHeight * 0.35, 0, 0, Math.PI);
         ctx.fill();
 
         // Upper Lip (Always contoured with Cupid's bow)
         ctx.fillStyle = '#BA4D5F';
         ctx.beginPath();
         ctx.moveTo(-mWidth * 1.05, 18);
-        ctx.quadraticCurveTo(-mWidth * 0.5, 16.5, -2, 17.2);
-        ctx.lineTo(0, 17.8);
-        ctx.lineTo(2, 17.2);
-        ctx.quadraticCurveTo(mWidth * 0.5, 16.5, mWidth * 1.05, 18);
+        ctx.quadraticCurveTo(-mWidth * 0.5, 16.2, -2, 17.0);
+        ctx.lineTo(0, 17.6);
+        ctx.lineTo(2, 17.0);
+        ctx.quadraticCurveTo(mWidth * 0.5, 16.2, mWidth * 1.05, 18);
         ctx.quadraticCurveTo(0, 19 - mHeight * 0.4, -mWidth * 1.05, 18);
         ctx.closePath();
         ctx.fill();
@@ -760,7 +766,7 @@
         ctx.fillStyle = '#C9586B';
         ctx.beginPath();
         ctx.moveTo(-mWidth * 0.95, 18.5);
-        ctx.quadraticCurveTo(0, 21.5 + mHeight * 0.6, mWidth * 0.95, 18.5);
+        ctx.quadraticCurveTo(0, 22.2 + mHeight * 0.5, mWidth * 0.95, 18.5);
         ctx.quadraticCurveTo(0, 19 + mHeight * 0.4, -mWidth * 0.95, 18.5);
         ctx.closePath();
         ctx.fill();
@@ -768,24 +774,24 @@
         // Lower Lip Gloss Highlight
         ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.beginPath();
-        ctx.ellipse(0, 20.0 + mHeight * 0.3, mWidth * 0.3, 0.8, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 20.2 + mHeight * 0.25, mWidth * 0.32, 0.9, 0, 0, Math.PI * 2);
         ctx.fill();
 
         // Lip Corner Dimple Shadows
         ctx.fillStyle = 'rgba(100, 30, 40, 0.4)';
         ctx.beginPath();
-        ctx.arc(-mWidth * 1.05, 18, 1.0, 0, Math.PI * 2);
-        ctx.arc(mWidth * 1.05, 18, 1.0, 0, Math.PI * 2);
+        ctx.arc(-mWidth * 1.05, 18, 1.1, 0, Math.PI * 2);
+        ctx.arc(mWidth * 1.05, 18, 1.1, 0, Math.PI * 2);
         ctx.fill();
       } else {
         // Natural Closed Smile (Cupid's Bow + Lower Lip)
         ctx.fillStyle = '#BA4D5F';
         ctx.beginPath();
         ctx.moveTo(-mWidth, 18);
-        ctx.quadraticCurveTo(-mWidth * 0.5, 16.2, -2, 17.0);
-        ctx.lineTo(0, 17.6);
-        ctx.lineTo(2, 17.0);
-        ctx.quadraticCurveTo(mWidth * 0.5, 16.2, mWidth, 18);
+        ctx.quadraticCurveTo(-mWidth * 0.5, 16.0, -2, 16.8);
+        ctx.lineTo(0, 17.4);
+        ctx.lineTo(2, 16.8);
+        ctx.quadraticCurveTo(mWidth * 0.5, 16.0, mWidth, 18);
         ctx.quadraticCurveTo(0, 19.5, -mWidth, 18);
         ctx.closePath();
         ctx.fill();
@@ -793,20 +799,20 @@
         ctx.fillStyle = '#C9586B';
         ctx.beginPath();
         ctx.moveTo(-mWidth * 0.88, 18.2);
-        ctx.quadraticCurveTo(0, 22.2, mWidth * 0.88, 18.2);
+        ctx.quadraticCurveTo(0, 22.5, mWidth * 0.88, 18.2);
         ctx.quadraticCurveTo(0, 19.2, -mWidth * 0.88, 18.2);
         ctx.closePath();
         ctx.fill();
 
         ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.beginPath();
-        ctx.ellipse(0, 19.8, mWidth * 0.35, 1.0, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 20.0, mWidth * 0.35, 1.0, 0, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = 'rgba(100, 30, 40, 0.4)';
         ctx.beginPath();
-        ctx.arc(-mWidth, 18, 1.0, 0, Math.PI * 2);
-        ctx.arc(mWidth, 18, 1.0, 0, Math.PI * 2);
+        ctx.arc(-mWidth, 18, 1.1, 0, Math.PI * 2);
+        ctx.arc(mWidth, 18, 1.1, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -1142,7 +1148,7 @@
 
         if (pauseRemaining > 0) {
           pauseRemaining -= 80;
-          mouthOpenTarget = 0.02;
+          mouthOpenTarget = 0.03;
           mouthWidthTarget = 1.0;
           return;
         }
@@ -1151,23 +1157,23 @@
           const tok = tokens[tIdx++];
           if ([',', ':', ';', '-'].includes(tok)) {
             pauseRemaining = 160;
-            mouthOpenTarget = 0.02;
+            mouthOpenTarget = 0.03;
             mouthWidthTarget = 1.0;
           } else if (['.', '!', '?', '\n', '।'].includes(tok)) {
             pauseRemaining = 320;
-            mouthOpenTarget = 0.02;
+            mouthOpenTarget = 0.03;
             mouthWidthTarget = 1.0;
           } else if (tok.trim().length > 0) {
             const hasWideVowel = /[aAoOआओऔઆઓઔఆఓஆஒ]/.test(tok);
             const hasSmileVowel = /[eEiIईएऐઈએઐ]/.test(tok);
             if (hasWideVowel) {
-              mouthOpenTarget = 0.25 + Math.random() * 0.06;
-              mouthWidthTarget = 0.98;
+              mouthOpenTarget = 0.35 + Math.random() * 0.08;
+              mouthWidthTarget = 1.02;
             } else if (hasSmileVowel) {
-              mouthOpenTarget = 0.16 + Math.random() * 0.05;
-              mouthWidthTarget = 1.12;
+              mouthOpenTarget = 0.24 + Math.random() * 0.06;
+              mouthWidthTarget = 1.18;
             } else {
-              mouthOpenTarget = 0.09 + Math.random() * 0.05;
+              mouthOpenTarget = 0.13 + Math.random() * 0.05;
               mouthWidthTarget = 0.96;
             }
           }
@@ -1179,11 +1185,11 @@
       utterance.onboundary = (e) => {
         const charAt = cleanVoiceText[e.charIndex];
         if (charAt && [',', '.', '!', '?', ';', '।'].includes(charAt)) {
-          mouthOpenTarget = 0.02;
+          mouthOpenTarget = 0.03;
           mouthWidthTarget = 1.0;
         } else {
-          mouthOpenTarget = Math.random() * 0.14 + 0.08;
-          mouthWidthTarget = Math.random() * 0.12 + 0.94;
+          mouthOpenTarget = Math.random() * 0.20 + 0.14;
+          mouthWidthTarget = Math.random() * 0.14 + 0.95;
         }
       };
 
