@@ -1069,16 +1069,19 @@ class ConversationOrchestrator:
                     if any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "school aaya", "school gaya"]):
                         reply = (f"Yes! {sname} was marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
                                  f"Overall, {sname} maintains a strong attendance of **{pct}%** ({pres} present out of {tot} school days, with {abs_cnt} absences).")
+                    elif any(w in msg_lower for w in ["recent", "breakdown", "detailed", "which days"]):
+                        reply = (f"Here is the recent record for {sname}: {pres} days present out of {tot} school days ({abs_cnt} absences). "
+                                 f"On the last session ({last_date}), {sname} was {last_status.upper()}. Would you like me to check anything else or submit a leave note?")
                     else:
-                        reply = (f"Here is the latest attendance summary for **{sname}**: **{pct}% overall attendance** "
-                                 f"({pres} days attended out of {tot} sessions, with {abs_cnt} absences). On the last school session ({last_date}), {sname} was **{last_status.upper()}**.")
+                        reply = (f"Sure, let me check that for you! {sname} currently has **{pct}%** attendance ({pres}/{tot} days attended). "
+                                 f"Would you like me to check his recent attendance too?")
                     suggested_actions = [
                         SuggestedAction(label="Recent Absences", action_type="recent_attendance"),
                         SuggestedAction(label="Submit Leave Note", action_type="submit_leave")
                     ]
                 elif user.role == "student":
-                    reply = (f"Your current attendance stands at **{pct}%** ({pres}/{tot} days attended)! "
-                             f"You're in good standing. Keep up the consistent punctuality! 👏")
+                    reply = (f"You currently have **{pct}%** attendance ({pres}/{tot} days attended)! "
+                             f"You're in good standing. Would you like me to check your homework or upcoming timetable?")
                 else:
                     reply = f"{sname} has an overall attendance of {pct}% ({pres}/{tot} days). Last recorded status: {last_status.upper()} on {last_date}."
             return reply, suggested_actions, executed_tools
