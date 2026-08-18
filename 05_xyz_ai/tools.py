@@ -335,3 +335,73 @@ def tool_query_database(
         }
     except Exception as e:
         return {"error": f"SQL Query failed: {str(e)}"}
+
+# Tool 11: Get Class Roster & Student Strength
+def tool_get_class_roster(
+    user: UserTokenPayload,
+    class_name: Optional[str] = None
+) -> Dict[str, Any]:
+    """Retrieves list of enrolled students, roll numbers, and total strength for a class."""
+    try:
+        from shared.database import get_db_connection
+        conn = get_db_connection()
+        c = conn.cursor()
+
+        target_class = class_name
+        if not target_class:
+            if user.role == "teacher":
+                c.execute("SELECT name FROM classes WHERE class_teacher_id = ? LIMIT 1", (user.user_id,))
+                crow = c.fetchone()
+                target_class = crow["name"] if crow else "Grade 10-A"
+            elif user.role in ["student", "parent"]:
+                c.execute("SELECT c.name FROM students s JOIN classes c ON c.id = s.class_id WHERE s.id = ? OR s.name = ? LIMIT 1", (user.user_id, user.name))
+                crow = c.fetchone()
+                target_class = crow["name"] if crow else "Grade 10-A"
+            else:
+                target_class = "Grade 10-A"
+
+        c.execute("""
+            SELECT s.id, s.name, s.roll_number, c.name as class_name
+            FROM students s
+            JOIN classes c ON c.id = s.class_id
+            WHERE LOWER(c.name) LIKE LOWER(?)
+            ORDER BY s.roll_number
+        """, (f"%{target_class}%",))
+        rows = [dict(r) for r in c.fetchall()]
+        conn.close()
+
+        return {
+            "class_name": target_class,
+            "total_students": len(rows),
+            "students": rows
+        }
+    except Exception as e:
+        return {"error": f"Failed to retrieve class roster: {str(e)}"}
+
+# Tool 12: Get School-Wide Enrollment
+def tool_get_school_enrollment(
+    user: UserTokenPayload
+) -> Dict[str, Any]:
+    """Retrieves school-wide enrollment metrics and grade-wise breakdown."""
+    try:
+        from shared.database import get_db_connection
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("""
+            SELECT c.name as class_name, COUNT(s.id) as student_count
+            FROM classes c
+            LEFT JOIN students s ON s.class_id = c.id
+            GROUP BY c.id
+            ORDER BY c.name
+        """)
+        rows = [dict(r) for r in c.fetchall()]
+        total_enrolled = sum(r["student_count"] for r in rows)
+        conn.close()
+
+        return {
+            "total_enrolled_students": total_enrolled,
+            "class_breakdown": rows
+        }
+    except Exception as e:
+        return {"error": f"Failed to retrieve school enrollment: {str(e)}"}
+
