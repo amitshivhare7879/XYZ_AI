@@ -235,6 +235,33 @@ def translate_template_patterns(text: str, target_lang: str) -> str:
         elif target_lang == "ur":
             return f"میں {sname} کی تعلیم کے حوالے سے آپ کی ہر ممکن مدد کے لیے حاضر ہوں، Mr./Mrs. {pname}! آپ روزانہ کی حاضری، امتحانی نتائج، فیس ادائیگی یا استاد سے گفتگو کے لیے پوچھ سکتے ہیں۔"
 
+    # Pattern 8B: Student Conversational Fallback
+    m8b = re.search(r"I'm here to help you succeed, ([^!]+)! You can ask me about your daily timetable, exam schedules, homework, or attendance\. What can we look at together\?", text)
+    if m8b:
+        sname = m8b.group(1)
+        if target_lang == "gu":
+            return f"હું તમારી સફળતા અને અભ્યાસમાં મદદ માટે અહીં છું, {sname}! તમે મને દૈનિક સમયપત્રક, પરીક્ષા શેડ્યૂલ, હોમવર્ક અથવા હાજરી વિશે પૂછી શકો છો. આજે આપણે શું જોઈએ?"
+        elif target_lang == "hi":
+            return f"मैं आपकी सफलता और पढ़ाई में मदद के लिए यहाँ हूँ, {sname}! आप मुझसे दैनिक समय सारणी, परीक्षा शेड्यूल, होमवर्क या उपस्थिति के बारे में पूछ सकते हैं। आज हम क्या देखें?"
+        elif target_lang == "mr":
+            return f"मी तुझ्या अभ्यासात आणि प्रगतीमध्ये तुला मदत करण्यासाठी येथे आहे, {sname}! तू मला दैनंदिन वेळापत्रक, परीक्षांचे वेळापत्रक, गृहपाठ किंवा उपस्थितीबद्दल विचारू शकतोस. आज आपण काय पाहूया?"
+        elif target_lang == "ta":
+            return f"உங்கள் கல்வி வெற்றிக்கு உதவ நான் இங்கு இருக்கிறேன், {sname}! தினசரி நேர அட்டவணை, தேர்வு அட்டவணை, வீட்டுப்பாடம் அல்லது வருகை பற்றி என்னிடம் கேட்கலாம்."
+        elif target_lang == "te":
+            return f"మీ చదువులో విజయం సాధించడానికి నేను సహాయం చేయడానికి ఇక్కడ ఉన్నాను, {sname}! రోజువారీ టైమ్‌టేబుల్, పరీక్షల షెడ్యూల్, హోమ్‌వర్క్ లేదా హాజరు గురించి మీరు నన్ను అడగవచ్చు."
+        elif target_lang == "bn":
+            return f"আমি তোমার পড়াশোনায় সাফল্যের জন্য সাহায্য করতে এখানে আছি, {sname}! তুমি আমাকে প্রতিদিনের রুটিন, পরীক্ষার সময়সূচী, হোমওয়ার্ক বা উপস্থিতি সম্পর্কে জিজ্ঞাসা করতে পারো।"
+        elif target_lang == "pa":
+            return f"ਮੈਂ ਤੁਹਾਡੀ ਪੜ੍ਹਾਈ ਵਿੱਚ ਸਫਲਤਾ ਲਈ ਮਦਦ ਕਰਨ ਲਈ ਇੱਥੇ ਹਾਂ, {sname}! ਤੁਸੀਂ ਮੈਨੂੰ ਰੋਜ਼ਾਨਾ ਟਾਈਮਟੇਬਲ, ਪ੍ਰੀਖਿਆ ਸ਼ਡਿਊਲ, ਹੋਮਵਰਕ ਜਾਂ ਹਾਜ਼ਰੀ ਬਾਰੇ ਪੁੱਛ ਸਕਦੇ ਹੋ।"
+        elif target_lang == "kn":
+            return f"ನಿಮ್ಮ ಶಿಕ್ಷಣದಲ್ಲಿ ಯಶಸ್ಸು ಸಾಧಿಸಲು ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ, {sname}! ದೈನಂದಿನ ವೇಳಾಪಟ್ಟಿ, ಪರೀಕ್ಷಾ ವೇಳಾಪಟ್ಟಿ, ಮನೆಕೆಲಸ ಅಥವಾ ಹಾಜರಾತಿಯ ಬಗ್ಗೆ ನೀವು ನನ್ನನ್ನು ಕೇಳಬಹುದು."
+        elif target_lang == "ml":
+            return f"നിങ്ങളുടെ പഠനത്തിൽ സഹായിക്കാൻ ഞാൻ ഇവിടെയുണ്ട്, {sname}! ദൈനംദിന ടൈംടേബിൾ, പരീക്ഷാ ഷെഡ്യൂൾ, ഗൃഹപാഠം അല്ലെങ്കിൽ ഹാജർ എന്നിവയെക്കുറിച്ച് നിങ്ങൾക്ക് എന്നോട് ചോദിക്കാം."
+        elif target_lang == "ur":
+            return f"میں آپ کی کامیابی اور تعلیمی مدد کے لیے یہاں موجود ہوں، {sname}! آپ مجھ سے روزانہ کا ٹائم ٹیبل، امتحانی شیڈول، ہوم ورک یا حاضری کے بارے میں پوچھ سکتے ہیں۔"
+        elif target_lang == "hinglish":
+            return f"Main aapki study aur success me help karne ke liye yahan hoon, {sname}! Aap mujhse daily timetable, exam schedule, homework ya attendance ke baare me pooch sakte hain. Aaj hum kya dekhein?"
+
     # Pattern 9: School-Wide Attendance Overview (Principal Analytics)
     m9 = re.search(r"\*\*School-Wide Attendance Overview\*\*: The overall student attendance across all grades is currently \*\*([^*]+)\*\*\. Top class breakdown: (.*?)\. Would you like an itemized list of classes falling below the 85% benchmark\?", text, re.DOTALL)
     if m9:

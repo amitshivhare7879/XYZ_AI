@@ -109,4 +109,19 @@ async def test_explicit_language_selection_command():
     assert res.language == "hi"
     assert "हिन्दी" in res.response_text or "नमस्ते" in res.response_text
 
+@pytest.mark.asyncio
+async def test_marathi_grades_user_exact_query():
+    """Validates exact user query in Marathi: 'माझ्या मुलाचा शेवटच्या टेस्टमध्ये किती मार्क्स आले होते?'"""
+    res = await ConversationOrchestrator.process_message(
+        "माझ्या मुलाचा शेवटच्या टेस्टमध्ये किती मार्क्स आले होते?",
+        user=PARENT_AMIT,
+        language="mr"
+    )
+    assert res.language == "mr"
+    assert "tool_get_grades" in res.executed_tools
+    # Must NOT reply in English and must contain Marathi academic terms
+    assert ("राहुल" in res.response_text or "गुण" in res.response_text or "अहवाल" in res.response_text or "सरासरी" in res.response_text or "मार्क्स" in res.response_text)
+    assert "I'm here to help you succeed" not in res.response_text
+
+
 

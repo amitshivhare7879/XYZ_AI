@@ -1338,7 +1338,19 @@ class ConversationOrchestrator:
         # -------------------------------------------------------------------
         # G3. Past Grades, Exam Scores & Report Cards
         # -------------------------------------------------------------------
-        if any(w in msg_lower for w in ["grade", "grades", "marks", "score", "scores", "report card", "result", "results", "academic performance", "how did i do", "how is rahul doing in exams", "માર્ક્સ", "પરિણામ", "नंबर", "रिजल्ट"]):
+        is_grades_query = any(w in msg_lower for w in [
+            "grade", "grades", "mark", "marks", "score", "scores", "report card", "result", "results", "academic performance", "how did i do", "how is rahul doing in exams", "test marks", "last test",
+            "मार्क्स", "अंक", "नंबर", "रिजल्ट", "परिणाम", "गुण", "निकाल", "चाचणी", "परीक्षा",
+            "માર્ક્સ", "ગુણ", "પરિણામ", "નંબર", "કસોટી", "પરીક્ષા",
+            "மதிப்பெண்", "மதிப்பெண்கள்", "தேர்வு", "முடிவு",
+            "మార్కులు", "మార్క్స్", "ఫలితాలు", "నెంబర్",
+            "নম্বর", "মার্কস", "ফলাফল", "পরীক্ষা",
+            "ਅੰਕ", "ਨੰਬਰ", "ਮਾਰਕਸ", "ਨਤੀਜਾ", "ਪਰੀਖਿਆ",
+            "ಅಂಕಗಳು", "ಫಲಿತಾಂಶ", "ಪರೀಕ್ಷೆ",
+            "മാർക്കുകൾ", "ഫലം", "പരീക്ഷ",
+            "نمبر", "مارکس", "نتائج", "امتحان"
+        ])
+        if is_grades_query:
             context["active_topic"] = "grades"
             res = tool_get_grades(user=user, student_name=active_student)
             executed_tools.append("tool_get_grades")
