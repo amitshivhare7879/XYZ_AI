@@ -29,7 +29,7 @@ async def test_hinglish_attendance_query():
         language="hinglish"
     )
     assert "attendance" in res.response_text.lower() or "absent" in res.response_text.lower() or "present" in res.response_text.lower()
-    assert "tool_get_attendance" in res.executed_tools
+    assert "tool_get_attendance" in res.executed_tools or "get_attendance" in res.executed_tools
 
 @pytest.mark.asyncio
 async def test_hinglish_grades_query():

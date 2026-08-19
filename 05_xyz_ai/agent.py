@@ -314,7 +314,11 @@ def extract_subject_from_text(text: str) -> Optional[str]:
     return None
 
 def detect_message_language(text: str) -> Optional[SupportedLanguage]:
-    """Detects Indian language scripts and Hinglish."""
+    """Detects Indian language scripts, Marathi markers, and Hinglish."""
+    # Check Marathi specific words first for Devanagari text
+    if any(w in text for w in ["आहे", "आहेत", "नाही", "सांगा", "माहिती", "कशी", "किती", "उपस्थिती", "दिवस", "नमस्कार", "झाले", "करा", "गुण"]):
+        return "mr"
+
     for ch in text:
         if '\u0A80' <= ch <= '\u0AFF':
             return "gu"
@@ -363,7 +367,22 @@ class ConversationOrchestrator:
             "last_data": {}
         })
         detected_lang = detect_message_language(message)
-        lang = language or detected_lang or context.get("preferred_language") or user.preferred_language or "en"
+        # Priority:
+        # 1. If explicit non-English language is passed from frontend/test, keep it!
+        # 2. If message contains a detected vernacular script or Hinglish, use it!
+        # 3. If session context has preferred non-English language, use it!
+        # 4. Otherwise user profile or "en"
+        if language and language != "en":
+            lang = language
+        elif detected_lang and detected_lang != "en":
+            lang = detected_lang
+        elif context.get("preferred_language") and context.get("preferred_language") != "en":
+            lang = context.get("preferred_language")
+        elif user.preferred_language and user.preferred_language != "en":
+            lang = user.preferred_language
+        else:
+            lang = "en"
+            
         lang_code = lang.value if hasattr(lang, 'value') else str(lang)
         msg_clean = message.strip()
         msg_lower = msg_clean.lower()
@@ -636,13 +655,15 @@ class ConversationOrchestrator:
             if gemini_result:
                 gemini_text, tools_called = gemini_result
                 cleaned_text = sanitize_ai_output(gemini_text)
-                ConversationOrchestrator._record_turn(sid, state, user, msg_clean, cleaned_text, lang, tools_called)
+                from shared.multilingual_engine import translate_response_text
+                final_text = translate_response_text(cleaned_text, lang_code) if lang_code != "en" else cleaned_text
+                ConversationOrchestrator._record_turn(sid, state, user, msg_clean, final_text, lang, tools_called)
                 return ChatResponse(
-                    response_text=cleaned_text,
+                    response_text=final_text,
                     session_id=sid,
                     language=lang,
                     executed_tools=tools_called,
-                    visemes=generate_viseme_timeline(cleaned_text) if voice_requested else None
+                    visemes=generate_viseme_timeline(final_text) if voice_requested else None
                 )
 
         # =======================================================================
@@ -661,13 +682,15 @@ class ConversationOrchestrator:
             if groq_result:
                 groq_text, tools_called = groq_result
                 cleaned_text = sanitize_ai_output(groq_text)
-                ConversationOrchestrator._record_turn(sid, state, user, msg_clean, cleaned_text, lang, tools_called)
+                from shared.multilingual_engine import translate_response_text
+                final_text = translate_response_text(cleaned_text, lang_code) if lang_code != "en" else cleaned_text
+                ConversationOrchestrator._record_turn(sid, state, user, msg_clean, final_text, lang, tools_called)
                 return ChatResponse(
-                    response_text=cleaned_text,
+                    response_text=final_text,
                     session_id=sid,
                     language=lang,
                     executed_tools=tools_called,
-                    visemes=generate_viseme_timeline(cleaned_text) if voice_requested else None
+                    visemes=generate_viseme_timeline(final_text) if voice_requested else None
                 )
 
         # =======================================================================

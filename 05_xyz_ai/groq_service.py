@@ -274,6 +274,34 @@ class GroqService:
             except Exception:
                 pass
 
+            lang_code = language.value if hasattr(language, 'value') else str(language or "en")
+            lang_names = {
+                "en": "English",
+                "hi": "Hindi (हिन्दी)",
+                "gu": "Gujarati (ગુજરાતી)",
+                "mr": "Marathi (मराठी)",
+                "ta": "Tamil (தமிழ்)",
+                "te": "Telugu (తెలుగు)",
+                "bn": "Bengali (বাংলা)",
+                "pa": "Punjabi (ਪੰਜਾਬੀ)",
+                "kn": "Kannada (ಕನ್ನಡ)",
+                "ml": "Malayalam (മലയാളം)",
+                "ur": "Urdu (اردو)",
+                "hinglish": "Hinglish (Conversational Hindi + English words written in Latin script)"
+            }
+            target_lang_display = lang_names.get(lang_code, "English")
+
+            language_mandate = ""
+            if lang_code != "en":
+                language_mandate = (
+                    f"\n\n=======================================================\n"
+                    f"CRITICAL MULTILINGUAL MANDATE (STRICT):\n"
+                    f"- The active user conversation language is: {target_lang_display}.\n"
+                    f"- You MUST generate your entire response in {target_lang_display}.\n"
+                    f"- DO NOT reply in English! Translate all greetings, explanations, attendance stats, grades, and follow-ups naturally into {target_lang_display}.\n"
+                    f"=======================================================\n"
+                )
+
             full_system_prompt = (
                 f"{system_instruction}\n\n"
                 f"CURRENT USER CONTEXT:\n"
@@ -281,7 +309,8 @@ class GroqService:
                 f"- Verified Role: {user.role}\n"
                 f"- User ID: {user.user_id}\n"
                 f"- Assigned Class / Section: {assigned_class}\n"
-                f"- Preferred Language: {language}\n\n"
+                f"- Preferred Language: {target_lang_display} ({lang_code})\n"
+                f"{language_mandate}\n"
                 f"HUMAN-LIKE CONVERSATIONAL GUIDELINES:\n"
                 f"1. Conversational & Persona-Driven Tone:\n"
                 f"   - Behave like a natural, thoughtful, caring human school assistant. Avoid robotic, repetitive, or formulaic templates.\n"
@@ -298,7 +327,7 @@ class GroqService:
                 f"   - Gracefully handle corrections ('no, I meant Math', 'actually for next Monday') without getting confused.\n"
                 f"   - When information is missing (like leave dates or vague questions), ask clarifying questions politely.\n"
                 f"4. Multilingual & Vernacular Support:\n"
-                f"   - Respond naturally in the user's preferred language ({language}) when requested (English, Hindi, Gujarati, Marathi, Tamil, Telugu, Hinglish, etc.).\n"
+                f"   - When target language is {target_lang_display}, generate fluent, grammatically accurate {target_lang_display}.\n"
                 f"5. Real Database Tool Integration:\n"
                 f"   - Always use the provided tools to query real attendance, exam grades, timetable, homework, class rosters, and fee invoices.\n"
                 f"   - When asked 'how many students are in my class', 'what is the class strength', 'who is in the class', or 'total students', call 'get_class_roster' tool immediately for '{assigned_class}'.\n"

@@ -144,13 +144,42 @@ class GeminiService:
         try:
             tools = self.build_tools(user)
             
+            lang_code = language.value if hasattr(language, 'value') else str(language or "en")
+            lang_names = {
+                "en": "English",
+                "hi": "Hindi (हिन्दी)",
+                "gu": "Gujarati (ગુજરાતી)",
+                "mr": "Marathi (मराठी)",
+                "ta": "Tamil (தமிழ்)",
+                "te": "Telugu (తెలుగు)",
+                "bn": "Bengali (বাংলা)",
+                "pa": "Punjabi (ਪੰਜਾਬੀ)",
+                "kn": "Kannada (ಕನ್ನಡ)",
+                "ml": "Malayalam (മലയാളം)",
+                "ur": "Urdu (اردو)",
+                "hinglish": "Hinglish (Conversational Hindi + English words written in Latin script)"
+            }
+            target_lang_display = lang_names.get(lang_code, "English")
+
+            language_mandate = ""
+            if lang_code != "en":
+                language_mandate = (
+                    f"\n\n=======================================================\n"
+                    f"CRITICAL MULTILINGUAL MANDATE (STRICT):\n"
+                    f"- The active user conversation language is: {target_lang_display}.\n"
+                    f"- You MUST generate your entire response in {target_lang_display}.\n"
+                    f"- DO NOT reply in English! Translate all greetings, explanations, attendance stats, grades, and follow-ups naturally into {target_lang_display}.\n"
+                    f"=======================================================\n"
+                )
+
             full_system_prompt = (
                 f"{system_instruction}\n"
                 f"CURRENT USER CONTEXT:\n"
                 f"- Name: {user.name}\n"
                 f"- Verified Role: {user.role}\n"
                 f"- User ID: {user.user_id}\n"
-                f"- Preferred Language: {language}\n\n"
+                f"- Preferred Language: {target_lang_display} ({lang_code})\n"
+                f"{language_mandate}\n"
                 f"HUMAN-LIKE CONVERSATIONAL GUIDELINES:\n"
                 f"1. Conversational & Persona-Driven Tone:\n"
                 f"   - Behave like a natural, thoughtful, caring human school assistant. Avoid robotic, repetitive, or formulaic templates.\n"
@@ -167,7 +196,7 @@ class GeminiService:
                 f"   - Gracefully handle user corrections ('no, I meant Math', 'actually tomorrow') without getting confused.\n"
                 f"   - If user input is ambiguous or missing required details, ask clarifying questions warmly.\n"
                 f"4. Multilingual & Hinglish Support:\n"
-                f"   - Naturally understand and respond in English, Hindi, Gujarati, Tamil, Telugu, Marathi, Bengali, Punjabi, Kannada, Malayalam, Urdu, and Hinglish.\n"
+                f"   - When target language is {target_lang_display}, generate fluent, grammatically accurate {target_lang_display}.\n"
                 f"5. Real Database Integration:\n"
                 f"   - Use available tools to fetch ground truth records dynamically. Never fabricate marks, attendance, or fees.\n\n"
                 f"FEW-SHOT STYLE EXAMPLES (FOR TONE, BREVITY & FLOW):\n"
