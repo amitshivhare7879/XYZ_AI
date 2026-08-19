@@ -123,5 +123,29 @@ async def test_marathi_grades_user_exact_query():
     assert ("राहुल" in res.response_text or "गुण" in res.response_text or "अहवाल" in res.response_text or "सरासरी" in res.response_text or "मार्क्स" in res.response_text)
     assert "I'm here to help you succeed" not in res.response_text
 
+@pytest.mark.asyncio
+async def test_kannada_attendance_query():
+    """Validates Kannada query: 'ನಮಸ್ಕಾರ, ರಾಹುಲ್ ಅವರ ಹಾಜರಾತಿ ಎಷ್ಟು ಇದೆ?'"""
+    res = await ConversationOrchestrator.process_message(
+        "ನಮಸ್ಕಾರ, ರಾಹುಲ್ ಅವರ ಹಾಜರಾತಿ ಎಷ್ಟು ಇದೆ?",
+        user=PARENT_AMIT,
+        language="kn"
+    )
+    assert res.language == "kn"
+    assert "tool_get_attendance" in res.executed_tools
+    assert ("ಹಾಜರಾತಿ" in res.response_text or "ರಾಹುಲ್" in res.response_text or "ದಿನಗಳು" in res.response_text or "91.2%" in res.response_text)
+
+@pytest.mark.asyncio
+async def test_explicit_kannada_language_switch():
+    """Validates explicit switch to Kannada: 'Kannada' -> sets language to kn and greets in Kannada."""
+    res = await ConversationOrchestrator.process_message(
+        "Kannada",
+        user=PARENT_AMIT,
+        session_id="sess_kannada_switch_01"
+    )
+    assert res.language == "kn"
+    assert "ಕನ್ನಡ" in res.response_text or "ನಮಸ್ಕಾರ" in res.response_text
+
+
 
 

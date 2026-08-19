@@ -422,9 +422,12 @@ class ConversationOrchestrator:
             "gu": ["gujarati", "ગુજરાતી", "gujrati", "gujrat", "gujarathi", "gujti", "gujju", "gujarati ma", "in gujarati", "gujarati please", "gujarati language"],
             "mr": ["marathi", "मराठी", "marthi", "marati", "marathii", "marathi madhe", "in marathi", "marathi please", "marathi language"],
             "ta": ["tamil", "தமிழ்", "tamizh", "tamli", "tamilil", "in tamil", "tamil please", "tamil language"],
-            "te": ["telugu", "తెలుగు", "telgu", "telegu", "in telugu", "telugu please"],
-            "bn": ["bengali", "বাংলা", "bangla", "bengli", "in bengali"],
-            "pa": ["punjabi", "ਪੰਜਾਬੀ", "panjabi", "in punjabi"],
+            "te": ["telugu", "తెలుగు", "telgu", "telegu", "in telugu", "telugu please", "telugu lo"],
+            "bn": ["bengali", "বাংলা", "bangla", "bengli", "in bengali", "bangla te"],
+            "pa": ["punjabi", "ਪੰਜਾਬੀ", "panjabi", "in punjabi", "punjabi vich"],
+            "kn": ["kannada", "ಕನ್ನಡ", "kanada", "kannad", "in kannada", "kannada please", "kannada dalli"],
+            "ml": ["malayalam", "മലയാളം", "malyalam", "in malayalam", "malayalam please"],
+            "ur": ["urdu", "اردو", "in urdu", "urdu please", "urdu me"],
             "hinglish": ["hinglish", "hinglis", "hingish", "hinlish", "hinglish me", "in hinglish"],
             "en": ["english", "engish", "engilsh", "englsih", "in english", "english please", "angrezi"]
         }
@@ -490,6 +493,43 @@ class ConversationOrchestrator:
                 suggested_actions = [
                     SuggestedAction(label="வருகைப் பதிவு", action_type="query_attendance"),
                     SuggestedAction(label="மதிப்பெண் பட்டியல்", action_type="query_grades")
+                ]
+            elif selected_lang_code == "te":
+                reply = f"నమస్కారం! మీరు **తెలుగు** భాషను ఎంచుకున్నారు. {active_student} హాజరు, పరీక్షల ఫలితాలు లేదా ఫీజుల గురించి మీరు ఏమి తెలుసుకోవాలనుకుంటున్నారు?"
+                suggested_actions = [
+                    SuggestedAction(label="హాజరు రికార్డు", action_type="query_attendance"),
+                    SuggestedAction(label="మార్కుల నివేదిక", action_type="query_grades")
+                ]
+            elif selected_lang_code == "kn":
+                reply = f"ನಮಸ್ಕಾರ! ನೀವು **ಕನ್ನಡ** ಭಾಷೆಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿದ್ದೀರಿ. {active_student} ಅವರ ಹಾಜರಾತಿ, ಪರೀಕ್ಷಾ ಫಲಿತಾಂಶಗಳು, ಶುಲ್ಕ ಅಥವಾ ವೇಳಾಪಟ್ಟಿಯ ಬಗ್ಗೆ ನೀವು ಏನನ್ನು ತಿಳಿಯಲು ಬಯಸುತ್ತೀರಿ?"
+                suggested_actions = [
+                    SuggestedAction(label="ಹಾಜರಾತಿ ವಿವರ", action_type="query_attendance"),
+                    SuggestedAction(label="ಅಂಕಗಳ ವರದಿ", action_type="query_grades"),
+                    SuggestedAction(label="ಶುಲ್ಕ ಮಾಹಿತಿ", action_type="query_fees")
+                ]
+            elif selected_lang_code == "bn":
+                reply = f"নমস্কার! আপনি **বাংলা** ভাষা নির্বাচন করেছেন। {active_student} এর উপস্থিতি, পরীক্ষার ফলাফল বা ফি সম্পর্কে আপনি কি জানতে চান?"
+                suggested_actions = [
+                    SuggestedAction(label="উপস্থিতি রেকর্ড", action_type="query_attendance"),
+                    SuggestedAction(label="ফলাফল রিপোর্ট", action_type="query_grades")
+                ]
+            elif selected_lang_code == "pa":
+                reply = f"ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਤੁਸੀਂ **ਪੰਜਾਬੀ** ਭਾਸ਼ਾ ਚੁਣੀ ਹੈ। {active_student} ਦੀ ਹਾਜ਼ਰੀ, ਪ੍ਰੀਖਿਆ ਨਤੀਜੇ ਜਾਂ ਫ਼ੀਸ ਬਾਰੇ ਤੁਸੀਂ ਕੀ ਜਾਣਨਾ ਚਾਹੁੰਦੇ ਹੋ?"
+                suggested_actions = [
+                    SuggestedAction(label="ਹਾਜ਼ਰੀ ਰਿਕਾਰਡ", action_type="query_attendance"),
+                    SuggestedAction(label="ਨਤੀਜਾ ਰਿਪੋਰਟ", action_type="query_grades")
+                ]
+            elif selected_lang_code == "ml":
+                reply = f"നമസ്കാരം! നിങ്ങൾ **മലയാളം** ഭാഷ തിരഞ്ഞെടുത്തു. {active_student} ഹാജർ, പരീക്ഷാ ഫലങ്ങൾ അല്ലെങ്കിൽ ഫീസ് എന്നിവയെക്കുറിച്ച് എന്താണ് അറിയേണ്ടത്?"
+                suggested_actions = [
+                    SuggestedAction(label="ഹാജർ രേഖ", action_type="query_attendance"),
+                    SuggestedAction(label="പരീക്ഷാ ഫലം", action_type="query_grades")
+                ]
+            elif selected_lang_code == "ur":
+                reply = f"آداب! آپ نے **اردو** زبان کا انتخاب کیا ہے۔ {active_student} کی حاضری، امتحانی نتائج یا فیس کے بارے میں آپ کیا جاننا چاہتے ہیں؟"
+                suggested_actions = [
+                    SuggestedAction(label="حاضری ریکارڈ", action_type="query_attendance"),
+                    SuggestedAction(label="امتحانی نتائج", action_type="query_grades")
                 ]
             elif selected_lang_code == "hinglish":
                 reply = f"Bohot badhiya! Humne conversation language **Hinglish** set kar di hai. {active_student} ki attendance, exam results, fees payment ya class schedule ke baare me aap kya jaan-na chahte hain?"
