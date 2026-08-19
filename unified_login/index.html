@@ -161,16 +161,15 @@
   </div>
 
   <script>
-    const isMultiPortDev = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && (window.location.port === "3000" || window.location.port === "3001" || window.location.port === "3002" || window.location.port === "3003" || window.location.port === "3004");
-    const isSingleOrigin = !isMultiPortDev;
+    const isSingleOrigin = window.location.port === "7860" || window.location.port === "8000" || window.location.hostname.includes("huggingface.co") || window.location.hostname.includes("hf.space") || window.location.port === "";
     const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
     
-    // Deployment Port Map for Local Multi-port Dev / Single-Origin Path Map for Hugging Face Spaces & Production
+    // Deployment Port Map for Local Dev / Single-Origin Path Map for Hugging Face Spaces
     const PORTAL_ROUTES = {
-      "student": isSingleOrigin ? "/student" : "http://localhost:3001",
-      "parent": isSingleOrigin ? "/parent" : "http://localhost:3002",
-      "teacher": isSingleOrigin ? "/staff" : "http://localhost:3003",
-      "principal": isSingleOrigin ? "/management" : "http://localhost:3004"
+      "student": isSingleOrigin ? "/student/" : "http://localhost:3001",
+      "parent": isSingleOrigin ? "/parent/" : "http://localhost:3002",
+      "teacher": isSingleOrigin ? "/staff/" : "http://localhost:3003",
+      "principal": isSingleOrigin ? "/management/" : "http://localhost:3004"
     };
 
     function showStatus(text, isError = false) {
@@ -210,12 +209,12 @@
         localStorage.setItem("xyz_user", JSON.stringify(data.user));
 
         const role = data.user.role;
-        const targetUrl = PORTAL_ROUTES[role] || (isSingleOrigin ? "/parent" : "http://localhost:3002");
+        const targetUrl = PORTAL_ROUTES[role] || (isSingleOrigin ? "/parent/" : "http://localhost:3002");
         
-        showStatus(`Authenticated as ${data.user.name} (${role.toUpperCase()}). Launching portal...`);
+        showStatus(`Authenticated as ${data.user.name} (${role.toUpperCase()}). Redirecting...`);
         
         setTimeout(() => {
-          window.location.assign(targetUrl);
+          window.location.href = targetUrl;
         }, 400);
 
       } catch (err) {

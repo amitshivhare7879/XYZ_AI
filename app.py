@@ -65,11 +65,11 @@ with gr.Blocks(title="XYZ AI School ERP Hub", theme=gr.themes.Soft()) as demo:
     gr.Markdown("Welcome to the **Delhi Public Global School ERP**. You can access all portals directly below:")
     with gr.Row():
         gr.Markdown("""
-        - 🌟 **[Unified Login Gateway](/login)**: SSO Login with Auto-Role Redirection
-        - 👨‍🎓 **[Student Portal](/student)**: Academic Assistant, Attendance (91.2%), Timetable & 3D Avatar
-        - 👨‍👩‍👧 **[Parent Portal](/parent)**: Child Progress, Attendance, Report Cards & Fee Invoices
-        - 👩‍🏫 **[Staff / Teacher Portal](/staff)**: Class 10-A Roster & Voice Attendance Marker
-        - 🏛️ **[Management Portal](/management)**: School Analytics, Fee Recovery & Escalations
+        - 🌟 **[Unified Login Gateway](/login/)**: SSO Login with Auto-Role Redirection
+        - 👨‍🎓 **[Student Portal](/student/)**: Academic Assistant, Attendance (91.2%), Timetable & 3D Avatar
+        - 👨‍👩‍👧 **[Parent Portal](/parent/)**: Child Progress, Attendance, Report Cards & Fee Invoices
+        - 👩‍🏫 **[Staff / Teacher Portal](/staff/)**: Class 10-A Roster & Voice Attendance Marker
+        - 🏛️ **[Management Portal](/management/)**: School Analytics, Fee Recovery & Escalations
         - 📖 **[Interactive Swagger API Docs](/docs)**: FastAPI REST & AI Endpoints
         """)
 
@@ -78,5 +78,6 @@ app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=7860, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=7860, proxy_headers=True, forwarded_allow_ips="*", log_level="info")
+
 

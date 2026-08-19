@@ -59,6 +59,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+try:
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+except Exception:
+    pass
+
 import time
 import sys
 
