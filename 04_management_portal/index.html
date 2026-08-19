@@ -391,7 +391,8 @@
 
   <script src="/shared/i18n.js"></script>
   <script>
-    const isSingleOrigin = window.location.port === "8000" || window.location.port === "7860" || window.location.port === "";
+    const isMultiPortDev = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && (window.location.port === "3000" || window.location.port === "3001" || window.location.port === "3002" || window.location.port === "3003" || window.location.port === "3004");
+    const isSingleOrigin = !isMultiPortDev;
     const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
     let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
     let isLiveVoiceActive = false;

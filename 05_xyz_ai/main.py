@@ -114,8 +114,44 @@ def startup_db_check():
         except Exception as se:
             print(f"[Startup Seeding Error]: {se}")
 
-# Mount all 4 Portals, Unified Login & Shared Assets for single-origin deployment
+from fastapi.responses import FileResponse, Response
+
+# Direct HTML Route Handlers (prevents 307/301 insecure redirect loops on HTTPS proxies like Hugging Face)
 root_dir = Path(__file__).parent.parent
+
+@app.get("/", response_class=FileResponse)
+def serve_root():
+    login_path = root_dir / "unified_login" / "index.html"
+    if login_path.exists():
+        return FileResponse(str(login_path))
+    return {"message": "XYZ AI School ERP Engine Online", "docs": "/docs"}
+
+@app.get("/login", response_class=FileResponse)
+@app.get("/login/", response_class=FileResponse)
+def serve_login_portal():
+    return FileResponse(str(root_dir / "unified_login" / "index.html"))
+
+@app.get("/student", response_class=FileResponse)
+@app.get("/student/", response_class=FileResponse)
+def serve_student_portal():
+    return FileResponse(str(root_dir / "01_student_portal" / "index.html"))
+
+@app.get("/parent", response_class=FileResponse)
+@app.get("/parent/", response_class=FileResponse)
+def serve_parent_portal():
+    return FileResponse(str(root_dir / "02_parent_portal" / "index.html"))
+
+@app.get("/staff", response_class=FileResponse)
+@app.get("/staff/", response_class=FileResponse)
+def serve_staff_portal():
+    return FileResponse(str(root_dir / "03_staff_portal" / "index.html"))
+
+@app.get("/management", response_class=FileResponse)
+@app.get("/management/", response_class=FileResponse)
+def serve_management_portal():
+    return FileResponse(str(root_dir / "04_management_portal" / "index.html"))
+
+# Mount Static Directories for Sub-Assets
 if (root_dir / "shared").exists():
     app.mount("/shared", StaticFiles(directory=str(root_dir / "shared")), name="shared")
 if (root_dir / "01_student_portal").exists():
@@ -128,15 +164,6 @@ if (root_dir / "04_management_portal").exists():
     app.mount("/management", StaticFiles(directory=str(root_dir / "04_management_portal"), html=True), name="management")
 if (root_dir / "unified_login").exists():
     app.mount("/login", StaticFiles(directory=str(root_dir / "unified_login"), html=True), name="login")
-
-from fastapi.responses import FileResponse, Response
-
-@app.get("/")
-def serve_root():
-    login_path = root_dir / "unified_login" / "index.html"
-    if login_path.exists():
-        return FileResponse(str(login_path))
-    return {"message": "XYZ AI School ERP Engine Online", "docs": "/docs"}
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
