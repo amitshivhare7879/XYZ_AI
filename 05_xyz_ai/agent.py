@@ -1400,8 +1400,19 @@ class ConversationOrchestrator:
                 reply = res.get("message", "Permission Denied.")
                 return reply, suggested_actions, executed_tools
 
-            sname = res.get("student_name", active_student or "Rahul")
-            avg = res.get("average_percentage", 87.5)
+            if "error" in res:
+                if user.role in ["principal", "teacher"]:
+                    reply = "As institutional leadership, you have access to all records. Could you please specify which student or class you would like academic results for?"
+                    suggested_actions = [
+                        SuggestedAction(label="Class 10-A Results", action_type="query_grades"),
+                        SuggestedAction(label="Upcoming Exams", action_type="query_exams")
+                    ]
+                else:
+                    reply = res.get("error", "Could not retrieve academic records.")
+                return reply, suggested_actions, executed_tools
+
+            sname = res.get("student_name", active_student or "the student")
+            avg = res.get("average_percentage", 0.0)
             grades_list = res.get("grades", [])
             
             top_grades = ", ".join([f"{g['subject_name']}: {g['marks_obtained']}/100 ({g['grade']})" for g in grades_list[:3]])
@@ -1424,7 +1435,7 @@ class ConversationOrchestrator:
                     SuggestedAction(label="Maths Study Tips", action_type="tips_math")
                 ]
             else:
-                reply = f"Academic summary for {sname}: Overall Average **{avg}%**. Scores: {top_grades}."
+                reply = f"Academic report for **{sname}**: Overall Average **{avg}%**. Key Scores: {top_grades}."
             return reply, suggested_actions, executed_tools
 
         # -------------------------------------------------------------------

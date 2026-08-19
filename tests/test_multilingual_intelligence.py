@@ -146,6 +146,20 @@ async def test_explicit_kannada_language_switch():
     assert res.language == "kn"
     assert "ಕನ್ನಡ" in res.response_text or "ನಮಸ್ಕಾರ" in res.response_text
 
+@pytest.mark.asyncio
+async def test_principal_kannada_grades_disambiguation():
+    """Validates Principal Dr. Rajesh Sharma asking 'ನನ್ನ ಮಗನ ಕೊನೆಯ ಪರೀಕ್ಷೆಯಲ್ಲಿ ಎಷ್ಟು ಅಂಕಗಳು ಬಂದವು' prompts for student name in Kannada."""
+    PRINCIPAL_RAJESH = UserTokenPayload(user_id="usr_principal_01", email="rajesh.sharma@school.edu", name="Dr. Rajesh Sharma", role="principal")
+    res = await ConversationOrchestrator.process_message(
+        "ನನ್ನ ಮಗನ ಕೊನೆಯ ಪರೀಕ್ಷೆಯಲ್ಲಿ ಎಷ್ಟು ಅಂಕಗಳು ಬಂದವು",
+        user=PRINCIPAL_RAJESH,
+        language="kn"
+    )
+    assert res.language == "kn"
+    # Must ask for student name/class in Kannada and NOT blindly dump Rahul's record
+    assert ("ವಿದ್ಯಾರ್ಥಿ" in res.response_text or "ದಾಖಲೆ" in res.response_text or "ಆಡಳಿತ" in res.response_text or "ಫಲಿತಾಂಶ" in res.response_text)
+
+
 
 
 

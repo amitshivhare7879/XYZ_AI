@@ -313,6 +313,32 @@ def translate_template_patterns(text: str, target_lang: str) -> str:
         elif target_lang == 'hinglish':
             return f'**School-Wide Enrollment**: School me abhi total **{tot} students** enrolled hain. Class breakdown: **{breakdown}**. Kya aap kisi specific class ki attendance ya student records dekhna chahte hain?'
 
+    # Pattern 12: Institutional Leadership Student Disambiguation
+    m12 = re.search(r'As institutional leadership, you have access to all records\. Could you please specify which student or class you would like academic results for\?', text)
+    if m12:
+        if target_lang == 'kn':
+            return 'ಸಾಂಸ್ಥಿಕ ಆಡಳಿತ ಮಂಡಳಿಯಾಗಿ, ನೀವು ಎಲ್ಲಾ ವಿದ್ಯಾರ್ಥಿಗಳ ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು. ನೀವು ಯಾವ ವಿದ್ಯಾರ್ಥಿ ಅಥವಾ ತರಗತಿಯ ಪರೀಕ್ಷಾ ಫಲಿತಾಂಶಗಳನ್ನು ನೋಡಲು ಬಯಸುತ್ತೀರಿ ಎಂಬುದನ್ನು ತಿಳಿಸಬಹುದೇ?'
+        elif target_lang == 'hi':
+            return 'प्रशासनिक नेतृत्व के रूप में, आपके पास सभी रिकॉर्ड देखने की अनुमति है। कृपया बताएं कि आप किस विद्यार्थी या कक्षा के परीक्षा परिणाम देखना चाहते हैं?'
+        elif target_lang == 'mr':
+            return 'शाळा व्यवस्थापन प्रमुख म्हणून, आपल्याकडे सर्व विद्यार्थ्यांचे रेकॉर्ड पाहण्याचा अधिकार आहे. आपण कोणत्या विद्यार्थ्याचा किंवा वर्गाचा निकाल पाहू इच्छिता?'
+        elif target_lang == 'gu':
+            return 'શાળા વહીવટી વડા તરીકે, આપણી પાસે તમામ રેકોર્ડ જોવાની મંજૂરી છે. કૃપા કરીને જણાવો કે આપ કયા વિદ્યાર્થી અથવા વર્ગનું પરિણામ જોવા માંગો છો?'
+        elif target_lang == 'ta':
+            return 'பள்ளி நிர்வாகத் தலைவராக, அனைத்து மாணவர்களின் பதிவுகளையும் பார்க்கும் உரிமை உங்களுக்கு உள்ளது. நீங்கள் எந்த மாணவர் அல்லது வகுப்பின் தேர்வு முடிவுகளைப் பார்க்க விரும்புகிறீர்கள்?'
+        elif target_lang == 'te':
+            return 'సంస్థాగత నాయకత్వంగా, మీకు అన్ని రికార్డులను చూసే అనుమతి ఉంది. మీరు ఏ విద్యార్థి లేదా తరగతి ఫలితాలను చూడాలనుకుంటున్నారో దయచేసి పేర్కొనగలరా?'
+        elif target_lang == 'bn':
+            return 'প্রাতিষ্ঠানিক নেতৃত্ব হিসেবে, আপনার সমস্ত রেকর্ড দেখার অনুমতি রয়েছে। আপনি কোন শিক্ষার্থী বা ক্লাসের ফলাফল দেখতে চান অনুগ্রহ করে নির্দিষ্ট করুন?'
+        elif target_lang == 'pa':
+            return 'ਸਕੂਲ ਪ੍ਰਬੰਧਕ ਵਜੋਂ, ਤੁਹਾਡੇ ਕੋਲ ਸਾਰੇ ਵਿਦਿਆਰਥੀਆਂ ਦੇ ਰਿਕਾਰਡ ਦੇਖਣ ਦਾ ਅਧਿਕਾਰ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੱਸੋ ਕਿ ਤੁਸੀਂ ਕਿਸ ਵਿਦਿਆਰਥੀ ਜਾਂ ਕਲਾਸ ਦੇ ਨਤੀਜੇ ਦੇਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?'
+        elif target_lang == 'ml':
+            return 'സ്ഥാപന മേധാവി എന്ന നിലയിൽ, നിങ്ങൾക്ക് എല്ലാ റെക്കോർഡുകളും പരിശോധിക്കാം. ഏത് വിദ്യാർത്ഥിയുടെയോ ക്ലാസിന്റെയോ ഫലങ്ങളാണ് താങ്കൾക്ക് അറിയേണ്ടത്?'
+        elif target_lang == 'ur':
+            return 'ادارہ جاتی قیادت کے طور پر، آپ کو تمام ریکارڈ تک رسائی حاصل ہے۔ برائے مہربانی بتائیں کہ آپ کس طالب علم یا کلاس کے امتحانی نتائج دیکھنا چاہتے ہیں؟'
+        elif target_lang == 'hinglish':
+            return 'As institutional leadership, aapke paas sabhi records ka access hai. Please batayein ki aap kis student ya class ke academic results dekhna chahte hain?'
+
     return text
 
 
