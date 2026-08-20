@@ -292,16 +292,7 @@
             </div>
           </div>
 
-<div id="managementChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin">
-            <div class="flex items-start space-x-3">
-              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 flex items-center justify-center text-black text-xs font-bold shrink-0 shadow">
-                XYZ
-              </div>
-              <div class="bg-gray-800/90 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-xs leading-relaxed text-gray-200 shadow-md">
-                <p>Good day, Dr. Rajesh Sharma. <strong>Management Assistant online</strong>. I am prepared to provide institution-wide attendance analytics, fee collection audit reports, academic distributions, or monitor human escalation queues. How may I assist you today?</p>
-              </div>
-            </div>
-          </div>
+<div id="managementChatFeed" class="flex-1 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin"></div>
 
           <div id="liveVoiceBar" class="hidden py-2 px-3 my-2 rounded-xl bg-amber-950/40 border border-amber-500/30 flex items-center justify-between text-xs text-amber-300 animate-pulse">
             <div class="flex items-center space-x-2">
@@ -1633,10 +1624,10 @@
         const token = await getAuthToken();
         const headers = token ? { "Authorization": `Bearer ${token}` } : {};
         const res = await fetch(`${API_BASE}/api/chat/history?session_id=${currentSessionId}&user_id=usr_mgmt_01`, { headers });
+        const feed = document.getElementById('managementChatFeed');
         if (res.ok) {
           const data = await res.json();
           if (data.messages && data.messages.length > 0) {
-            const feed = document.getElementById('managementChatFeed');
             if (feed) {
               feed.innerHTML = '';
               data.messages.forEach(m => {
@@ -1645,16 +1636,30 @@
               hasLiveGreetingSpoken = true;
             }
           } else {
-            const feed = document.getElementById('managementChatFeed');
             if (feed && feed.children.length === 0) {
-              const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
+              const curLang = selectedLanguage || localStorage.getItem('preferred_lang_principal') || localStorage.getItem('preferred_lang') || 'en';
               const welcome = mgmtGreetings[curLang] || mgmtGreetings.en;
               appendMessage('assistant', welcome);
+              hasLiveGreetingSpoken = false;
             }
+          }
+        } else {
+          if (feed && feed.children.length === 0) {
+            const curLang = selectedLanguage || localStorage.getItem('preferred_lang_principal') || localStorage.getItem('preferred_lang') || 'en';
+            const welcome = mgmtGreetings[curLang] || mgmtGreetings.en;
+            appendMessage('assistant', welcome);
+            hasLiveGreetingSpoken = false;
           }
         }
       } catch (e) {
         console.log('Chat history load notice:', e);
+        const feed = document.getElementById('managementChatFeed');
+        if (feed && feed.children.length === 0) {
+          const curLang = selectedLanguage || localStorage.getItem('preferred_lang_principal') || localStorage.getItem('preferred_lang') || 'en';
+          const welcome = mgmtGreetings[curLang] || mgmtGreetings.en;
+          appendMessage('assistant', welcome);
+          hasLiveGreetingSpoken = false;
+        }
       }
     }
 
