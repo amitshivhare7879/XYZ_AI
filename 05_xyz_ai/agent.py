@@ -975,31 +975,69 @@ class ConversationOrchestrator:
             "kitne student", "kitne students", "kitne bacche", "kitne bache", "kul kitne student", "kul kitne bacche",
             "kitne bacche hain", "kitne student hain", "class me kitne", "class me kitne student",
             "कितने बच्चे", "कितने छात्र", "कुल विद्यार्थी", "कक्षा में कितने", "क्लास में कितने", "छात्रों की संख्या",
-            "કેટલા વિદ્યાર્થી", "કુલ વિદ્યાર્થી", "વર્ગમાં કેટલા", "વિદ્યાર્થીઓની સંખ્યા"
+            "કેટલા વિદ્યાર્થી", "કુલ વિદ્યાર્થી", "વર્ગમાં કેટલા", "વિદ્યાર્થીઓની સંખ્યા",
+            "वर्गात किती विद्यार्थी", "एकूण विद्यार्थी", "विद्यार्थ्यांची संख्या"
         ])
-        if is_student_count_query:
-            context["active_topic"] = "roster"
-            target_class = "Grade 10-A"
-            if user.role == "teacher":
-                try:
-                    conn = get_db_connection()
-                    c = conn.cursor()
-                    c.execute("SELECT name FROM classes WHERE class_teacher_id = ? LIMIT 1", (user.user_id,))
+        has_attendance_keywords = any(w in msg_lower for w in [
+            "present", "absent", "attendance", "hajir", "aaye", "aaya", "aayi", "aaye hain",
+            "હાજર", "ગેરહાજર", "હાજરી", "उपस्थित", "अनुपस्थित", "उपस्थिति", "हाजिर", "गैरहाजिर",
+            "வருகை", "வராதவர்", "హాజరు", "ಗೈರುಹಾಜರಿ"
+        ])
+
+        if is_student_count_query and not has_attendance_keywords:
+            context["active_topic"] = "class_roster"
+            executed_tools.append("tool_query_database")
+            conn = get_db_connection()
+            c = conn.cursor()
+            
+            if user.role == "principal":
+                c.execute("""
+                    SELECT c.name as class_name, COUNT(s.id) as student_count
+                    FROM classes c
+                    LEFT JOIN students s ON s.class_id = c.id
+                    GROUP BY c.id
+                    ORDER BY c.name
+                """)
+                rows = c.fetchall()
+                total_enrolled = sum(r["student_count"] for r in rows)
+                breakdown_str = ", ".join([f"{r['class_name']}: {r['student_count']} students" for r in rows])
+                reply = (f"**School-Wide Enrollment**: There are currently **{total_enrolled} students** enrolled across the institution. "
+                         f"Class breakdown: **{breakdown_str}**. Would you like to view attendance or student records for a specific class?")
+                suggested_actions = [
+                    SuggestedAction(label="School Attendance", action_type="query_attendance"),
+                    SuggestedAction(label="Fee Collection", action_type="query_fees")
+                ]
+            else:
+                target_class_name = "Grade 10-A"
+                if user.role == "teacher":
+                    c.execute("SELECT c.name, c.id FROM classes c WHERE c.class_teacher_id = ? LIMIT 1", (user.user_id,))
                     crow = c.fetchone()
                     if crow:
-                        target_class = crow["name"]
-                    conn.close()
-                except Exception:
-                    pass
-            from tools import tool_get_class_roster
-            res = tool_get_class_roster(user=user, class_name=target_class)
-            executed_tools.append("tool_get_class_roster")
-            total_students = res.get("total_students", 8)
-            reply = f"**{target_class}** currently has **{total_students} students** enrolled. Would you like to view the full student roster or check today's attendance?"
-            suggested_actions = [
-                SuggestedAction(label="View Roster", action_type="query_roster"),
-                SuggestedAction(label="Mark Attendance", action_type="mark_attendance")
-            ]
+                        target_class_name = crow["name"]
+                elif user.role in ["student", "parent"]:
+                    std_name = active_student or "Rahul Patel"
+                    c.execute("SELECT c.name, c.id FROM students s JOIN classes c ON c.id = s.class_id WHERE s.id = ? OR LOWER(s.name) LIKE LOWER(?) LIMIT 1", (user.user_id, f"%{std_name}%"))
+                    crow = c.fetchone()
+                    if crow:
+                        target_class_name = crow["name"]
+
+                c.execute("""
+                    SELECT s.name, s.roll_number
+                    FROM students s
+                    JOIN classes c ON c.id = s.class_id
+                    WHERE c.name = ?
+                    ORDER BY s.roll_number
+                """, (target_class_name,))
+                stds = c.fetchall()
+                names_str = ", ".join([s["name"] for s in stds])
+                cnt = len(stds)
+                reply = (f"There are **{cnt} students** enrolled in **{target_class_name}**: {names_str}. "
+                         f"Would you like to check today's attendance or the academic schedule for this class?")
+                suggested_actions = [
+                    SuggestedAction(label="Class Attendance", action_type="query_attendance"),
+                    SuggestedAction(label="Timetable", action_type="query_schedule")
+                ]
+            conn.close()
             return reply, suggested_actions, executed_tools
 
         # -------------------------------------------------------------------

@@ -440,7 +440,9 @@
 
   <script src="/shared/i18n.js"></script>
   <script>
-    const isSingleOrigin = window.location.port === "8000" || window.location.port    const storedUser = JSON.parse(localStorage.getItem("xyz_user") || "{}");
+    const isSingleOrigin = window.location.port === "8000" || window.location.port === "7860" || window.location.port === "";
+    const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
+    const storedUser = JSON.parse(localStorage.getItem("xyz_user") || "{}");
     const studentUserLang = (storedUser.role === "student" && storedUser.preferred_language) ? storedUser.preferred_language : null;
     let selectedLanguage = localStorage.getItem("preferred_lang_student") || studentUserLang || "en";
     let isLiveVoiceActive = false;
@@ -491,28 +493,6 @@
           recognition = null;
         }
         setTimeout(initSpeechRecognition, 200);
-      }
-      const feed = document.getElementById('studentChatFeed');
-      const userMsgs = feed ? feed.querySelectorAll('.user-bubble, [data-role="user"]').length : 0;
-      if (feed && userMsgs === 0) {
-        feed.innerHTML = '';
-        const welcome = studentGreetings[lang] || studentGreetings.en;
-        appendMessage('assistant', welcome);
-      }
-    }�దువుకుందాం?",
-      kn: "ನಮಸ್ಕಾರ ರಾಹುಲ್ ಪಟೇಲ್! ನಾನು ಆರಿಯಾ, ನಿಮ್ಮ ಎಐ ಸ್ಟಡಿ ಕಂಪ್ಯಾನಿಯನ್. ಮನೆಕೆಲಸದ ಸಂದೇಹಗಳನ್ನು ಪರಿಹರಿಸಲು, ಸಿಬಿಎಸ್‌ಇ ಬೋರ್ಡ್ ಪರೀಕ್ಷೆಗಳಿಗೆ ಸಿದ್ಧತೆ ನಡೆಸಲು ಮತ್ತು ನಿಯೋಜನೆಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತೇನೆ. ಇಂದು ನಾವು ಯಾವ ವಿಷಯವನ್ನು ಕಲಿಯೋಣ?",
-      bn: "নমস্কার রাহুল প্যাটেল! আমি আরিয়া, তোমার এআই স্টাডি সঙ্গী। হোমওয়ার্ক, সিবিএসই বোর্ড পরীক্ষার প্রস্তুতিতে সাহায্য করতে পারি। আজ আমরা কী শিখব?",
-      pa: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਰਾਹੁਲ ਪਟੇਲ! ਮੈਂ ਆਰੀਆ ਹਾਂ, ਤੁਹਾਡੀ ਏਆਈ ਸਟੱਡੀ ਸਾਥੀ। ਹੋਮਵਰਕ ਅਤੇ ਸੀਬੀਐਸਈ ਬੋਰਡ ਪ੍ਰੀਖਿਆ ਦੀ ਤਿਆਰੀ ਵਿੱਚ ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰ ਸਕਦੀ ਹਾਂ। ਅੱਜ ਅਸੀਂ ਕੀ ਪੜ੍ਹੀਏ?",
-      ml: "നമസ്കാരം രാഹുൽ പട്ടേൽ! ഞാൻ ആരിയ, നിങ്ങളുടെ എഐ പഠന സഹായി. ഹോംവർക്ക് സംശയങ്ങൾ തീർക്കാനും സിബിഎസ്ഇ പരീക്ഷയ്ക്ക് തയ്യാറെടുക്കാനും സഹായിക്കാം. ഇന്ന് എന്താണ് പഠിക്കേണ്ടത്?",
-      ur: "سلام راہل پٹیل! میں آریا ہوں، آپ کا اے آئی تعلیمی ساتھی۔ ہوم ورک، بورڈ امتحان کی تیاری میں مدد کے لیے حاضر ہوں۔ آج ہم کیا پڑھیں؟",
-      hinglish: "Hello Rahul! Main Aria hoon, aapki AI Study Companion. Homework doubts solve karne, CBSE prep ya assignments me help ke liye ready hoon. Aap kisi bhi language me continue kar sakte ho. Aaj kya padhna hai?"
-    };
-
-    function onLanguageChange(lang) {
-      selectedLanguage = lang;
-      localStorage.setItem('preferred_lang', lang);
-      if (window.SchoolI18n) {
-        SchoolI18n.applyTranslations(lang);
       }
       const feed = document.getElementById('studentChatFeed');
       const userMsgs = feed ? feed.querySelectorAll('.user-bubble, [data-role="user"]').length : 0;
