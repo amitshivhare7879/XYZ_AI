@@ -13,179 +13,159 @@ pinned: false
 
 **XYZ AI** is an enterprise-grade Applied AI ecosystem designed as an intuitive, empathetic, and human-like assistant for **Students, Parents, Teachers, and School Leadership/Principals** across **Interactive Chat, Continuous Live Duplex Voice, and 60FPS 3D Canvas AI Avatars**.
 
-Built on a clean monorepo architecture, XYZ AI enforces **deterministic application-layer RBAC security**, supports **11 Indian languages & Hinglish**, features a **3-state human escalation engine**, and provides **comprehensive School ERP operations** (Attendance, Academics, Timetables, Fee Invoices, Circulars, Homework, and Leave Management).
+The platform is powered by a **Dual AI LLM Architecture (Google Gemini + Groq LLaMA)** with dynamic tool calling, strict **application-layer RBAC security**, **11 Indian regional languages & Hinglish**, a **3-state human escalation callback engine**, and **live database-backed ERP operations** (Attendance, Academics, Timetables, Fee Invoices, Circulars, Homework, and Leave Management).
 
 ---
 
-## 🌟 Key Highlights & Innovations
+## 🏗️ How the Application Works (End-to-End Flow)
 
-1. **4 Distinct AI Personas**:
-   - **Student (Academic Assistant — Alex)**: Cheerful, motivating, Pomodoro study techniques, exam stress counseling, timetable & homework lookup.
-   - **Parent (Parent Support Assistant — Maya)**: Empathetic, polite, child attendance tracking, grades inspection, fee payment, and leave application dispatch.
-   - **Teacher (Teaching Assistant — Professor Orion)**: Professional, concise, voice/click attendance marking, class roster analysis, assignment submission audits.
-   - **Principal (Executive Institutional Assistant — Athena)**: Strategic, analytical, school-wide attendance KPIs, fee collection analytics, faculty workload, and escalation resolution.
-2. **Interactive 60FPS 3D Canvas Avatar & Viseme Lip-Sync**:
-   - Real-time animated canvas avatar with expressive eye blinking, eyebrow articulation, ambient breathing, and realistic viseme mouth shaping synchronized to speech audio.
-3. **Hands-Free Gemini Live Duplex Voice**:
-   - Continuous two-way conversational voice with acoustic echo cancellation, automatic microphone squelching while the assistant speaks, and zero robotic interruptions.
-4. **Natural Conversational Intelligence**:
-   - Time-of-day and name-aware personalized greetings.
-   - Multi-turn context memory retention across sessions.
-   - Temporal query disambiguation (accurately distinguishes *yesterday* from *today*).
-   - In-conversation corrections (*"No, I meant Science"*, *"Actually for next Monday"*).
-   - Clarification questioning (*"What dates and reason should I list for your leave note?"*).
-   - Empathetic counseling for academic anxiety.
-5. **Real-Time Human Escalation State Machine**:
-   - Interactive options: **“Talk to Teacher”** and **“Contact School Management”**.
-   - Strict confirmation requirement before dispatching tickets.
-   - Anti-hallucination honesty guarantee (never claims contact unless confirmed by the ERP service).
-6. **Zero-Trust Application-Layer RBAC Security**:
-   - JWT token authentication + verified entity ownership in code (never delegates authorization to LLM goodwill).
-   - Immune to prompt injections, role-claim impersonation, and unauthorized child/financial access.
-7. **100% Automated Test Coverage**: **50 / 50 comprehensive pytest unit & integration tests passing (100%)**.
+XYZ AI does **not** rely on static hardcoded responses or pre-fitted mock text. Every query flows through an intelligent real-time pipeline:
 
----
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User (Student / Parent / Teacher / Principal)
+    participant UI as Portal Frontend (Avatar + Live Voice)
+    participant Auth as Auth & RBAC Security Layer
+    participant AI as Dual AI LLM Engine (Gemini / Groq)
+    participant DB as Live School ERP Database (SQLite / Postgres)
 
-## 📁 Repository Structure
-
-```text
-XYZ_AI/
-├── 01_student_portal/         # Student Academic Assistant Portal (Avatar, Voice, Homework, Timetable)
-│   ├── index.html             # Student dashboard frontend
-│   └── package.json
-├── 02_parent_portal/          # Parent Support Assistant Portal (Child Attendance, Fees, Reports)
-│   ├── index.html             # Parent dashboard frontend
-│   └── package.json
-├── 03_staff_portal/           # Teacher / Staff Portal (Voice/Click Attendance, Rosters, Homework)
-│   ├── index.html             # Teacher dashboard frontend
-│   └── package.json
-├── 04_management_portal/      # Principal / Leadership Portal (School KPIs, Fee Audits, Escalations)
-│   ├── index.html             # Principal dashboard frontend
-│   └── package.json
-├── unified_login/             # Unified Single Sign-On Portal (Role Switching & Credentials)
-│   └── index.html             # SSO login page
-├── 05_xyz_ai/                 # FastAPI Backend & Multi-Agent Orchestration Core
-│   ├── agent.py               # Human-like conversational orchestrator, memory & persona engine
-│   ├── auth.py                # JWT authentication, demo credentials & role authorization
-│   ├── erp_services.py        # Database-backed ERP business logic (Attendance, Fees, Grades, etc.)
-│   ├── gemini_service.py      # Non-blocking Google Gemini integration with fast fallback
-│   ├── groq_service.py        # Ultra-fast Groq Llama fallback engine with tool execution
-│   ├── main.py                # FastAPI REST API, routing, static mounts & startup verification
-│   ├── rbac.py                # Role-Based Access Control & parent-child ownership validator
-│   ├── tools.py               # Safe ERP tool registry wrapping business services
-│   ├── package.json
-│   └── requirements.txt
-├── shared/                    # Shared Schemas, Database Core & Multilingual Engine
-│   ├── database.py            # Universal SQLite & PostgreSQL adapter (WAL mode, busy timeout)
-│   ├── i18n.js                # Frontend vernacular UI dictionaries & dynamic script switcher
-│   ├── multilingual_engine.py # Multi-lingual pattern translator & Indic TTS phoneme mapper
-│   ├── schemas.py             # Pydantic data contracts for API requests, responses, and tokens
-│   ├── seed_data.py           # Comprehensive Indian School ERP seed dataset (Grades 9-12 PCMB/Commerce)
-│   └── types.ts               # TypeScript interface definitions
-├── tests/                     # Automated Test Suite (50 Comprehensive Tests)
-│   ├── conftest.py            # Isolated test database fixture
-│   ├── test_erp_tools.py      # Student, Parent, Teacher, Principal ERP operations
-│   ├── test_escalation.py     # 3-state escalation triggering, confirmation & mock dispatch
-│   ├── test_fee_conversation_flow.py # Multi-turn fee context & persistent history
-│   ├── test_human_assistant_personas.py # AI Personas, memory, corrections & empathy
-│   ├── test_multilingual_intelligence.py # Hinglish, Hindi, Gujarati, Tamil, Marathi, Kannada
-│   ├── test_rbac_security.py  # Prompt injection, fake role claims, and cross-parent access blocks
-│   └── test_student_exam_and_subject_flow.py # Exam schedules & study tips
-├── Dockerfile                 # Unified container deployment for Hugging Face Spaces / Cloud
-├── app.py                     # Hugging Face Space entrypoint
-├── .env.example               # Environment configuration template
-└── README.md                  # Comprehensive Documentation
+    User->>UI: Types text or speaks via Live Voice
+    UI->>Auth: Submits query with signed JWT Bearer token
+    Auth->>Auth: Validates role permissions & parent-child ownership
+    Auth->>AI: Passes verified user context, role, & message
+    AI->>AI: LLM determines required ERP tool & parameters
+    AI->>DB: Executes dynamic SQL query on live database
+    DB-->>AI: Returns real-time database records
+    AI->>AI: LLM dynamically synthesizes natural language response
+    AI->>UI: Returns response text, suggested action chips & avatar visemes
+    UI->>User: Displays text, animates 3D Avatar mouth & speaks in selected language
 ```
 
+### Detailed Pipeline Breakdown:
+1. **User Authentication & Identity Verification**:
+   - The user logs in with their credentials (e.g. email/password or demo switcher).
+   - The backend signs a tamper-proof **JWT Bearer Token** containing verified `user_id`, `role`, and `name`.
+2. **Zero-Trust RBAC & Ownership Guardrails**:
+   - Before touching any data, [`05_xyz_ai/rbac.py`](file:///d:/Applied_AI/XYZ_AI/05_xyz_ai/rbac.py) checks if the user's role has permission to access the requested operation.
+   - For parents, it strictly verifies child ownership so parents cannot access records for other families.
+3. **Dual AI LLM Engine Execution (Gemini + Groq)**:
+   - **Google Gemini 1.5 Flash / Pro** and **Groq LLaMA 3.3 70B** work in tandem with dynamic fallback.
+   - The LLM dynamically analyzes the user's query, selects structured tools, triggers SQL database operations, retrieves live records, and formulates rich conversational responses.
+4. **Live Database Extraction**:
+   - Queries are executed directly against the live database (`students`, `attendance`, `grades`, `classes`, `fee_invoices`, `homework`, `escalation_tickets`).
+5. **Multilingual Synthesis & 3D Canvas Avatar**:
+   - The synthesized response is translated into the user's chosen language (Hindi, Gujarati, Tamil, Marathi, Hinglish, etc.) and spoken via Web Speech TTS while the 3D Canvas Avatar articulates real-time viseme mouth shapes.
+
 ---
 
-## 🎭 AI Personas & Role Matrix
+## 🌟 Key Features & Capabilities
 
-| Persona | Portal Role | Voice & Tone | Key Capabilities |
+### 1. 📊 Comprehensive Attendance Operations Across All Roles
+- 🎓 **Students**: View own cumulative attendance percentage, total present/absent days, and precise day-by-day logs (including distinguishing *yesterday* from *today*).
+- 👨‍👩‍👧 **Parents**: View linked child's attendance rate, receive absence alerts, check day-by-day records, and submit leave notes directly.
+- 👩‍🏫 **Teachers**: Hands-free voice or one-click attendance marking (e.g. *"Mark Rahul absent today"*), instant live database updates, and class roster summaries.
+- 🏛️ **Principals**: Executive institution-wide attendance KPIs, class-by-class percentage breakdown, low attendance alerts, and individual student lookups.
+
+### 2. 📞 Dissatisfaction Detection & "Request Callback" Escalation
+When a user expresses dissatisfaction (*"I am not satisfied"*, *"I want to talk to the teacher"*, *"Connect me to management"*):
+- The assistant immediately provides interactive options:
+  - 📞 **"Request a Call Back / Talk to Teacher"**
+  - 🏛️ **"Contact School Management"**
+  - 🤖 **"Continue with AI"**
+- Upon user confirmation, it generates a real **Escalation Ticket** in the database with a unique Ticket ID and assigns it to the teacher/leadership queue.
+- **Anti-Hallucination Honesty Guarantee**: If a mock dispatch service fails, the bot truthfully informs the user rather than falsely claiming contact was made.
+
+### 3. 🤖 4 Distinct AI Personas
+| Persona | Role | Voice & Tone | Primary Responsibilities |
 | :--- | :--- | :--- | :--- |
-| **Alex** | **Student** | Friendly, motivating, enthusiastic | Homework assistance, exam schedules, study techniques (Pomodoro), timetable lookup, exam stress relief. |
-| **Maya** | **Parent** | Empathetic, polite, clear, reassuring | Child attendance tracking, report card marks, fee balance inquiries & online UPI, leave note submissions. |
-| **Professor Orion** | **Teacher** | Professional, collegial, efficient | Hands-free voice/click attendance marking, class roster analysis, homework submissions tracking. |
-| **Athena** | **Principal** | Executive, analytical, data-driven | School-wide attendance KPIs, fee collection audits, class breakdown benchmarks, escalation ticket review. |
+| **Alex** | **Student** | Friendly, motivating, cheerful | Homework assistance, exam schedules, Pomodoro study techniques, timetable lookup, exam stress relief. |
+| **Maya** | **Parent** | Empathetic, patient, polite, clear | Child attendance tracking, report card marks, fee balance inquiries & online UPI payment, leave applications. |
+| **Professor Orion** | **Teacher** | Professional, collegial, concise | Live voice attendance marking, class roster analysis, assignment submission audits. |
+| **Athena** | **Principal** | Executive, strategic, analytical | School-wide attendance KPIs, fee collection audits, class benchmarks, escalation ticket review. |
+
+### 4. 🗣️ 11 Indian Languages + Hinglish Support
+Full conversational understanding and synthesized speech across:
+`English`, `Hinglish`, `Hindi` (हिन्दी), `Gujarati` (ગુજરાતી), `Tamil` (தமிழ்), `Telugu` (తెలుగు), `Marathi` (मराठी), `Bengali` (বাংলা), `Punjabi` (ਪੰਜਾਬੀ), `Kannada` (ಕನ್ನಡ), `Malayalam` (മലയാളം), and `Urdu` (اردو).
 
 ---
 
-## 🛡️ Enterprise Security & RBAC Matrix
+## 🗄️ Database & Pre-Seeded Academic Records
 
-Security is strictly enforced in code at the **application layer** in [`05_xyz_ai/rbac.py`](file:///d:/Applied_AI/XYZ_AI/05_xyz_ai/rbac.py):
+XYZ AI includes a realistic, production-grade **School ERP relational database schema** (SQLite with WAL mode and PostgreSQL/Supabase compatibility) pre-populated with real academic data:
 
-| Capability / Resource | Student | Parent | Teacher | Principal |
-| :--- | :---: | :---: | :---: | :---: |
-| **View Own Attendance** | ✅ | ❌ | ❌ | ❌ |
-| **View Linked Child's Attendance** | ❌ | ✅ *(Own Child Only)* | ❌ | ❌ |
-| **Mark Class Attendance** | ❌ | ❌ | ✅ *(Assigned Class)* | ✅ |
-| **School-Wide Attendance KPIs** | ❌ | ❌ | ❌ | ✅ |
-| **View Report Cards / Marks** | ✅ *(Self)* | ✅ *(Own Child)* | ✅ *(Assigned Class)* | ✅ *(All)* |
-| **Fee Invoices & Online UPI** | ❌ | ✅ *(Own Child)* | ❌ | ✅ *(Aggregates)* |
-| **Submit Leave Applications** | ✅ | ✅ | ❌ | ❌ |
-| **Review / Manage Escalation Tickets** | ❌ | ❌ | ✅ | ✅ |
-
-- **Parent-Child Link Isolation**: `validate_parent_student_ownership` ensures Parent A cannot inspect records for Parent B's child even if specifically requested by name or student ID.
-- **Prompt Injection Defense**: Input guardrails detect and neutralize instructions attempting to override system rules, extract prompts, or elevate roles.
+- 👥 **Users & Profiles**: Students, Parents, Teachers, and School Leadership with secure auth links.
+- 🏫 **Classes & Subjects**: Grades 9 to 12 across Secondary, Senior Secondary PCMB (Physics, Chemistry, Math, Biology, CS), and Commerce.
+- 📅 **3-Month Active Attendance Calendar**: Full daily attendance records through August 20, 2026.
+- 📝 **Examinations & Grades**: Monthly Unit Tests, Quarterly Exams, and Mid-Terms with subject-wise marks, max marks, and teacher remarks.
+- 💳 **Fee Invoices & Receipts**: Term-wise tuition fees, transportation fees, payment statuses (`paid`, `partial`, `unpaid`, `overdue`), and online transaction receipts.
+- 📚 **Homework & Timetables**: Daily subject assignments with submission tracking and weekly period schedules.
+- 🎫 **Escalation Tickets & Leaves**: Live support ticket queue and parent leave requisitions.
 
 ---
 
-## 🗣️ Supported Languages & Multilingual Intelligence
+## 🚀 Quickstart: Setup & Running Guide
 
-XYZ AI dynamically processes conversations and outputs synthesized speech across **11 Indian languages + Hinglish**:
-
-1. English (`en`)
-2. Hinglish (`hinglish` — conversational Indian English + Hindi)
-3. Hindi (`hi` — हिन्दी)
-4. Gujarati (`gu` — ગુજરાતી)
-5. Tamil (`ta` — தமிழ்)
-6. Telugu (`te` — తెలుగు)
-7. Marathi (`mr` — मराठी)
-8. Bengali (`bn` — বাংলা)
-9. Punjabi (`pa` — ਪੰਜਾਬੀ)
-10. Kannada (`kn` — ಕನ್ನಡ)
-11. Malayalam (`ml` — മലയാളം)
-12. Urdu (`ur` — اردو)
-
----
-
-## 🚀 Quickstart & Local Execution
-
-### 1. Prerequisites
-- Python 3.10+
-- Modern Web Browser (Google Chrome or Microsoft Edge recommended for Web Speech & Web Audio APIs)
-
-### 2. Setup Environment
+### 1. Clone the Repository
 ```bash
-# Clone the repository
 git clone https://github.com/amitshivhare7879/XYZ_AI.git
 cd XYZ_AI
+```
 
-# Install Python dependencies
+### 2. Configure Environment Variables (`.env`)
+Create a `.env` file in the root directory by copying from `.env.example`:
+```bash
+cp .env.example .env
+```
+
+Ensure your `.env` contains:
+```env
+# Server Configuration
+PORT=7860
+ENVIRONMENT=development
+USE_LOCAL_SQLITE_FALLBACK=true
+
+# Security Key
+JWT_SECRET=super_secret_xyz_ai_jwt_key_2026
+
+# Optional LLM API Keys (Enables Live Gemini & Groq LLMs)
+GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
+
+# Optional PostgreSQL / Supabase URL (Uses local SQLite fallback if unset)
+DATABASE_URL=
+```
+*(Note: If API keys are omitted, the built-in deterministic multi-agent fallback engine handles all queries, tools, and conversations seamlessly).*
+
+### 3. Install Dependencies
+```bash
+# Install Python requirements
 pip install -r 05_xyz_ai/requirements.txt
+```
 
-# Seed the real-world School ERP database (Aug 2026 Academic Calendar)
+### 4. Initialize & Seed the ERP Database
+```bash
+# Seeds full academic records (Grades 9-12, Attendance, Exams, Fees, Timetables)
 python -m shared.seed_data
 ```
 
-### 3. Launch the Server
+### 5. Start the Application Server
 ```bash
-# Start the unified FastAPI backend & portal server
+# Launch FastAPI backend & all portal frontends
 uvicorn 05_xyz_ai.main:app --host 0.0.0.0 --port 7860 --reload
 ```
 
-### 4. Access the Portals
-Open your browser at `http://localhost:7860`:
-- 🔐 **Unified Login**: [http://localhost:7860/login](http://localhost:7860/login)
-- 🎓 **Student Portal**: [http://localhost:7860/student](http://localhost:7860/student)
-- 👨‍👩‍👧 **Parent Portal**: [http://localhost:7860/parent](http://localhost:7860/parent)
-- 👩‍🏫 **Staff / Teacher Portal**: [http://localhost:7860/staff](http://localhost:7860/staff)
+### 6. Open in Browser
+- 🔐 **Unified Login (Role Switcher)**: [http://localhost:7860/login](http://localhost:7860/login)
+- 🎓 **Student Academic Portal**: [http://localhost:7860/student](http://localhost:7860/student)
+- 👨‍👩‍👧 **Parent Support Portal**: [http://localhost:7860/parent](http://localhost:7860/parent)
+- 👩‍🏫 **Teacher / Staff Portal**: [http://localhost:7860/staff](http://localhost:7860/staff)
 - 🏛️ **Management / Principal Portal**: [http://localhost:7860/management](http://localhost:7860/management)
-- 📚 **Swagger API Documentation**: [http://localhost:7860/docs](http://localhost:7860/docs)
+- 📚 **Swagger Interactive API Docs**: [http://localhost:7860/docs](http://localhost:7860/docs)
 
 ---
 
-## 🔑 Demo Login Accounts
+## 🔑 Pre-Configured Demo Accounts
 
 | Role | Email | Password | Pre-Assigned Context |
 | :--- | :--- | :--- | :--- |
@@ -196,29 +176,30 @@ Open your browser at `http://localhost:7860`:
 
 ---
 
-## 🧪 Automated Testing Suite
+## 🧪 Automated Testing Suite (50 / 50 Passing)
 
-The project includes **50 automated pytest unit and integration tests** passing with 100% success rate:
+Run the full automated test suite to verify security, database tools, multilingual translation, and escalation state machines:
 
 ```bash
-# Run the complete test suite
+# Run all tests
 pytest tests/ -v
 ```
 
-### Verified Test Breakdown (50 / 50 Passing):
-- **12 ERP Tool Execution Tests**: Student, Parent, Teacher, and Principal ERP operations.
-- **4 Human Escalation Tests**: 3-state state machine, user confirmation, and honest mock dispatch.
-- **10 Human Persona & Empathy Tests**: Memory retention, follow-ups, in-conversation corrections, and exam stress relief.
-- **12 Multilingual Intelligence Tests**: Vernacular translation and tool accuracy across Hindi, Gujarati, Tamil, Marathi, Kannada, and Hinglish.
+### Verified Test Breakdown:
+- **12 ERP Tool Execution Tests**: Student, Parent, Teacher, and Principal database queries.
+- **4 Human Escalation Tests**: 3-state escalation state machine, callback requests, and honest mock dispatch.
+- **10 Human Persona & Empathy Tests**: Memory retention, in-conversation corrections, and exam stress relief.
+- **12 Multilingual Intelligence Tests**: Indic translations across Hindi, Gujarati, Tamil, Marathi, Kannada, and Hinglish.
 - **9 RBAC Security & Guardrail Tests**: Parent-child link isolation, unauthorized fee blocks, fake role claims, and prompt injection defense.
 - **2 Student Exam & Subject Guidance Tests**: Timetables, exam schedules, and Pomodoro study technique advice.
 - **1 Fee Conversation Flow Test**: Multi-turn invoice and payment history persistence.
 
 ---
 
-## 📦 Package for Submission / Distribution
+## 📦 Project Submission ZIP Archive
 
-To create a clean submission ZIP archive without cache directories, run:
+To generate a clean submission ZIP file ready for distribution (automatically excluding cache, virtual environments, and `.git` files):
+
 ```bash
 python make_submission_zip.py
 ```
@@ -227,4 +208,4 @@ This produces `XYZ_AI_Submission.zip` in the root directory.
 ---
 
 ## 📄 License
-This project is built for the **XYZ AI Applied AI Competition / Deployment**. All rights reserved.
+This project is built for the **XYZ AI Applied AI Competition & Deployment**. All rights reserved.
