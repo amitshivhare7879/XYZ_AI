@@ -84,9 +84,25 @@ When a user expresses dissatisfaction (*"I am not satisfied"*, *"I want to talk 
 | **Professor Orion** | **Teacher** | Professional, collegial, concise | Live voice attendance marking, class roster analysis, assignment submission audits. |
 | **Athena** | **Principal** | Executive, strategic, analytical | School-wide attendance KPIs, fee collection audits, class benchmarks, escalation ticket review. |
 
-### 4. 🗣️ 11 Indian Languages + Hinglish Support
-Full conversational understanding and synthesized speech across:
-`English`, `Hinglish`, `Hindi` (हिन्दी), `Gujarati` (ગુજરાતી), `Tamil` (தமிழ்), `Telugu` (తెలుగు), `Marathi` (मराठी), `Bengali` (বাংলা), `Punjabi` (ਪੰਜਾਬੀ), `Kannada` (ಕನ್ನಡ), `Malayalam` (മലയാളം), and `Urdu` (اردو).
+### 4. 🗣️ Dynamic Multilingual Intelligence (11 Indian Languages + Hinglish)
+XYZ AI features an adaptive multilingual engine with real-time speech and script recognition across **11 Indian languages + Hinglish**:
+
+- **🌐 In-Chat Script Auto-Detection**: If a user switches languages mid-conversation (e.g. typing in Devanagari, Gujarati script, Tamil script, or romanized Hinglish), the AI automatically detects the script and dynamically aligns all subsequent answers, database summaries, and tool confirmations to that language.
+- **🎛️ Portal Dropdown Language Locking**: Selecting a language from the portal's top dropdown immediately updates the AI's greeting, interface labels, prompt chips, and text-to-speech engine to the chosen dialect.
+- **🎙️ Live Duplex Voice Language Adaptation**: During hands-free continuous voice calls, the Web Speech Recognition engine dynamically updates its locale (e.g., `hi-IN`, `gu-IN`, `ta-IN`, `te-IN`, `mr-IN`, `kn-IN`, `bn-IN`, `pa-IN`, `ml-IN`, `ur-PK`, `en-IN`), allowing users to speak naturally in their native tongue without restarting the call.
+- **Supported Languages**:
+  1. `English` (`en`)
+  2. `Hinglish` (`hinglish` — conversational Indian English + Hindi)
+  3. `Hindi` (`hi` — हिन्दी)
+  4. `Gujarati` (`gu` — ગુજરાતી)
+  5. `Tamil` (`ta` — தமிழ்)
+  6. `Telugu` (`te` — తెలుగు)
+  7. `Marathi` (`mr` — मराठी)
+  8. `Bengali` (`bn` — বাংলা)
+  9. `Punjabi` (`pa` — ਪੰਜਾਬੀ)
+  10. `Kannada` (`kn` — ಕನ್ನಡ)
+  11. `Malayalam` (`ml` — മലയാളം)
+  12. `Urdu` (`ur` — اردو)
 
 ---
 
