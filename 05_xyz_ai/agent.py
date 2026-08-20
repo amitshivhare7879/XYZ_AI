@@ -371,22 +371,28 @@ class ConversationOrchestrator:
             "active_date": None,
             "last_data": {}
         })
+        # Language Priority:
+        # 1. If message contains typed vernacular script (e.g. Hindi, Gujarati, Tamil text), switch to that script
+        # 2. If explicit language parameter is passed from user/frontend dropdown, respect it immediately
+        # 3. If detected language is non-English, use it
+        # 4. Otherwise use session context preferred language or user profile or 'en'
         detected_lang = detect_message_language(message)
-        # Priority:
-        # 1. If explicit non-English language is passed from frontend/test, keep it!
-        # 2. If message contains a detected vernacular script or Hinglish, use it!
-        # 3. If session context has preferred non-English language, use it!
-        # 4. Otherwise user profile or "en"
-        if language and language != "en":
-            lang = language
-        elif detected_lang and detected_lang != "en":
+        has_vernacular_script = bool(re.search(r'[\u0A80-\u0AFF\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0980-\u09FF\u0A00-\u0A7F\u0D00-\u0D7F\u0600-\u06FF]', message))
+
+        if has_vernacular_script and detected_lang:
             lang = detected_lang
-        elif context.get("preferred_language") and context.get("preferred_language") != "en":
+        elif language:
+            lang = language
+        elif detected_lang:
+            lang = detected_lang
+        elif context.get("preferred_language"):
             lang = context.get("preferred_language")
-        elif user.preferred_language and user.preferred_language != "en":
+        elif user.preferred_language:
             lang = user.preferred_language
         else:
             lang = "en"
+
+        context["preferred_language"] = lang
             
         lang_code = lang.value if hasattr(lang, 'value') else str(lang)
         msg_clean = message.strip()
