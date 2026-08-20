@@ -313,6 +313,104 @@ def translate_template_patterns(text: str, target_lang: str) -> str:
         elif target_lang == 'hinglish':
             return f'**School-Wide Enrollment**: School me abhi total **{tot} students** enrolled hain. Class breakdown: **{breakdown}**. Kya aap kisi specific class ki attendance ya student records dekhna chahte hain?'
 
+    # Pattern 13: Executive Fee Collection Analytics (Principal Analytics)
+    m13 = re.search(r"\*\*Executive Fee Collection Analytics\*\*:\s*-\s*Total Billed:\s*₹([0-9.,]+)\s*-\s*Total Collected:\s*₹([0-9.,]+)\s*\(\s*\*\*([0-9.]+)%\s*collection rate\*\*\)\s*-\s*Total Outstanding Dues:\s*₹([0-9.,]+)\s*across\s*(\d+)\s*overdue accounts\.\s*Would you like to export the list of outstanding accounts for administrative follow-up\?", text, re.DOTALL)
+    if m13:
+        billed, coll, rate, out, overdue_cnt = m13.groups()
+        if target_lang == "hi":
+            return (f"**कार्यकारी शुल्क संग्रह विश्लेषण**:\n"
+                    f"- कुल बिलिंग: ₹{billed}\n"
+                    f"- कुल संग्रह: ₹{coll} (**{rate}% संग्रह दर**)\n"
+                    f"- कुल बकाया राशि: ₹{out} ({overdue_cnt} बकाया खातों में)।\n"
+                    f"क्या आप प्रशासनिक अनुवर्ती कार्रवाई के लिए बकाया खातों की सूची डाउनलोड करना चाहते हैं?")
+        elif target_lang == "gu":
+            return (f"**કાર્યકારી ફી સંગ્રહ વિશ્લેષણ**:\n"
+                    f"- કુલ બિલિંગ: ₹{billed}\n"
+                    f"- કુલ સંગ્રહ: ₹{coll} (**{rate}% સંગ્રહ દર**)\n"
+                    f"- કુલ બાકી રકમ: ₹{out} ({overdue_cnt} બાકી ખાતાઓમાં).\n"
+                    f"શું આપ વહીવટી ફોલો-અપ માટે બાકી ખાતાઓની યાદી ડાઉનલોડ કરવા માંગો છો?")
+        elif target_lang == "mr":
+            return (f"**कार्यकारी फी संकलन विश्लेषण**:\n"
+                    f"- एकूण बिलिंग: ₹{billed}\n"
+                    f"- एकूण संकलित: ₹{coll} (**{rate}% संकलन प्रमाण**)\n"
+                    f"- एकूण थकबाकी: ₹{out} ({overdue_cnt} थकीत खात्यांमध्ये).\n"
+                    f"आपण प्रशासकीय पाठपुराव्यासाठी थकीत खात्यांची यादी डाउनलोड करू इच्छिता?")
+        elif target_lang == "te":
+            return (f"**ఎగ్జిక్యూటివ్ ఫీజు వసూలు విశ్లేషణ**:\n"
+                    f"- మొత్తం బిల్లింగ్: ₹{billed}\n"
+                    f"- మొత్తం వసూలైనది: ₹{coll} (**{rate}% వసూలు శాతం**)\n"
+                    f"- మొత్తం బకాయిలు: ₹{out} ({overdue_cnt} బకాయి ఖాతాలు).\n"
+                    f"పరిపాలనా చర్యల కొరకు బకాయి ఖాతాల జాబితాను ఎగుమతి చేయాలనుకుంటున్నారా?")
+        elif target_lang == "ta":
+            return (f"**நிர்வாகக் கட்டண வசூல் பகுப்பாய்வு**:\n"
+                    f"- மொத்த பில்லிங்: ₹{billed}\n"
+                    f"- மொத்த வசூல்: ₹{coll} (**{rate}% வசூல் விகிதம்**)\n"
+                    f"- மொத்த நிலுவைத் தொகை: ₹{out} ({overdue_cnt} நிலுவைக் கணக்குகள்).\n"
+                    f"நிர்வாகத் தொடர் நடவடிக்கைக்காக நிலுவைக் கணக்குகளின் பட்டியலைப் பதிவிறக்க விரும்புகிறீர்களா?")
+        elif target_lang == "kn":
+            return (f"**ಕಾರ್ಯನಿರ್ವಾಹಕ ಶುಲ್ಕ ಸಂಗ್ರಹ ವಿಶ್ಲೇಷಣೆ**:\n"
+                    f"- ಒಟ್ಟು ಬಿಲ್ಲಿಂಗ್: ₹{billed}\n"
+                    f"- ಒಟ್ಟು ಸಂಗ್ರಹ: ₹{coll} (**{rate}% ಸಂಗ್ರಹ ದರ**)\n"
+                    f"- ಒಟ್ಟು ಬಾಕಿ ಶುಲ್ಕ: ₹{out} ({overdue_cnt} ಬಾಕಿ ಖಾತೆಗಳಲ್ಲಿ).\n"
+                    f"ಆಡಳಿತಾತ್ಮಕ ಕ್ರಮಕ್ಕಾಗಿ ಬಾಕಿ ಖಾತೆಗಳ ಪಟ್ಟಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?")
+        elif target_lang == "bn":
+            return (f"**কার্যনির্বাহী ফি সংগ্রহ বিশ্লেষণ**:\n"
+                    f"- মোট বিলিং: ₹{billed}\n"
+                    f"- মোট সংগৃহীত: ₹{coll} (**{rate}% সংগ্রহের হার**)\n"
+                    f"- মোট বকেয়া: ₹{out} ({overdue_cnt}টি বকেয়া অ্যাকাউন্টে)।\n"
+                    f"আপনি কি প্রশাসনিক ফলো-আপের জন্য বকেয়া অ্যাকাউন্টের তালিকা ডাউনলোড করতে চান?")
+        elif target_lang == "pa":
+            return (f"**ਕਾਰਜਕਾਰੀ ਫ਼ੀਸ ਵਸੂਲੀ ਵਿਸ਼ਲੇਸ਼ਣ**:\n"
+                    f"- ਕੁੱਲ ਬਿਲਿੰਗ: ₹{billed}\n"
+                    f"- ਕੁੱਲ ਵਸੂਲੀ: ₹{coll} (**{rate}% ਵਸੂਲੀ ਦਰ**)\n"
+                    f"- ਕੁੱਲ ਬਕਾਇਆ ਰਕਮ: ₹{out} ({overdue_cnt} ਬਕਾਇਆ ਖਾਤਿਆਂ ਵਿੱਚ)।\n"
+                    f"ਕੀ ਤੁਸੀਂ ਪ੍ਰਬੰਧਕੀ ਕਾਰਵਾਈ ਲਈ ਬਕਾਇਆ ਖਾਤਿਆਂ ਦੀ ਸੂਚੀ ਡਾਊਨਲੋਡ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")
+        elif target_lang == "ml":
+            return (f"**എക്സിക്യൂട്ടീവ് ഫീസ് ശേഖരണ വിശകലനം**:\n"
+                    f"- ആകെ ബില്ലിംഗ്: ₹{billed}\n"
+                    f"- ആകെ ശേഖരിച്ചത്: ₹{coll} (**{rate}% ശേഖരണ നിരക്ക്**)\n"
+                    f"- ആകെ കുടിശ്ശിക: ₹{out} ({overdue_cnt} അക്കൗണ്ടുകളിൽ).\n"
+                    f"തുടർനടപടികൾക്കായി കുടിശ്ശിക അക്കൗണ്ടുകളുടെ ലിസ്റ്റ് ഡൗൺലോഡ് ചെയ്യണോ?")
+        elif target_lang == "ur":
+            return (f"**ایگزیکٹو فیس وصولی کا تجزیہ**:\n"
+                    f"- کل بلنگ: ₹{billed}\n"
+                    f"- کل وصول شدہ: ₹{coll} (**{rate}% وصولی کی شرح**)\n"
+                    f"- کل واجب الادا رقم: ₹{out} ({overdue_cnt} بقایا کھاتوں میں)۔\n"
+                    f"کیا آپ انتظامی کارروائی کے لیے بقایا کھاتوں کی فہرست دیکھنا چاہتے ہیں؟")
+        elif target_lang == "hinglish":
+            return (f"**Executive Fee Collection Analytics**:\n"
+                    f"- Total Billed: ₹{billed}\n"
+                    f"- Total Collected: ₹{coll} (**{rate}% collection rate**)\n"
+                    f"- Total Outstanding Dues: ₹{out} across {overdue_cnt} overdue accounts.\n"
+                    f"Kya aap administrative follow-up ke liye overdue accounts ki list export karna chahte hain?")
+
+    # Pattern 14: Principal Greeting
+    m14 = re.search(r"Good day,\s*([^!]+)!\s*I'm Athena,\s*your Executive Management Assistant\.\s*Which language do you prefer\?", text)
+    if m14:
+        pname = m14.group(1)
+        if target_lang == "hi":
+            return f"शुभ दिन, {pname}! मैं अथेना हूँ, आपकी कार्यकारी प्रबंधन सहायक। आप किस भाषा में बातचीत करना पसंद करेंगे?"
+        elif target_lang == "gu":
+            return f"શુભ દિવસ, {pname}! હું અથેના છું, આપની કાર્યકારી મેનેજમેન્ટ આસિસ્ટન્ટ. આપ કઈ ભાષામાં વાતચીત પસંદ કરશો?"
+        elif target_lang == "mr":
+            return f"शुभ दिवस, {pname}! मी अथेना, आपली कार्यकारी व्यवस्थापन सहाय्यक. आपण कोणत्या भाषेत संवाद साधू इच्छिता?"
+        elif target_lang == "te":
+            return f"శుభదినం, {pname}! నేను మీ ఎగ్జిక్యూటివ్ మేనేజ్‌మెంట్ అసిస్టెంట్ అథీనా. మీరు ఏ భాషలో మాట్లాడటానికి ఇష్టపడతారు?"
+        elif target_lang == "ta":
+            return f"நாளொரு நன்நாளாக அமையட்டும், {pname}! நான் அதீனா, உங்கள் நிர்வாக ஏஐ உதவியாளர். எந்த மொழியில் பேச விரும்புகிறீர்கள்?"
+        elif target_lang == "kn":
+            return f"ಶುಭ ದಿನ, {pname}! ನಾನು ಅಥೀನಾ, ನಿಮ್ಮ ಸಾಂಸ್ಥಿಕ ಕಾರ್ಯನಿರ್ವಾಹಕ ಸಹಾಯಕ. ನೀವು ಯಾವ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಬಯಸುತ್ತೀರಿ?"
+        elif target_lang == "bn":
+            return f"শুভ দিন, {pname}! আমি অ্যাথিনা, আপনার এক্সিকিউটিভ ম্যানেজমেন্ট সহকারী। আপনি কোন ভাষায় কথা বলতে পছন্দ করবেন?"
+        elif target_lang == "pa":
+            return f"ਸ਼ੁਭ ਦਿਨ, {pname}! ਮੈਂ ਅਥੀਨਾ ਹਾਂ, ਤੁਹਾਡੀ ਐਗਜ਼ੀਕਿਊਟਿਵ ਮੈਨੇਜਮੈਂਟ ਅਸਿਸਟੈਂਟ। ਤੁਸੀਂ ਕਿਹੜੀ ਭਾਸ਼ਾ ਪਸੰਦ ਕਰੋਗੇ?"
+        elif target_lang == "ml":
+            return f"ശുഭദിനം, {pname}! ഞാൻ അഥീന, നിങ്ങളുടെ എക്സിക്യൂട്ടീവ് മാനേജ്‌മെന്റ് സഹായി. ഏത് ഭാഷയിലാണ് സംസാരിക്കാൻ താല്പര്യം?"
+        elif target_lang == "ur":
+            return f"شاندار دن، {pname}! میں ایتھینا ہوں، آپ کی ایگزیکٹو مینجمنٹ اسسٹنٹ۔ آپ کس زبان میں گفتگو پسند کریں گے؟"
+        elif target_lang == "hinglish":
+            return f"Good day, {pname}! Main Athena hoon, aapki Executive Management Assistant. Aap kis language me continue karna chahte hain?"
+
     # Pattern 12: Institutional Leadership Student Disambiguation
     m12 = re.search(r'As institutional leadership, you have access to all records\. Could you please specify which student or class you would like academic results for\?', text)
     if m12:

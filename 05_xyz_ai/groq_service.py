@@ -454,7 +454,8 @@ class GroqService:
                                 })
 
                         elif msg_obj.get("content"):
-                            return msg_obj["content"], executed_tools
+                            norm_tools = [t if t.startswith("tool_") else f"tool_{t}" for t in executed_tools]
+                            return msg_obj["content"], norm_tools
                         else:
                             break
 

@@ -393,7 +393,11 @@
   <script>
     const isSingleOrigin = window.location.port === "8000" || window.location.port === "7860" || window.location.port === "";
     const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
-    let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
+    
+    // Scoped language preference for principal to prevent cross-portal pollution
+    const storedUser = JSON.parse(localStorage.getItem("xyz_user") || "{}");
+    const principalUserLang = (storedUser.role === "principal" || storedUser.role === "management" || storedUser.role === "admin") && storedUser.preferred_language ? storedUser.preferred_language : null;
+    let selectedLanguage = localStorage.getItem("preferred_lang_principal") || localStorage.getItem("preferred_lang_management") || principalUserLang || "en";
     let isLiveVoiceActive = false;
     let recognition = null;
     let isSpeaking = false;
@@ -429,9 +433,20 @@
 
     function onLanguageChange(lang) {
       selectedLanguage = lang;
+      localStorage.setItem('preferred_lang_principal', lang);
+      localStorage.setItem('preferred_lang_management', lang);
       localStorage.setItem('preferred_lang', lang);
+      const sel = document.getElementById('languageSelect');
+      if (sel && sel.value !== lang) sel.value = lang;
       if (window.SchoolI18n) {
         SchoolI18n.applyTranslations(lang);
+      }
+      if (isLiveVoiceActive) {
+        if (recognition) {
+          try { recognition.abort(); } catch(e) {}
+          recognition = null;
+        }
+        setTimeout(initSpeechRecognition, 200);
       }
       const feed = document.getElementById('managementChatFeed');
       const userMsgs = feed ? feed.querySelectorAll('.user-bubble, [data-role="user"]').length : 0;
@@ -1597,7 +1612,7 @@
           const authRes = await fetch(`${API_BASE}/api/auth/mock-login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role: 'admin', language: selectedLanguage })
+            body: JSON.stringify({ role: 'principal', language: selectedLanguage })
           });
           if (authRes.ok) {
             const d = await authRes.json();
@@ -1661,7 +1676,7 @@
         user: {
           user_id: "usr_mgmt_01",
           name: "Dr. Rajesh Sharma",
-          role: "admin",
+          role: "principal",
           preferred_language: selectedLanguage
         }
       };

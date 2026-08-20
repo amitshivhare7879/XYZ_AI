@@ -180,13 +180,18 @@ def detect_affirmation(text: str) -> bool:
     return any(a in low or low.startswith(a) for a in affirmations)
 
 def detect_greeting(text: str) -> bool:
-    """Detects if user is sending a natural greeting."""
+    """Detects if user is sending a natural standalone greeting."""
     low = text.lower().strip()
-    greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "namaste", "namaskar", "kem cho", "vanakkam", "pranam", "how are you", "what's up", "hey there", "hi there", "greetings"]
+    # If the user is asking a substantive question alongside a polite greeting, route to tool/topic handling
+    if any(k in low for k in ["attendance", "present", "absent", "marks", "grade", "score", "fee", "fees", "dues", "timetable", "schedule", "homework", "exam", "हाजरी", "उपस्थिति", "उपस्थिती", "फीસ", "फी", "शुल्क", "गुण", "अंक", "निकाल"]):
+        return False
+    greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "namaste", "namaskar", "kem cho", "vanakkam", "pranam", "how are you", "what's up", "hey there", "hi there", "greetings", "नमस्कार", "नमस्ते", "પ્રણામ", "வணக்கம்", "నమస్కారం", "ನಮಸ್ಕಾರ", "নমস্কার", "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ", "നമസ്കാരം", "سلام"]
     words = re.findall(r'\b\w+\b', low)
     if any(g in low for g in ["good morning", "good afternoon", "good evening", "how are you", "what's up", "kem cho", "hey there", "hi there"]):
         return True
     if len(words) <= 3 and any(w in greetings for w in words):
+        return True
+    if any(low == g for g in greetings):
         return True
     return False
 
