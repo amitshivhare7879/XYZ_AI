@@ -641,6 +641,42 @@ class ConversationOrchestrator:
                 )
 
         # =======================================================================
+                # Check if user (Principal / Teacher / Leadership) is querying the escalation ticket queue
+        is_ticket_queue_query = any(w in msg_lower for w in [
+            "escalation ticket", "escalation tickets", "open escalation", "open tickets", "ticket queue",
+            "support tickets", "pending complaints", "grievances", "escalations", "support queue",
+            "active tickets", "resolved tickets", "support requests", "open complaints"
+        ])
+        if is_ticket_queue_query:
+            context["active_topic"] = "escalations"
+            if user.role in ["principal", "teacher"]:
+                try:
+                    conn = get_db_connection()
+                    c = conn.cursor()
+                    c.execute("SELECT ticket_id, student_name, parent_name, target, reason, status, created_at FROM escalation_tickets ORDER BY created_at DESC LIMIT 5")
+                    tickets = c.fetchall()
+                    conn.close()
+                    executed_tools.append("tool_query_escalations")
+                    if tickets:
+                        t_lines = []
+                        for t in tickets:
+                            st_badge = "🟡 OPEN" if t["status"] == "open" else "🟢 RESOLVED"
+                            t_lines.append(f"- **#{t['ticket_id']}** ({st_badge}) - **{t['student_name']}** (Parent: {t['parent_name']}): {t['reason']}")
+                        t_str = "\n".join(t_lines)
+                        reply = (f"**Institutional Escalation Queue** ({len(tickets)} recent tickets):\n\n"
+                                 f"{t_str}\n\n"
+                                 f"Would you like to review resolution details for a specific ticket?")
+                    else:
+                        reply = "There are currently **0 open escalation tickets** in the institutional queue. All inquiries are resolved."
+                except Exception as e:
+                    reply = "There are currently no unresolved escalation tickets requiring executive action."
+                suggested_actions = [SuggestedAction(label="Refresh Queue", action_type="query_escalations")]
+            else:
+                reply = "You can view your submitted support and escalation requests in your portal support tab."
+                suggested_actions = []
+            return reply, suggested_actions, executed_tools
+
+        # =======================================================================
         # Step 3: Handle Dissatisfaction / Escalation Request
         # =======================================================================
         if detect_dissatisfaction_or_escalation(msg_clean):
@@ -1185,7 +1221,9 @@ class ConversationOrchestrator:
                         reply = (f"You currently have **{pct}%** attendance ({pres}/{tot} days attended)! "
                                  f"You're in good standing. Would you like me to check your homework or upcoming timetable?")
                 else:
-                    reply = f"{sname} has an overall attendance of {pct}% ({pres}/{tot} days). Last recorded status: {last_status.upper()} on {last_date}."
+                    # Principal / Management view of a specific student
+                    reply = (f"Yes! {sname} was marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
+                             f"Overall, {sname} maintains an attendance rate of **{pct}%** ({pres}/{tot} days attended, with {abs_cnt} absences).")
             return reply, suggested_actions, executed_tools
 
         # -------------------------------------------------------------------

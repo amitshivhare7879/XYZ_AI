@@ -1597,24 +1597,28 @@
     });
 
     async function getAuthToken() {
-      let token = localStorage.getItem('xyz_token') || localStorage.getItem('auth_token');
-      if (!token) {
-        try {
-          const authRes = await fetch(`${API_BASE}/api/auth/mock-login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role: 'principal', language: selectedLanguage })
-          });
-          if (authRes.ok) {
-            const d = await authRes.json();
-            token = d.access_token;
-            localStorage.setItem('xyz_token', token);
-            localStorage.setItem('auth_token', token);
-            if (d.user) localStorage.setItem('xyz_user', JSON.stringify(d.user));
-          }
-        } catch(e) {
-          console.warn('Auto auth notice:', e);
+      let token = localStorage.getItem('xyz_token_principal');
+      const storedUser = JSON.parse(localStorage.getItem('xyz_user_principal') || localStorage.getItem('xyz_user') || '{}');
+      if (token && (storedUser.role === 'principal' || storedUser.role === 'management' || storedUser.role === 'admin')) {
+        return token;
+      }
+      try {
+        const authRes = await fetch(`${API_BASE}/api/auth/mock-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: 'principal', language: selectedLanguage })
+        });
+        if (authRes.ok) {
+          const d = await authRes.json();
+          token = d.access_token;
+          localStorage.setItem('xyz_token_principal', token);
+          localStorage.setItem('xyz_user_principal', JSON.stringify(d.user));
+          localStorage.setItem('xyz_token', token);
+          localStorage.setItem('auth_token', token);
+          localStorage.setItem('xyz_user', JSON.stringify(d.user));
         }
+      } catch(e) {
+        console.warn('Auto auth notice:', e);
       }
       return token;
     }

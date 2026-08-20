@@ -1635,24 +1635,28 @@
     });
 
     async function getAuthToken() {
-      let token = localStorage.getItem('xyz_token') || localStorage.getItem('auth_token');
-      if (!token) {
-        try {
-          const authRes = await fetch(`${API_BASE}/api/auth/mock-login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role: 'parent', language: selectedLanguage })
-          });
-          if (authRes.ok) {
-            const d = await authRes.json();
-            token = d.access_token;
-            localStorage.setItem('xyz_token', token);
-            localStorage.setItem('auth_token', token);
-            if (d.user) localStorage.setItem('xyz_user', JSON.stringify(d.user));
-          }
-        } catch(e) {
-          console.warn('Auto auth notice:', e);
+      let token = localStorage.getItem('xyz_token_parent');
+      const storedUser = JSON.parse(localStorage.getItem('xyz_user_parent') || localStorage.getItem('xyz_user') || '{}');
+      if (token && storedUser.role === 'parent') {
+        return token;
+      }
+      try {
+        const authRes = await fetch(`${API_BASE}/api/auth/mock-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: 'parent', language: selectedLanguage })
+        });
+        if (authRes.ok) {
+          const d = await authRes.json();
+          token = d.access_token;
+          localStorage.setItem('xyz_token_parent', token);
+          localStorage.setItem('xyz_user_parent', JSON.stringify(d.user));
+          localStorage.setItem('xyz_token', token);
+          localStorage.setItem('auth_token', token);
+          localStorage.setItem('xyz_user', JSON.stringify(d.user));
         }
+      } catch(e) {
+        console.warn('Auto auth notice:', e);
       }
       return token;
     }
