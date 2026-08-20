@@ -1187,6 +1187,30 @@ class ConversationOrchestrator:
                     "breakdown", "detailed", "which days", "record of last", "absences", "log"
                 ]) or (last_topic == "attendance" and any(w in msg_lower for w in ["yes", "sure", "check", "show", "tell me"]))
 
+                # Resolve specific target record (Yesterday vs Today vs Latest Record)
+                is_yesterday_query = any(w in msg_lower for w in [
+                    "yesterday", "beete kal", "kal aya", "kal aaya", "kal aayi", "kal gaya", "kal present", "kal absent", "kal status", "kal attendance",
+                    "ગઈકાલે", "நேற்று", "నిన్న", "ಗನ್ನೆ", "গতকাল", "ਕੱਲ੍ਹ", "ഇന്നലെ", "گزشتہ کل"
+                ])
+                is_today_query = any(w in msg_lower for w in [
+                    "today", "aaj", "aaya hai", "aayi hai", "aaj aya", "aaj aaya", "aaj present", "aaj absent", "aaj status", "aaj attendance",
+                    "આજે", "இன்று", "నేడు", "ಇಂದು", "আজ", "ਅੱਜ", "ഇന്ന്", "آج"
+                ])
+
+                target_rec = None
+                if is_yesterday_query:
+                    # If recent[0] is today (2026-08-20) or future, yesterday's school day is recent[1]
+                    if len(recent) > 1 and recent[0]["date"] >= "2026-08-20":
+                        target_rec = recent[1]
+                    elif recent:
+                        target_rec = recent[0]
+                elif is_today_query or recent:
+                    target_rec = recent[0] if recent else None
+
+                target_status = target_rec["status"] if target_rec else "present"
+                target_date = target_rec["date"] if target_rec else "2026-08-20"
+                date_phrase = f"yesterday ({target_date})" if is_yesterday_query else f"today ({target_date})" if is_today_query else f"on {target_date}"
+
                 if user.role == "parent":
                     if is_daily_or_recent_request and recent:
                         num_records = 5
@@ -1207,8 +1231,8 @@ class ConversationOrchestrator:
                                  f"{items_str}\n\n"
                                  f"**Overall Cumulative**: **{pct}%** ({pres} present / {tot} total sessions, {abs_cnt} absences).\n"
                                  f"Would you like to submit a leave note for an upcoming date or request a teacher callback?")
-                    elif any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "school aaya", "school gaya"]):
-                        reply = (f"Yes! {sname} was marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
+                    elif any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "school aaya", "school gaya", "present", "absent"]):
+                        reply = (f"Yes! {sname} was marked **{target_status.upper()}** {date_phrase}. "
                                  f"Overall, {sname} maintains a strong attendance of **{pct}%** ({pres} present out of {tot} school days, with {abs_cnt} absences).")
                     else:
                         reply = (f"Sure, let me check that for you! {sname} currently has **{pct}%** attendance ({pres}/{tot} days attended). "
@@ -1223,14 +1247,14 @@ class ConversationOrchestrator:
                         log_lines = [f"- 📅 **{r.get('date')}**: {'✅ PRESENT' if r.get('status','').upper() == 'PRESENT' else '❌ ABSENT'}" for r in records_to_show]
                         reply = (f"Here is your recent attendance breakdown:\n\n" + "\n".join(log_lines) + f"\n\n**Overall**: **{pct}%** ({pres}/{tot} days).")
                     elif any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "marked present", "was i present", "was i absent", "was i in school", "is i am marked"]):
-                        reply = (f"Yes! You were marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
+                        reply = (f"Yes! You were marked **{target_status.upper()}** {date_phrase}. "
                                  f"Overall, you maintain a strong attendance of **{pct}%** ({pres}/{tot} days attended). Keep up the great work!")
                     else:
                         reply = (f"You currently have **{pct}%** attendance ({pres}/{tot} days attended)! "
                                  f"You're in good standing. Would you like me to check your homework or upcoming timetable?")
                 else:
                     # Principal / Management view of a specific student
-                    reply = (f"Yes! {sname} was marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
+                    reply = (f"Yes! {sname} was marked **{target_status.upper()}** {date_phrase}. "
                              f"Overall, {sname} maintains an attendance rate of **{pct}%** ({pres}/{tot} days attended, with {abs_cnt} absences).")
             return reply, suggested_actions, executed_tools
 
