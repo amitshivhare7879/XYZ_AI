@@ -488,6 +488,17 @@
 
     // 3. Update global states and localStorage
     global.selectedLanguage = lang;
+    try {
+      const u = localStorage.getItem('xyz_user');
+      if (u) {
+        const parsed = JSON.parse(u);
+        const role = parsed.role;
+        if (role) {
+          const roleKey = 'preferred_lang_' + (role === 'management' ? 'principal' : role);
+          localStorage.setItem(roleKey, lang);
+        }
+      }
+    } catch(e) {}
     localStorage.setItem('preferred_lang', lang);
     localStorage.setItem('xyz_language', lang);
 
@@ -499,7 +510,24 @@
   }
 
   function initI18n(defaultLang = 'en') {
-    const saved = localStorage.getItem('preferred_lang') || localStorage.getItem('xyz_language') || defaultLang;
+    let saved = null;
+    try {
+      const u = localStorage.getItem('xyz_user');
+      if (u) {
+        const parsed = JSON.parse(u);
+        const role = parsed.role;
+        if (role) {
+          const roleKey = 'preferred_lang_' + (role === 'management' ? 'principal' : role);
+          saved = localStorage.getItem(roleKey);
+        }
+        if (!saved && parsed.preferred_language) {
+          saved = parsed.preferred_language;
+        }
+      }
+    } catch(e) {}
+    if (!saved) {
+      saved = localStorage.getItem('preferred_lang') || localStorage.getItem('xyz_language') || defaultLang;
+    }
     global.selectedLanguage = saved;
     const sel = document.getElementById('languageSelect');
     if (sel) {

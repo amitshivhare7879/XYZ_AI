@@ -419,7 +419,9 @@
   <script>
     const isSingleOrigin = window.location.port === "8000" || window.location.port === "7860" || window.location.port === "";
     const API_BASE = isSingleOrigin ? window.location.origin : "http://localhost:8000";
-    let selectedLanguage = localStorage.getItem("preferred_lang") || "en";
+    const storedUser = JSON.parse(localStorage.getItem("xyz_user") || "{}");
+    const parentUserLang = (storedUser.role === "parent" && storedUser.preferred_language) ? storedUser.preferred_language : null;
+    let selectedLanguage = localStorage.getItem("preferred_lang_parent") || parentUserLang || "en";
     let isLiveVoiceActive = false;
     let recognition = null;
     let isSpeaking = false;
@@ -455,9 +457,19 @@
 
     function onLanguageChange(lang) {
       selectedLanguage = lang;
+      localStorage.setItem('preferred_lang_parent', lang);
       localStorage.setItem('preferred_lang', lang);
+      const sel = document.getElementById('languageSelect');
+      if (sel && sel.value !== lang) sel.value = lang;
       if (window.SchoolI18n) {
         SchoolI18n.applyTranslations(lang);
+      }
+      if (isLiveVoiceActive) {
+        if (recognition) {
+          try { recognition.abort(); } catch(e) {}
+          recognition = null;
+        }
+        setTimeout(initSpeechRecognition, 200);
       }
       const feed = document.getElementById('parentChatFeed');
       const userMsgs = feed ? feed.querySelectorAll('.user-bubble, [data-role="user"]').length : 0;

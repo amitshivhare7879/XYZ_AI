@@ -209,6 +209,13 @@
         localStorage.setItem("xyz_user", JSON.stringify(data.user));
 
         const role = data.user.role;
+        const userLang = data.user.preferred_language || "en";
+        const roleKey = "preferred_lang_" + (role === "management" ? "principal" : role);
+        if (!localStorage.getItem(roleKey)) {
+          localStorage.setItem(roleKey, userLang);
+        }
+        localStorage.setItem("preferred_lang", localStorage.getItem(roleKey) || userLang);
+
         const targetUrl = PORTAL_ROUTES[role] || (isSingleOrigin ? "/parent/" : "http://localhost:3002");
         
         showStatus(`Authenticated as ${data.user.name} (${role.toUpperCase()}). Redirecting...`);

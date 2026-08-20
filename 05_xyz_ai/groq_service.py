@@ -367,7 +367,7 @@ class GroqService:
             }
 
             models_to_try = [self.model_name]
-            for fallback in ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "gemma2-9b-it"]:
+            for fallback in ["qwen/qwen3.6-27b", "openai/gpt-oss-20b"]:
                 if fallback not in models_to_try:
                     models_to_try.append(fallback)
 
