@@ -218,7 +218,7 @@ def generate_seed_data(db_file=None):
         all_student_records.append((sid, sname, cid))
 
     print("[6/9] Generating 3-Month Real Calendar Attendance (~91.2% for Rahul Patel)...")
-    end_date = datetime.date(2026, 8, 15)
+    end_date = datetime.date(2026, 8, 20)
     school_days = []
     curr = end_date - datetime.timedelta(days=130)
     while curr <= end_date:

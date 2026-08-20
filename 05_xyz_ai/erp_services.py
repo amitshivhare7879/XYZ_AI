@@ -197,13 +197,31 @@ class ERPAttendanceService:
             details={"student_name": student["name"], "date": date_str, "status": status_val}
         )
 
+        # Fetch updated class stats
+        c.execute("""
+            SELECT 
+                COUNT(s.id) as total_students,
+                SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present_count,
+                SUM(CASE WHEN a.status = 'absent' THEN 1 ELSE 0 END) as absent_count
+            FROM students s
+            LEFT JOIN attendance a ON a.student_id = s.id AND a.date = ?
+            WHERE s.class_id = ?
+        """, (date_str, class_id))
+        class_stats = c.fetchone()
+        pres_cnt = (class_stats["present_count"] or 0) if class_stats else 0
+        tot_cnt = (class_stats["total_students"] or 0) if class_stats else 0
+        abs_cnt = (class_stats["absent_count"] or 0) if class_stats else 0
+
         return {
             "success": True,
             "message": f"Successfully marked {student['name']} as {status_val.upper()} for {date_str}.",
             "attendance_id": att_id,
             "student_name": student["name"],
             "date": date_str,
-            "status": status_val
+            "status": status_val,
+            "present_count": pres_cnt,
+            "absent_count": abs_cnt,
+            "total_students": tot_cnt
         }
 
     @staticmethod
