@@ -1344,10 +1344,25 @@
       utterance.rate = 0.92;
       utterance.pitch = 1.0;
 
+      const langLocaleMap = {
+        'hi': 'hi-IN',
+        'gu': 'gu-IN',
+        'mr': 'mr-IN',
+        'ta': 'ta-IN',
+        'te': 'te-IN',
+        'kn': 'kn-IN',
+        'bn': 'bn-IN',
+        'pa': 'pa-IN',
+        'ml': 'ml-IN',
+        'ur': 'ur-PK',
+        'hinglish': 'hi-IN',
+        'en': 'en-IN'
+      };
+
       const hasIndicChars = /[\u0900-\u0D7F\u0600-\u06FF]/.test(cleanVoiceText);
       const curLang = selectedLanguage || localStorage.getItem('preferred_lang') || 'en';
 
-      let targetLocale = 'en-IN';
+      let targetLocale = langLocaleMap[curLang] || 'en-IN';
       if (hasIndicChars) {
         if (/[\u0900-\u097F]/.test(cleanVoiceText)) targetLocale = (curLang === 'mr') ? 'mr-IN' : 'hi-IN';
         else if (/[\u0A80-\u0AFF]/.test(cleanVoiceText)) targetLocale = 'gu-IN';
@@ -1358,21 +1373,19 @@
         else if (/[\u0C80-\u0CFF]/.test(cleanVoiceText)) targetLocale = 'kn-IN';
         else if (/[\u0D00-\u0D7F]/.test(cleanVoiceText)) targetLocale = 'ml-IN';
         else if (/[\u0600-\u06FF]/.test(cleanVoiceText)) targetLocale = 'ur-PK';
-      } else {
-        targetLocale = 'en-IN';
       }
 
       utterance.lang = targetLocale;
-      const langPrefix = targetLocale.substring(0, 2);
+      const langPrefix = targetLocale.substring(0, 2).toLowerCase();
 
       const voices = window.speechSynthesis.getVoices();
       if (voices && voices.length > 0) {
-        let matchingVoice = null;
-        if (hasIndicChars) {
-          matchingVoice = voices.find(v => v.lang && (v.lang.toLowerCase() === targetLocale.toLowerCase() || v.lang.toLowerCase().startsWith(langPrefix)));
-        }
+        let matchingVoice = voices.find(v => v.lang && (v.lang.toLowerCase() === targetLocale.toLowerCase() || v.lang.toLowerCase().replace('_', '-').startsWith(targetLocale.toLowerCase())));
         if (!matchingVoice) {
-          matchingVoice = voices.find(v => v.lang && (v.lang.includes('en-IN') || v.lang.includes('hi-IN') || v.name.includes('India') || v.name.includes('Indian')));
+          matchingVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(langPrefix));
+        }
+        if (!matchingVoice && targetLocale !== 'en-IN') {
+          matchingVoice = voices.find(v => v.lang && (v.lang.includes('hi-IN') || v.lang.includes('en-IN') || v.name.toLowerCase().includes('india') || v.name.toLowerCase().includes('hindi')));
         }
         if (!matchingVoice) {
           matchingVoice = voices.find(v => (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google UK English Female') || v.name.includes('Natural') || v.name.includes('Jenny')));

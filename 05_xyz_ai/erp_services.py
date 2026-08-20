@@ -185,7 +185,6 @@ class ERPAttendanceService:
         """, (att_id, student_id, class_id, date_str, status_val, marked_by_user_id, remarks or ""))
 
         conn.commit()
-        conn.close()
 
         # Log mutation audit event
         log_audit_event(
@@ -211,6 +210,8 @@ class ERPAttendanceService:
         pres_cnt = (class_stats["present_count"] or 0) if class_stats else 0
         tot_cnt = (class_stats["total_students"] or 0) if class_stats else 0
         abs_cnt = (class_stats["absent_count"] or 0) if class_stats else 0
+
+        conn.close()
 
         return {
             "success": True,

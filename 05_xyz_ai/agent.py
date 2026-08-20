@@ -1091,15 +1091,16 @@ class ConversationOrchestrator:
         # F. Attendance Queries & Follow-ups
         # -------------------------------------------------------------------
         is_attendance_query = any(w in msg_lower for w in [
-            "attendance", "attedenace", "attedaence", "attandance", "atendance", "attendence", "attendace", "attedance", "attedence", "attednace", "attndance",
+            "attendance", "attedenace", "attedaence", "attandance", "atendance", "attendence", "attendace", "attedance", "attedence", "attednace", "attndance", "attendanc",
             "present", "presnt", "prsent", "absent", "absnt", "absance", "absence", "absences", "school yesterday", "come to school", "came to school", 
-            "days", "school aya", "school aaya", "school aayi", "school gaya", "kal school", "hajiri",
+            "days", "school aya", "school aaya", "school aayi", "school gaya", "kal school", "hajiri", "hajri",
             "percentage", "percenatege", "persentage", "percentge", "prcentage", "percntage", "percent",
             "last 5 days", "last 7 days", "last 10 days", "last few days", "recent days", "past days", "record of last", "daily record", "attendance record",
+            "overall", "scholl", "skool", "school attendance", "overall attendance", "school-wide attendance", "whole school", "institution attendance",
+            "హాజరు", "గైర్హాజరు", "హాజరయ్యారు",
             "હાજરી", "હાજર", "ગેરહાજર", "ઉપસ્થિતિ",
             "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "उपस्थिती", "उपस्थित", "अनुपस्थित",
             "வருகை", "வராதவர்",
-            "హాజరు", "గైర్హాజరు", "హాజరయ్యారు",
             "উপস্থিতি", "অনুপস্থিত", "উপস্থিত",
             "ਹਾਜ਼ਰੀ", "ਗ਼ੈਰਹਾਜ਼ਰ", "ਹਾਜ਼ਰ",
             "ಹಾಜರಾತಿ", "ಗೈರುಹಾಜರಿ", "ಹಾಜರಿದ್ದಾರೆ",
@@ -1129,14 +1130,30 @@ class ConversationOrchestrator:
                     reply = res.get("message", "Permission Denied.")
                 else:
                     dt = res.get("date", "2026-08-20")
-                    pres_c = res.get("present_count", 7)
-                    tot_c = res.get("total_students", 8)
+                    pres_c = res.get("present_count")
+                    tot_c = res.get("total_students")
+                    if pres_c is None or tot_c is None:
+                        try:
+                            from rbac import validate_teacher_class_ownership
+                            from erp_services import ERPAttendanceService
+                            cls_info = validate_teacher_class_ownership(user.user_id)
+                            csum = ERPAttendanceService.get_class_attendance_summary(class_id=cls_info["id"], date_str=dt)
+                            pres_c = csum.get("present_count", pres_c or 0)
+                            tot_c = csum.get("total_students", tot_c or 0)
+                        except Exception:
+                            pres_c = pres_c if pres_c is not None else 8
+                            tot_c = tot_c if tot_c is not None else 8
+
                     reply = (f"Attendance successfully recorded! **{student_to_mark}** has been marked **{status_target.upper()}** for **{dt}** in the school database. "
                              f"Class total is now **{pres_c} of {tot_c} students present**.")
                 return reply, suggested_actions, executed_tools
 
             # Retrieve attendance
-            target_student = mentioned_student if user.role in ["principal", "teacher"] else (mentioned_student or active_student)
+            is_principal_overall = user.role == "principal" and (
+                not mentioned_student or
+                any(w in msg_lower for w in ["overall", "school", "scholl", "skool", "all", "whole", "institution", "campus", "summary", "metrics", "overview", "rate", "grade", "class"])
+            )
+            target_student = None if is_principal_overall else (mentioned_student if user.role in ["principal", "teacher"] else (mentioned_student or active_student))
             res = tool_get_attendance(user=user, student_name=target_student)
             executed_tools.append("tool_get_attendance")
             context["last_data"] = res

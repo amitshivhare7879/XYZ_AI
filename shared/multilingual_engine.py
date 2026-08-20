@@ -286,6 +286,8 @@ def translate_template_patterns(text: str, target_lang: str) -> str:
             return f"**സ്കൂൾ തല ഹാജർ അവലോകനം**: എല്ലാ ക്ലാസുകളിലെയും ആകെ വിദ്യാർത്ഥി ഹാജർ നിലവിൽ **{pct}** ആണ്. ക്ലാസ് തിരിച്ചുള്ള വിവരങ്ങൾ: {cls_summary}."
         elif target_lang == "ur":
             return f"**اسکول کی مجموعی حاضری کا جائزہ**: تمام کلاسوں میں طلباء کی کل حاضری اس وقت **{pct}** ہے۔ کلاس وار تفصیلات: {cls_summary}۔ کیا آپ 85 فیصد سے کم حاضری والی کلاسوں کی فہرست دیکھنا چاہتے ہیں؟"
+        elif target_lang == "hinglish":
+            return f"**School-Wide Attendance Overview**: Sabhi grades me overall student attendance abhi **{pct}** hai. Top class breakdown: {cls_summary}. Kya aap 85% benchmark se neeche wali classes ki list dekhna chahte hain?"
 
     # Pattern 10: Class Enrollment & Student Roster
     m10 = re.search(r'There are \*\*(\d+) students\*\* enrolled in \*\*([^*]+)\*\*: (.*?)\. Would you like to check today\'s attendance or the academic schedule for this class\?', text, re.DOTALL)
@@ -436,6 +438,393 @@ def translate_template_patterns(text: str, target_lang: str) -> str:
             return 'ادارہ جاتی قیادت کے طور پر، آپ کو تمام ریکارڈ تک رسائی حاصل ہے۔ برائے مہربانی بتائیں کہ آپ کس طالب علم یا کلاس کے امتحانی نتائج دیکھنا چاہتے ہیں؟'
         elif target_lang == 'hinglish':
             return 'As institutional leadership, aapke paas sabhi records ka access hai. Please batayein ki aap kis student ya class ke academic results dekhna chahte hain?'
+
+    # Pattern 15: Parent Attendance Overview - "Sure, let me check that for you! Rahul currently has **91.2%** attendance (83/91 days attended). Would you like me to check his recent day-by-day attendance log too?"
+    m15 = re.search(r"Sure, let me check that for you!\s*([^*]+)\s*currently has\s*\*\*([^*]+)\*\*\s*attendance\s*\((\d+)/(\d+) days attended\)\.\s*Would you like me to check (?:his|her|their) recent day-by-day attendance log too\?", text)
+    if m15:
+        sname, pct, pres, tot = m15.groups()
+        sname = sname.strip()
+        if target_lang == "hi":
+            return f"अवश्य, मैं आपके लिए जाँच कर लेता हूँ! {sname} की वर्तमान उपस्थिति **{pct}** ({tot} में से {pres} दिन उपस्थित) है। क्या आप दैनिक उपस्थिति रिकॉर्ड भी देखना चाहते हैं?"
+        elif target_lang == "gu":
+            return f"ચોક્કસ, હું તમારા માટે તપાસી લઉં છું! {sname} ની હાલની હાજરી **{pct}** ({tot} માંથી {pres} દિવસ હાજર) છે. શું તમે દૈનિક હાજરી પત્રક પણ જોવા માંગો છો?"
+        elif target_lang == "mr":
+            return f"नक्कीच, मी आपल्यासाठी तपासतो! {sname} ची सद्य उपस्थिती **{pct}** ({tot} पैकी {pres} दिवस उपस्थित) आहे. आपल्याला दैनंदिन उपस्थिती नोंद देखील पाहायची आहे का?"
+        elif target_lang == "ta":
+            return f"நிச்சயமாக, உங்களுக்காக பார்க்கிறேன்! {sname} இன் தற்போதைய வருகை **{pct}** ({tot} நாட்களில் {pres} நாட்கள் வருகை). தினசரி வருகைப் பதிவையும் பார்க்க விரும்புகிறீர்களா?"
+        elif target_lang == "te":
+            return f"తప్పకుండా, నేను మీ కోసం తనిఖీ చేస్తాను! {sname} ప్రస్తుత హాజరు **{pct}** ({tot} రోజుల్లో {pres} రోజులు హాజరు). రోజువారీ హాజరు రికార్డును కూడా చూడాలనుకుంటున్నారా?"
+        elif target_lang == "bn":
+            return f"অবশ্যই, আমি আপনার জন্য দেখে দিচ্ছি! {sname} এর বর্তমান উপস্থিতি **{pct}** ({tot} দিনের মধ্যে {pres} দিন উপস্থিত)। আপনি কি প্রতিদিনের উপস্থিতি লগ দেখতে চান?"
+        elif target_lang == "pa":
+            return f"ਜ਼ਰੂਰ, ਮੈਂ ਤੁਹਾਡੇ ਲਈ ਚੈੱਕ ਕਰਦਾ ਹਾਂ! {sname} ਦੀ ਮੌਜੂਦਾ ਹਾਜ਼ਰੀ **{pct}** ({tot} ਵਿੱਚੋਂ {pres} ਦਿਨ ਹਾਜ਼ਰ) ਹੈ। ਕੀ ਤੁਸੀਂ ਰੋਜ਼ਾਨਾ ਹਾਜ਼ਰੀ ਰਿਕਾਰਡ ਵੀ ਦੇਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"
+        elif target_lang == "kn":
+            return f"ಖಂಡಿತ, ನಾನು ನಿಮಗಾಗಿ ಪರಿಶೀಲಿಸುತ್ತೇನೆ! {sname} ಅವರ ಪ್ರಸ್ತುತ ಹಾಜರಾತಿ **{pct}** ({tot} ದಿನಗಳಲ್ಲಿ {pres} ದಿನಗಳು ಹಾಜರಾಗಿದ್ದಾರೆ). ಇತ್ತೀಚಿನ ದಿನವಾರು ಹಾಜರಾತಿ ಲಾಗ್ ಅನ್ನು ಸಹ ನೋಡಲು ಬಯಸುವಿರಾ?"
+        elif target_lang == "ml":
+            return f"തീർച്ചയായും, ഞാൻ പരിശോധിക്കാം! {sname} ന് നിലവിൽ **{pct}** ഹാജറുണ്ട് ({tot} ൽ {pres} ദിവസങ്ങൾ). ദിവസേനയുള്ള ഹാജർ രേഖ കാണണമെന്നുണ്ടോ?"
+        elif target_lang == "ur":
+            return f"ضرور، میں آپ کے لیے چیک کر لیتا ہوں! {sname} کی موجودہ حاضری **{pct}** ({tot} میں سے {pres} دن حاضر) ہے۔ کیا آپ روزانہ کا حاضری ریکارڈ بھی دیکھنا چاہتے ہیں؟"
+        elif target_lang == "hinglish":
+            return f"Sure, main aapke liye check kar deta hoon! {sname} ki current attendance **{pct}** ({tot} me se {pres} days attended) hai. Kya aap recent day-by-day attendance log bhi check karna chahte hain?"
+
+    # Pattern 16: Parent Yesterday/Today Status - "Yes! Rahul was marked **PRESENT** yesterday (2026-08-19). Overall, Rahul maintains a strong attendance of **91.2%** (83 present out of 91 school days, with 8 absences)."
+    m16 = re.search(r"Yes!\s*([^*]+)\s*was marked\s*\*\*([^*]+)\*\*\s*(yesterday \([^)]+\)|today \([^)]+\)|on [^.]+)\.\s*Overall,\s*([^ ]+)\s*maintains a strong attendance of\s*\*\*([^*]+)\*\*\s*\((\d+)\s*present out of\s*(\d+)\s*school days,\s*with\s*(\d+)\s*absences\)\.", text)
+    if m16:
+        sname, status, dt_phrase, _, pct, pres, tot, abs_cnt = m16.groups()
+        sname = sname.strip()
+        status_upper = status.upper()
+        if target_lang == "hi":
+            st_hi = "उपस्थित (PRESENT)" if "PRESENT" in status_upper else "अनुपस्थित (ABSENT)"
+            return f"हाँ! {sname} को {dt_phrase} **{st_hi}** चिह्नित किया गया था। कुल मिलाकर, {sname} की उपस्थिति **{pct}** ({tot} में से {pres} दिन उपस्थित, {abs_cnt} अनुपस्थिति) के साथ उत्कृष्ट है।"
+        elif target_lang == "gu":
+            st_gu = "હાજર (PRESENT)" if "PRESENT" in status_upper else "ગેરહાજર (ABSENT)"
+            return f"હા! {sname} ને {dt_phrase} **{st_gu}** નોંધવામાં આવ્યા હતા. સમગ્ર રીતે, {sname} ની હાજરી **{pct}** ({tot} માંથી {pres} દિવસ હાજર, {abs_cnt} ગેરહાજરી) સાથે ખૂબ સારી છે."
+        elif target_lang == "mr":
+            st_mr = "उपस्थित (PRESENT)" if "PRESENT" in status_upper else "गैरहजर (ABSENT)"
+            return f"होय! {sname} यांना {dt_phrase} **{st_mr}** नोंदवले गेले होते. एकंदरीत, {sname} ची उपस्थिती **{pct}** ({tot} पैकी {pres} दिवस उपस्थित, {abs_cnt} गैरहजर) सह उत्तम आहे."
+        elif target_lang == "ta":
+            st_ta = "வருகை (PRESENT)" if "PRESENT" in status_upper else "வராதவர் (ABSENT)"
+            return f"ஆம்! {sname} {dt_phrase} அன்று **{st_ta}** எனப் பதிவு செய்யப்பட்டுள்ளார். ஒட்டுமொத்தமாக, {sname} **{pct}** வருகை சதவீதத்தை ({tot} நாட்களில் {pres} நாட்கள்) பராமரிக்கிறார்."
+        elif target_lang == "te":
+            st_te = "హాజరు (PRESENT)" if "PRESENT" in status_upper else "గైర్హాజరు (ABSENT)"
+            return f"అవును! {sname} {dt_phrase} న **{st_te}** గా నమోదు చేయబడ్డారు. మొత్తంమీద, {sname} **{pct}** హాజరును ({tot} రోజుల్లో {pres} రోజులు) కొనసాగిస్తున్నారు."
+        elif target_lang == "bn":
+            st_bn = "উপস্থিত (PRESENT)" if "PRESENT" in status_upper else "অনুপস্থিত (ABSENT)"
+            return f"হ্যাঁ! {sname} কে {dt_phrase} **{st_bn}** চিহ্নিত করা হয়েছিল। সামগ্রিকভাবে, {sname} **{pct}** উপস্থিতি ({tot} দিনের মধ্যে {pres} দিন) বজায় রেখেছেন।"
+        elif target_lang == "pa":
+            st_pa = "ਹਾਜ਼ਰ (PRESENT)" if "PRESENT" in status_upper else "ਗ਼ੈਰਹਾਜ਼ਰ (ABSENT)"
+            return f"ਹਾਂ! {sname} ਨੂੰ {dt_phrase} **{st_pa}** ਦਰਜ ਕੀਤਾ ਗਿਆ ਸੀ। ਸਮੁੱਚੇ ਤੌਰ 'ਤੇ, {sname} ਦੀ ਹਾਜ਼ਰੀ **{pct}** ({tot} ਵਿੱਚੋਂ {pres} ਦਿਨ ਹਾਜ਼ਰ) ਬਹੁਤ ਚੰਗੀ ਹੈ।"
+        elif target_lang == "kn":
+            st_kn = "ಹಾಜರು (PRESENT)" if "PRESENT" in status_upper else "ಗೈರುಹಾಜರು (ABSENT)"
+            return f"ಹೌದು! {sname} ಅವರನ್ನು {dt_phrase} **{st_kn}** ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ. ಒಟ್ಟಾರೆಯಾಗಿ, {sname} **{pct}** ಹಾಜರಾತಿಯನ್ನು ({tot} ದಿನಗಳಲ್ಲಿ {pres} ದಿನಗಳು) ಕಾಯ್ದುಕೊಂಡಿದ್ದಾರೆ."
+        elif target_lang == "ml":
+            st_ml = "ഹാജർ (PRESENT)" if "PRESENT" in status_upper else "ഹാജരായില്ല (ABSENT)"
+            return f"അതെ! {sname} {dt_phrase} ൽ **{st_ml}** ആയിരുന്നു. ആകെ {sname} ന് **{pct}** ഹാജറുണ്ട് ({tot} ൽ {pres} ദിവസങ്ങൾ)."
+        elif target_lang == "ur":
+            st_ur = "حاضر (PRESENT)" if "PRESENT" in status_upper else "غیر حاضر (ABSENT)"
+            return f"جی ہاں! {sname} کو {dt_phrase} **{st_ur}** درج کیا گیا تھا۔ مجموعی طور پر، {sname} کی حاضری **{pct}** ({tot} میں سے {pres} دن حاضر) ہے۔"
+        elif target_lang == "hinglish":
+            return f"Haan! {sname} ko {dt_phrase} **{status_upper}** mark kiya gaya tha. Overall, {sname} ki attendance **{pct}** ({tot} me se {pres} days present, {abs_cnt} absences) ke sath strong hai."
+
+    # Pattern 17: Parent Greeting - "Hello Mr. Amit Patel! Good afternoon! I'm XYZ AI, your Parent Support Assistant. Which language do you prefer?"
+    m17 = re.search(r"Hello\s+([^!]+)!\s*([^!]+)!\s*I'm XYZ AI,\s*your Parent Support Assistant\.\s*Which language do you prefer\?", text)
+    if m17:
+        pname, tgreet = m17.groups()
+        if target_lang == "hi":
+            return f"नमस्ते {pname}! {tgreet}! मैं XYZ AI हूँ, आपका अभिभावक सहायता सहायक। आप किस भाषा में बातचीत करना पसंद करेंगे?"
+        elif target_lang == "gu":
+            return f"નમસ્તે {pname}! {tgreet}! હું XYZ AI છું, આપનો પેરેન્ટ સપોર્ટ આસિસ્ટન્ટ. આપ કઈ ભાષામાં વાતચીત પસંદ કરશો?"
+        elif target_lang == "mr":
+            return f"नमस्कार {pname}! {tgreet}! मी XYZ AI, आपला पालक सहाय्यक. आपण कोणत्या भाषेत संवाद साधू इच्छिता?"
+        elif target_lang == "ta":
+            return f"வணக்கம் {pname}! {tgreet}! நான் XYZ AI, உங்கள் பெற்றோர் உதவி உதவியாளர். எந்த மொழியில் பேச விரும்புகிறீர்கள்?"
+        elif target_lang == "te":
+            return f"నమస్కారం {pname}! {tgreet}! నేను XYZ AI, మీ పేరెంట్ సపోర్ట్ అసిస్టెంట్. మీరు ఏ భాషలో మాట్లాడటానికి ఇష్టపడతారు?"
+        elif target_lang == "bn":
+            return f"নমস্কার {pname}! {tgreet}! আমি XYZ AI, আপনার অভিভাবক সহায়তা সহকারী। আপনি কোন ভাষায় কথা বলতে পছন্দ করবেন?"
+        elif target_lang == "pa":
+            return f"ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ {pname}! {tgreet}! ਮੈਂ XYZ AI ਹਾਂ, ਤੁਹਾਡਾ ਪੇਰੈਂਟ ਸਪੋਰਟ ਅਸਿਸਟੈਂਟ। ਤੁਸੀਂ ਕਿਹੜੀ ਭਾਸ਼ਾ ਪਸੰਦ ਕਰੋਗੇ?"
+        elif target_lang == "kn":
+            return f"ನಮಸ್ಕಾರ {pname}! {tgreet}! ನಾನು XYZ AI, ನಿಮ್ಮ ಪೋಷಕರ ಬೆಂಬಲ ಸಹಾಯಕ. ನೀವು ಯಾವ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಬಯಸುತ್ತೀರಿ?"
+        elif target_lang == "ml":
+            return f"നമസ്കാരം {pname}! {tgreet}! ഞാൻ XYZ AI, രക്ഷിതാക്കളുടെ പിന്തുണ സഹായി. ഏത് ഭാഷയിലാണ് സംസാരിക്കാൻ താല്പര്യം?"
+        elif target_lang == "ur":
+            return f"آداب {pname}! {tgreet}! میں XYZ AI ہوں، آپ کا پیرنٹ سپورٹ اسسٹنٹ۔ آپ کس زبان میں گفتگو پسند کریں گے؟"
+        elif target_lang == "hinglish":
+            return f"Hello {pname}! {tgreet}! Main XYZ AI hoon, aapka Parent Support Assistant. Aap kis language me continue karna chahte hain?"
+
+    # Pattern 18: Student Greeting
+    m18 = re.search(r"Hey\s+([^!]+)!\s*([^!]+)!\s*😊\s*I'm XYZ AI,\s*your Academic Assistant\.\s*Which language do you prefer\?", text)
+    if m18:
+        sname, tgreet = m18.groups()
+        if target_lang == "hi":
+            return f"नमस्ते {sname}! {tgreet}! 😊 मैं XYZ AI हूँ, आपका शैक्षणिक सहायक। आप किस भाषा में बात करना चाहते हैं?"
+        elif target_lang == "gu":
+            return f"નમસ્તે {sname}! {tgreet}! 😊 હું XYZ AI છું, તમારો શૈક્ષણિક સહાયક. તમે કઈ ભાષામાં વાત કરવા માંગો છો?"
+        elif target_lang == "mr":
+            return f"नमस्कार {sname}! {tgreet}! 😊 मी XYZ AI, तुझा शैक्षणिक सहाय्यक. तू कोणत्या भाषेत संवाद साधू इच्छितोस?"
+        elif target_lang == "ta":
+            return f"வணக்கம் {sname}! {tgreet}! 😊 நான் XYZ AI, உங்கள் கல்வி உதவியாளர். எந்த மொழியில் பேச விரும்புகிறீர்கள்?"
+        elif target_lang == "te":
+            return f"హలో {sname}! {tgreet}! 😊 నేను XYZ AI, మీ అకడమిక్ అసిస్టెంట్. మీరు ఏ భాషలో మాట్లాడాలనుకుంటున్నారు?"
+        elif target_lang == "kn":
+            return f"ನಮಸ್ಕಾರ {sname}! {tgreet}! 😊 ನಾನು XYZ AI, ನಿಮ್ಮ ಶೈಕ್ಷಣಿಕ ಸಹಾಯಕ. ನೀವು ಯಾವ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡಲು ಬಯಸುತ್ತೀರಿ?"
+        elif target_lang == "bn":
+            return f"হ্যালো {sname}! {tgreet}! 😊 আমি XYZ AI, তোমার একাডেমিক সহকারী। তুমি কোন ভাষায় কথা বলতে চাও?"
+        elif target_lang == "pa":
+            return f"ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ {sname}! {tgreet}! 😊 ਮੈਂ XYZ AI ਹਾਂ, ਤੁਹਾਡਾ ਅਕਾਦਮਿਕ ਸਹਾਇਕ। ਤੁਸੀਂ ਕਿਹੜੀ ਭਾਸ਼ਾ ਚੁਣੋਗੇ?"
+        elif target_lang == "ml":
+            return f"ഹലോ {sname}! {tgreet}! 😊 ഞാൻ XYZ AI, നിങ്ങളുടെ അക്കാദമിക് സഹായി. ഏത് ഭാഷയിലാണ് സംസാരിക്കേണ്ടത്?"
+        elif target_lang == "ur":
+            return f"ہیلو {sname}! {tgreet}! 😊 میں XYZ AI ہوں، آپ کا تعلیمی اسسٹنٹ۔ آپ کس زبان میں بات کرنا چاہتے ہیں؟"
+        elif target_lang == "hinglish":
+            return f"Hey {sname}! {tgreet}! 😊 Main XYZ AI hoon, aapka Academic Assistant. Aap kis language me continue karna chahte hain?"
+
+    # Pattern 19: Holistic Progress - "Overall, **Rahul is doing very well!** 😊\n- **Attendance**: 91.2% (punctual and attending regularly)\n- **Academic Average**: 87.5% across all major subjects\n- **Behavior & Conduct**: Positive teacher remarks across classes.\nIs there a particular subject or upcoming school event you'd like to discuss in detail?"
+    m19 = re.search(r"Overall,\s*\*\*([^*]+)\s*is doing very well!\*\*\s*😊\s*-\s*\*\*Attendance\*\*:\s*([0-9.]+)%\s*\(punctual and attending regularly\)\s*-\s*\*\*Academic Average\*\*:\s*([0-9.]+)%\s*across all major subjects\s*-\s*\*\*Behavior & Conduct\*\*:\s*Positive teacher remarks across classes\.\s*Is there a particular subject or upcoming school event you'd like to discuss in detail\?", text, re.DOTALL)
+    if m19:
+        sname, pct, avg = m19.groups()
+        if target_lang == "hi":
+            return (f"कुल मिलाकर, **{sname} का प्रदर्शन बहुत अच्छा है!** 😊\n"
+                    f"- **उपस्थिति**: {pct}% (नियमित और समय पर उपस्थित)\n"
+                    f"- **शैक्षणिक औसत**: प्रमुख विषयों में {avg}%\n"
+                    f"- **आचरण व व्यवहार**: शिक्षकों द्वारा सकारात्मक टिप्पणी।\n"
+                    f"क्या आप किसी विशिष्ट विषय या आगामी कार्यक्रम के बारे में विस्तार से बात करना चाहते हैं?")
+        elif target_lang == "gu":
+            return (f"સમગ્ર રીતે, **{sname} નો દેખાવ ખૂબ જ સારો છે!** 😊\n"
+                    f"- **હાજરી**: {pct}% (નિયમિત અને સમયપાલન)\n"
+                    f"- **શૈક્ષણિક સરેરાશ**: મુખ્ય વિષયોમાં {avg}%\n"
+                    f"- **વર્તણૂક અને આચરણ**: શિક્ષકો દ્વારા સકારાત્મક પ્રતિસાદ.\n"
+                    f"શું આપ કોઈ ચોક્કસ વિષય અથવા આગામી કાર્યક્રમ વિશે વાત કરવા માંગો છો?")
+        elif target_lang == "mr":
+            return (f"एकंदरीत, **{sname} ची प्रगती खूप छान आहे!** 😊\n"
+                    f"- **उपस्थिती**: {pct}% (नियमित उपस्थिती)\n"
+                    f"- **शैक्षणिक सरासरी**: सर्व प्रमुख विषयांमध्ये {avg}%\n"
+                    f"- **वर्तन व शिस्त**: शिक्षकांचे सकारात्मक अभिप्राय.\n"
+                    f"आपल्याला एखाद्या विशिष्ट विषयाबद्दल किंवा आगामी कार्यक्रमाबद्दल अधिक माहिती हवी आहे का?")
+        elif target_lang == "ta":
+            return (f"ஒட்டுமொத்தமாக, **{sname} மிகச் சிறப்பாக செயல்படுகிறார்!** 😊\n"
+                    f"- **வருகை**: {pct}%\n- **கல்வி சராசரி**: {avg}%\n- **நடத்தை**: ஆசிரியர்களின் சிறந்த கருத்துகள்.\n"
+                    f"ஏதேனும் குறிப்பிட்ட பாடம் பற்றி பேச விரும்புகிறீர்களா?")
+        elif target_lang == "te":
+            return (f"మొత్తంమీద, **{sname} చాలా బాగా రాణిస్తున్నారు!** 😊\n"
+                    f"- **హాజరు**: {pct}%\n- **అకడమిక్ సగటు**: {avg}%\n- **ప్రవర్తన**: ఉపాధ్యాయుల సానుకూల అభిప్రాయాలు.\n"
+                    f"మీరు ఏదైనా నిర్దిష్ట విషయం గురించి చర్చించాలనుకుంటున్నారా?")
+        elif target_lang == "kn":
+            return (f"ಒಟ್ಟಾರೆಯಾಗಿ, **{sname} ಉತ್ತಮವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ!** 😊\n"
+                    f"- **ಹಾಜರಾತಿ**: {pct}%\n- **ಶೈಕ್ಷಣಿಕ ಸರಾಸರಿ**: {avg}%\n- **ನಡವಳಿಕೆ**: ಶಿಕ್ಷಕರ ಸಕಾರಾತ್ಮಕ ಪ್ರತಿಕ್ರಿಯೆ.\n"
+                    f"ನೀವು ನಿರ್ದಿಷ್ಟ ವಿಷಯದ ಬಗ್ಗೆ ಚರ್ಚಿಸಲು ಬಯಸುವಿರಾ?")
+        elif target_lang == "bn":
+            return (f"সামগ্রিকভাবে, **{sname} খুব ভালো করছে!** 😊\n"
+                    f"- **উপস্থিতি**: {pct}%\n- **একাডেমিক গড়**: {avg}%\n- **আচরণ**: শিক্ষকদের ইতিবাচক মন্তব্য।\n"
+                    f"আপনি কি নির্দিষ্ট কোনো বিষয় নিয়ে আলোচনা করতে চান?")
+        elif target_lang == "pa":
+            return (f"ਕੁੱਲ ਮਿਲਾ ਕੇ, **{sname} ਬਹੁਤ ਵਧੀਆ ਪ੍ਰਦਰਸ਼ਨ ਕਰ ਰਿਹਾ ਹੈ!** 😊\n"
+                    f"- **ਹਾਜ਼ਰੀ**: {pct}%\n- **ਅਕਾਦਮਿਕ ਔਸਤ**: {avg}%\n- **ਵਿਵਹਾਰ**: ਅਧਿਆਪਕਾਂ ਦੀ ਚੰਗੀ ਰਾਏ।\n"
+                    f"ਕੀ ਤੁਸੀਂ ਕਿਸੇ ਖਾਸ ਵਿਸ਼ੇ ਬਾਰੇ ਗੱਲ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")
+        elif target_lang == "ml":
+            return (f"മൊത്തത്തിൽ, **{sname} വളരെ മികച്ച പ്രകടനമാണ് കാഴ്ചവയ്ക്കുന്നത്!** 😊\n"
+                    f"- **ഹാജർ**: {pct}%\n- **അക്കാദമിക് ശരാശരി**: {avg}%\n"
+                    f"പ്രത്യേകം ഏതെങ്കിലും വിഷയത്തെക്കുറിച്ച് ചർച്ച ചെയ്യണമെന്നുണ്ടോ?")
+        elif target_lang == "ur":
+            return (f"مجموعی طور پر، **{sname} کی کارکردگی شاندار ہے!** 😊\n"
+                    f"- **حاضری**: {pct}%\n- **تعلیمی اوسط**: {avg}%\n- **طرز عمل**: اساتذہ کے مثبت تاثرات۔\n"
+                    f"کیا آپ کسی خاص مضمون پر بات کرنا چاہتے ہیں؟")
+        elif target_lang == "hinglish":
+            return (f"Overall, **{sname} ka performance kaafi accha hai!** 😊\n"
+                    f"- **Attendance**: {pct}% (regular aur punctual)\n"
+                    f"- **Academic Average**: {avg}% sabhi major subjects me\n"
+                    f"- **Behavior & Conduct**: Teachers ke positive remarks hain.\n"
+                    f"Kya aap kisi particular subject ya upcoming school event ke baare me discuss karna chahte hain?")
+
+    # Pattern 20: Academic Report Card
+    m20 = re.search(r"\*\*Academic Report for ([^*]+)\*\* \(([^)]+)\):\s*Overall Average:\s*\*\*([0-9.]+)%\*\*\.\s*Key subject scores:\s*(.*?)\.\s*Overall, ([^ ]+) is performing commendably\. Would you like to review specific subject remarks or the upcoming test schedule\?", text, re.DOTALL)
+    if m20:
+        sname, ename, avg, scores, _ = m20.groups()
+        if target_lang == "hi":
+            return (f"**{sname} की शैक्षणिक रिपोर्ट** ({ename}):\n"
+                    f"कुल औसत: **{avg}%**।\n"
+                    f"प्रमुख विषय अंक: {scores}।\n"
+                    f"कुल मिलाकर, {sname} का प्रदर्शन सराहनीय है। क्या आप विषयवार टिप्पणी या आगामी परीक्षा कार्यक्रम देखना चाहते हैं?")
+        elif target_lang == "gu":
+            return (f"**{sname} નો શૈક્ષણિક અહેવાલ** ({ename}):\n"
+                    f"કુલ સરેરાશ: **{avg}%**.\n"
+                    f"મુખ્ય વિષયના ગુણ: {scores}.\n"
+                    f"સમગ્ર રીતે, {sname} નો દેખાવ પ્રશંસનીય છે. શું આપ વિષયવાર શિક્ષકની નોંધ અથવા પરીક્ષા શેડ્યૂલ જોવા માંગો છો?")
+        elif target_lang == "mr":
+            return (f"**{sname} चा शैक्षणिक अहवाल** ({ename}):\n"
+                    f"एकूण सरासरी: **{avg}%**.\n"
+                    f"प्रमुख विषयांचे गुण: {scores}.\n"
+                    f"एकंदरीत, {sname} ची प्रगती वाखाणण्याजोगी आहे. आपल्याला विषयानुसार अभिप्राय किंवा परीक्षेचे वेळापत्रक पाहायचे आहे का?")
+        elif target_lang == "ta":
+            return f"**{sname} இன் கல்வி அறிக்கை** ({ename}):\nமொத்த சராசரி: **{avg}%**.\nமுக்கிய பாட மதிப்பெண்கள்: {scores}.\nதேர்வு அட்டவணையைப் பார்க்க விரும்புகிறீர்களா?"
+        elif target_lang == "te":
+            return f"**{sname} అకడమిక్ రిపోర్ట్** ({ename}):\nమొత్తం సగటు: **{avg}%**.\nముఖ్య విషయాల మార్కులు: {scores}.\nపరీక్షల షెడ్యూల్ చూడాలనుకుంటున్నారా?"
+        elif target_lang == "kn":
+            return f"**{sname} ಅವರ ಶೈಕ್ಷಣಿಕ ವರದಿ** ({ename}):\nಒಟ್ಟು ಸರಾಸರಿ: **{avg}%**.\nಪ್ರಮುಖ ವಿಷಯದ ಅಂಕಗಳು: {scores}.\nಪರೀಕ್ಷಾ ವೇಳಾಪಟ್ಟಿ ನೋಡಲು ಬಯಸುವಿರಾ?"
+        elif target_lang == "bn":
+            return f"**{sname} এর একাডেমিক রিপোর্ট** ({ename}):\nমোট গড়: **{avg}%**।\nপ্রধান বিষয়গুলির নম্বর: {scores}।\nপরীক্ষার সময়সূচী দেখতে চান?"
+        elif target_lang == "pa":
+            return f"**{sname} ਦੀ ਅਕਾਦਮਿਕ ਰਿਪੋਰਟ** ({ename}):\nਕੁੱਲ ਔਸਤ: **{avg}%**।\nਮੁੱਖ ਵਿਸ਼ਿਆਂ ਦੇ ਅੰਕ: {scores}।\nਪਰੀਖਿਆ ਸ਼ਡਿਊਲ ਦੇਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"
+        elif target_lang == "ml":
+            return f"**{sname} ന്റെ അക്കാദമിക് റിപ്പോർട്ട്** ({ename}):\nആകെ ശരാശരി: **{avg}%**.\nമാർക്കുകൾ: {scores}.\nപരീക്ഷാ ഷെഡ്യൂൾ വേണമെന്നുണ്ടോ?"
+        elif target_lang == "ur":
+            return f"**{sname} کی تعلیمی رپورٹ** ({ename}):\nمجموعی اوسط: **{avg}%**۔\nاہم مضامین کے نمبر: {scores}۔\nامتحانی شیڈول دیکھنا چاہتے ہیں؟"
+        elif target_lang == "hinglish":
+            return (f"**Academic Report for {sname}** ({ename}):\n"
+                    f"Overall Average: **{avg}%**.\n"
+                    f"Key subject scores: {scores}.\n"
+                    f"Overall, {sname} ka performance bohot accha hai. Kya aap specific subject remarks ya exam schedule dekhna chahte hain?")
+
+    # Pattern 21: Parent Exam Schedule
+    m21 = re.search(r"Upcoming exam schedule for \*\*([^*]+)\*\* \(Mid-Term Assessment 2026\):\s*-\s*Mathematics:\s*([^\n]+)\s*-\s*Science:\s*([^\n]+)\s*-\s*English:\s*([^\n]+)\s*-\s*Computer Applications:\s*([^\n]+)\s*Would you like subject performance insights or study preparation tips for ([^?]+)\?", text, re.DOTALL)
+    if m21:
+        sname, m_dt, s_dt, e_dt, c_dt, s_child = m21.groups()
+        if target_lang == "hi":
+            return (f"**{sname}** के लिए आगामी परीक्षा समय सारणी (सत्र 2026):\n"
+                    f"- गणित: {m_dt}\n- विज्ञान: {s_dt}\n- अंग्रेजी: {e_dt}\n- कंप्यूटर अनुप्रयोग: {c_dt}\n"
+                    f"क्या आप {s_child} के लिए अध्ययन युक्तियाँ (Study Tips) देखना चाहते हैं?")
+        elif target_lang == "gu":
+            return (f"**{sname}** માટે આગામી પરીક્ષાનું સમયપત્રક (સત્ર 2026):\n"
+                    f"- ગણિત: {m_dt}\n- વિજ્ઞાન: {s_dt}\n- અંગ્રેજી: {e_dt}\n- કમ્પ્યુટર: {c_dt}\n"
+                    f"શું આપ {s_child} માટે અભ્યાસ ટિપ્સ મેળવવા માંગો છો?")
+        elif target_lang == "mr":
+            return (f"**{sname}** साठी आगामी परीक्षेचे वेळापत्रक (सत्र 2026):\n"
+                    f"- गणित: {m_dt}\n- विज्ञान: {s_dt}\n- इंग्रजी: {e_dt}\n- संगणक: {c_dt}\n"
+                    f"आपल्याला {s_child} साठी अभ्यासाच्या टिप्स हव्या आहेत का?")
+        elif target_lang == "ta":
+            return f"**{sname}** க்கான தேர்வு அட்டவணை:\n- கணிதம்: {m_dt}\n- அறிவியல்: {s_dt}\n- ஆங்கிலம்: {e_dt}\n- கணினி: {c_dt}\nபடிப்பு குறிப்புகள் தேவையா?"
+        elif target_lang == "te":
+            return f"**{sname}** పరీక్షల షెడ్యూల్:\n- గణితం: {m_dt}\n- సైన్స్: {s_dt}\n- ఇంగ్లీష్: {e_dt}\n- కంప్యూటర్: {c_dt}\nస్టడీ టిప్స్ కావాలా?"
+        elif target_lang == "kn":
+            return f"**{sname}** ಪರೀಕ್ಷಾ ವೇಳಾಪಟ್ಟಿ:\n- ಗಣಿತ: {m_dt}\n- ವಿಜ್ಞಾನ: {s_dt}\n- ಇಂಗ್ಲಿಷ್: {e_dt}\n- ಕಂಪ್ಯೂಟರ್: {c_dt}\nಸ್ಟಡಿ ಟಿಪ್ಸ್ ಬೇಕೇ?"
+        elif target_lang == "bn":
+            return f"**{sname}** এর পরীক্ষার সময়সূচী:\n- গণিত: {m_dt}\n- বিজ্ঞান: {s_dt}\n- ইংরেজি: {e_dt}\n- কম্পিউটার: {c_dt}\nপড়ার টিপস চান?"
+        elif target_lang == "pa":
+            return f"**{sname}** ਲਈ ਪਰੀਖਿਆ ਸ਼ਡਿਊਲ:\n- ਗਣਿਤ: {m_dt}\n- ਵਿਗਿਆਨ: {s_dt}\n- ਅੰਗਰੇਜ਼ੀ: {e_dt}\n- ਕੰਪਿਊਟਰ: {c_dt}\nਸਟੱਡੀ ਟਿਪਸ ਚਾਹੀਦੇ ਹਨ?"
+        elif target_lang == "ml":
+            return f"**{sname}** പരീക്ഷാ ഷെഡ്യൂൾ:\n- മാത്തമാറ്റിക്സ്: {m_dt}\n- സയൻസ്: {s_dt}\n- ഇംഗ്ലീഷ്: {e_dt}\n- കമ്പ്യൂട്ടർ: {c_dt}"
+        elif target_lang == "ur":
+            return f"**{sname}** کا امتحانی شیڈول:\n- ریاضی: {m_dt}\n- سائنس: {s_dt}\n- انگریزی: {e_dt}\n- کمپیوٹر: {c_dt}"
+        elif target_lang == "hinglish":
+            return (f"Upcoming exam schedule for **{sname}**:\n"
+                    f"- Mathematics: {m_dt}\n- Science: {s_dt}\n- English: {e_dt}\n- Computer Applications: {c_dt}\n"
+                    f"Kya aap {s_child} ke liye study preparation tips chahte hain?")
+
+    # Pattern 22: Parent Fee Outstanding & Payment
+    m22 = re.search(r"For \*\*([^*]+)\*\*, there is a current outstanding balance of \*\*₹([0-9.,]+)\*\*\.\s*The upcoming installment is due by ([^.]+)\.\s*Would you like me to share payment details or email you the receipt\?", text, re.DOTALL)
+    if m22:
+        sname, dues, dt_due = m22.groups()
+        if target_lang == "hi":
+            return f"**{sname}** के लिए वर्तमान बकाया शुल्क राशि **₹{dues}** है। अगली किस्त {dt_due} तक देय है। क्या आप भुगतान विवरण देखना चाहते हैं या रसीद ईमेल पर चाहते हैं?"
+        elif target_lang == "gu":
+            return f"**{sname}** માટે હાલની બાકી ફી ની રકમ **₹{dues}** છે. આગામી હપ્તો {dt_due} સુધીમાં ભરવાનો છે. શું તમે ફી ભરવાની વિગતો મેળવવા માંગો છો કે ઈમેલ પર રસીદ મોકલું?"
+        elif target_lang == "mr":
+            return f"**{sname}** साठी सध्याची थकीत फी रक्कम **₹{dues}** आहे. पुढील हप्ता {dt_due} पर्यंत भरायचा आहे. आपल्याला पेमेंट तपशील हवे आहेत की ईमेलवर पावती पाठवू?"
+        elif target_lang == "ta":
+            return f"**{sname}** க்கான நிலுவைக் கட்டணம் **₹{dues}**. கட்டணம் செலுத்த வேண்டிய தேதி: {dt_due}. கட்டண விவரங்கள் வேண்டுமா?"
+        elif target_lang == "te":
+            return f"**{sname}** కోసం ప్రస్తుత బకాయి ఫీజు **₹{dues}**. గడువు తేదీ: {dt_due}. చెల్లింపు వివరాలు పంపమంటారా?"
+        elif target_lang == "kn":
+            return f"**{sname}** ಅವರ ಬಾಕಿ ಶುಲ್ಕ ಮೊತ್ತ **₹{dues}**. ಅಂತಿಮ ದಿನಾಂಕ: {dt_due}. ಪಾವತಿ ವಿವರಗಳು ಬೇಕೇ?"
+        elif target_lang == "bn":
+            return f"**{sname}** এর জন্য বর্তমান বকেয়া ফি **₹{dues}**। শেষ তারিখ: {dt_due}। পেমেন্ট বিবরণ দেখতে চান?"
+        elif target_lang == "pa":
+            return f"**{sname}** ਲਈ ਬਕਾਇਆ ਫ਼ੀਸ **₹{dues}** ਹੈ। ਆਖਰੀ ਮਿਤੀ: {dt_due}। ਭੁਗਤਾਨ ਦੇ ਵੇਰਵੇ ਚਾਹੀਦੇ ਹਨ?"
+        elif target_lang == "ml":
+            return f"**{sname}** ന്റെ കുടിശ്ശിക ഫീസ് തുക **₹{dues}**. അവസാന തീയതി: {dt_due}."
+        elif target_lang == "ur":
+            return f"**{sname}** کے لیے واجب الادا فیس **₹{dues}** ہے۔ آخری تاریخ: {dt_due}۔ ادائیگی کی تفصیلات چاہیے؟"
+        elif target_lang == "hinglish":
+            return f"**{sname}** ke liye current outstanding balance **₹{dues}** hai. Next installment {dt_due} tak due hai. Kya aap payment details chahte hain ya receipt email pe bhej doon?"
+
+    # Pattern 23: Parent Official Payment Details
+    m23 = re.search(r"Here are the official school payment details for \*\*([^*]+)\*\* \(Outstanding Amount: \*\*₹([0-9.,]+)\*\*\):\s*(.*?)\s*Would you like me to email you the official invoice and payment receipt for your records\?", text, re.DOTALL)
+    if m23:
+        sname, dues, pdetails = m23.groups()
+        if target_lang == "hi":
+            return (f"**{sname}** के लिए आधिकारिक स्कूल शुल्क भुगतान विवरण (बकाया राशि: **₹{dues}**):\n\n"
+                    f"💳 **1. ऑनलाइन पोर्टल**: पोर्टल हेडर में 'Pay Fees Online' पर क्लिक करें (UPI, NetBanking, Card).\n"
+                    f"🏦 **2. बैंक ट्रांसफर (NEFT/RTGS)**:\n"
+                    f"   - **लाभार्थी**: XYZ Public School Fee Collection\n"
+                    f"   - **बैंक**: HDFC Bank | **खाता संख्या**: `50200088991122` | **IFSC**: `HDFC0001042`\n"
+                    f"📱 **3. UPI ID**: `xyzschool.fees@hdfcbank`\n\n"
+                    f"क्या आप आधिकारिक चालान और रसीद ईमेल पर प्राप्त करना चाहते हैं?")
+        elif target_lang == "gu":
+            return (f"**{sname}** માટે સત્તાવાર ફી ચુકવણી વિગતો (બાકી રકમ: **₹{dues}**):\n\n"
+                    f"💳 **1. ઓનલાઇન પોર્ટલ**: પોર્ટલ હેડરમાં 'Pay Fees Online' ક્લિક કરો (UPI, NetBanking, Card).\n"
+                    f"🏦 **2. બેંક ટ્રાન્સફર (NEFT/RTGS)**:\n"
+                    f"   - **લાભાર્થી**: XYZ Public School Fee Collection\n"
+                    f"   - **બેંક**: HDFC Bank | **ખાતા નંબર**: `50200088991122` | **IFSC**: `HDFC0001042`\n"
+                    f"📱 **3. UPI ID**: `xyzschool.fees@hdfcbank`\n\n"
+                    f"શું આપ ઈમેલ પર સત્તાવાર રસીદ મેળવવા માંગો છો?")
+        elif target_lang == "mr":
+            return (f"**{sname}** साठी अधिकृत शाळा फी पेमेंट तपशील (थकबाकी: **₹{dues}**):\n\n"
+                    f"💳 **1. ऑनलाइन पोर्टल**: 'Pay Fees Online' वर क्लिक करा (UPI, NetBanking, Card).\n"
+                    f"🏦 **2. थेट बँक ट्रान्सफर**:\n"
+                    f"   - **बँक**: HDFC Bank | **खाते क्र**: `50200088991122` | **IFSC**: `HDFC0001042`\n"
+                    f"📱 **3. UPI ID**: `xyzschool.fees@hdfcbank`\n\n"
+                    f"आपल्याला अधिकृत पावती ईमेलवर हवी आहे का?")
+        elif target_lang == "ta":
+            return f"**{sname}** க்கான பள்ளி கட்டண விவரங்கள் (நிலுவை: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122` (IFSC: `HDFC0001042`).\nரசீதை மின்னஞ்சல் செய்யவா?"
+        elif target_lang == "te":
+            return f"**{sname}** పాఠశాల ఫీజు చెల్లింపు వివరాలు (బకాయి: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122` (IFSC: `HDFC0001042`).\nరశీదు ఇమెయిల్ చేయమంటారా?"
+        elif target_lang == "kn":
+            return f"**{sname}** ಶಾಲಾ ಶುಲ್ಕ ಪಾವತಿ ವಿವರಗಳು (ಬಾಕಿ: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122` (IFSC: `HDFC0001042`).\nರಶೀದಿಯನ್ನು ಇಮೇಲ್ ಮಾಡಬೇಕೇ?"
+        elif target_lang == "bn":
+            return f"**{sname}** এর স্কুল ফি প্রদানের বিবরণ (বকেয়া: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122` (IFSC: `HDFC0001042`)।\nরসিদ ইমেল করতে চান?"
+        elif target_lang == "pa":
+            return f"**{sname}** ਲਈ ਸਕੂਲ ਫ਼ੀਸ ਭੁਗਤਾਨ ਦੇ ਵੇਰਵੇ (ਬਕਾਇਆ: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122` (IFSC: `HDFC0001042`)।\nਰਸੀਦ ਈਮੇਲ ਕਰੀਏ?"
+        elif target_lang == "ml":
+            return f"**{sname}** ഫീസ് പേയ്‌മെന്റ് വിവരങ്ങൾ (കുടിശ്ശിക: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122`."
+        elif target_lang == "ur":
+            return f"**{sname}** کے اسکول فیس کی تفصیلات (بقایا: **₹{dues}**):\nUPI: `xyzschool.fees@hdfcbank` | HDFC Bank A/C: `50200088991122`۔\nکیا رسید ای میل کر دی جائے؟"
+        elif target_lang == "hinglish":
+            return (f"**{sname}** ke liye official payment details (Outstanding Amount: **₹{dues}**):\n\n"
+                    f"💳 **1. Online Payment Portal**: Header me 'Pay Fees Online' click karein.\n"
+                    f"🏦 **2. Direct Bank Transfer**: HDFC Bank | A/C: `50200088991122` | IFSC: `HDFC0001042`\n"
+                    f"📱 **3. UPI**: `xyzschool.fees@hdfcbank`\n\n"
+                    f"Kya aapko official invoice aur payment receipt email par chahiye?")
+
+    # Pattern 24: Fee Receipt Dispatched
+    m24 = re.search(r"📧 \*\*Fee Receipt & Invoice Dispatched!\*\*\s*The official fee invoice and payment breakdown for \*\*([^*]+)\*\* \(Term 1 - Academic Year 2025-26\) has been sent to your registered email address \(\*\*([^*]+)\*\*\)\.\s*You can also download digital PDF copies anytime under the Parent Portal Documents section\.", text, re.DOTALL)
+    if m24:
+        sname, p_email = m24.groups()
+        if target_lang == "hi":
+            return (f"📧 **शुल्क रसीद और चालान भेज दिया गया है!**\n"
+                    f"**{sname}** (सत्र 2025-26) का आधिकारिक शुल्क चालान आपके पंजीकृत ईमेल (**{p_email}**) पर भेज दिया गया है।\n"
+                    f"आप पेरेंट पोर्टल के दस्तावेज़ अनुभाग से भी कभी भी डिजिटल पीडीएफ डाउनलोड कर सकते हैं।")
+        elif target_lang == "gu":
+            return (f"📧 **ફી ની રસીદ અને બિલ ઈમેલ પર મોકલી દેવાયું છે!**\n"
+                    f"**{sname}** (સત્ર 2025-26) નું સત્તાવાર ફી બિલ આપના ઈમેલ (**{p_email}**) પર મોકલી દેવામાં આવ્યું છે.\n"
+                    f"આપ પેરેન્ટ પોર્ટલ પરથી પણ ગમે ત્યારે પીડીએફ ડાઉનલોડ કરી શકો છો.")
+        elif target_lang == "mr":
+            return (f"📧 **फी पावती व चलन ईमेलवर पाठवले आहे!**\n"
+                    f"**{sname}** ची अधिकृत फी पावती आपल्या नोंदणीकृत ईमेलवर (**{p_email}**) पाठवली गेली आहे.\n"
+                    f"आपण पालक पोर्टलवरून देखील पीडीएफ डाउनलोड करू शकता.")
+        elif target_lang == "ta":
+            return f"📧 **கட்டண ரசீது அனுப்பப்பட்டது!**\n**{sname}** இன் கட்டண ரசீது உங்கள் மின்னஞ்சலுக்கு (**{p_email}**) அனுப்பப்பட்டுள்ளது."
+        elif target_lang == "te":
+            return f"📧 **ఫీజు రసీదు పంపబడింది!**\n**{sname}** ఫీజు రసీదు మీ నమోదిత ఇమెయిల్‌కు (**{p_email}**) పంపబడింది."
+        elif target_lang == "kn":
+            return f"📧 **ಶುಲ್ಕ ರಶೀದಿಯನ್ನು ರವಾನಿಸಲಾಗಿದೆ!**\n**{sname}** ಅವರ ಶುಲ್ಕ ರಶೀದಿಯನ್ನು ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸಕ್ಕೆ (**{p_email}**) ಕಳುಹಿಸಲಾಗಿದೆ."
+        elif target_lang == "bn":
+            return f"📧 **ফি রসিদ সফলভাবে পাঠানো হয়েছে!**\n**{sname}** এর ফি রসিদ আপনার নিবন্ধিত ইমেল ঠিকানায় (**{p_email}**) পাঠানো হয়েছে।"
+        elif target_lang == "pa":
+            return f"📧 **ਫ਼ੀਸ ਰਸੀਦ ਭੇਜ ਦਿੱਤੀ ਗਈ ਹੈ!**\n**{sname}** ਦੀ ਫ਼ੀਸ ਰਸੀਦ ਤੁਹਾਡੇ ਰਜਿਸਟਰਡ ਈਮੇਲ (**{p_email}**) 'ਤੇ ਭੇਜ ਦਿੱਤੀ ਗਈ ਹੈ।"
+        elif target_lang == "ml":
+            return f"📧 **ഫീസ് രസീത് ഇമെയിൽ ചെയ്തു!**\n**{sname}** ന്റെ ഫീസ് രസീത് നിങ്ങളുടെ ഇമെയിലിലേക്ക് (**{p_email}**) അയച്ചു കഴിഞ്ഞു."
+        elif target_lang == "ur":
+            return f"📧 **فیس رسید ارسال کر دی گئی ہے!**\n**{sname}** کی سرکاری فیس رسید آپ کے ای میل (**{p_email}**) پر بھیج دی گئی ہے۔"
+        elif target_lang == "hinglish":
+            return (f"📧 **Fee Receipt & Invoice Dispatched!**\n"
+                    f"**{sname}** ki official fee invoice aapke registered email address (**{p_email}**) par bhej di gayi hai.\n"
+                    f"Aap Parent Portal ke Documents section se bhi digital PDF download kar sakte hain.")
+
+    # Pattern 25: Gratitude / Thank You Response
+    if "It is truly my pleasure to assist you! Please don't hesitate to reach out whenever you have questions about your child's schooling. Have a wonderful day!" in text:
+        if target_lang == "hi":
+            return "आपकी सहायता करना मेरा परम सौभाग्य है! जब भी आपको अपने बच्चे की पढ़ाई या स्कूल से जुड़ा कोई प्रश्न हो, बेझिझक पूछें। आपका दिन शुभ हो! 😊"
+        elif target_lang == "gu":
+            return "આપની મદદ કરવામાં મને ખૂબ આનંદ થયો! જ્યારે પણ બાળકના શિક્ષણ અંગે કોઈ પ્રશ્ન હોય, વિના સંકોચે પૂછશો. આપનો દિવસ શુભ રહે! 😊"
+        elif target_lang == "mr":
+            return "आपल्याला मदत करताना मला मनापासून आनंद झाला! मुलांच्या शिक्षणाबाबत जेव्हा काही विचारायचे असेल, तेव्हा नक्की विचारा. आपला दिवस छान जावो! 😊"
+        elif target_lang == "ta":
+            return "உங்களுக்கு உதவ முடிந்ததில் மிக்க மகிழ்ச்சி! உங்கள் குழந்தையின் கல்வி குறித்து எப்போது வேண்டுமானாலும் கேளுங்கள். இனிய நாளாக அமையட்டும்! 😊"
+        elif target_lang == "te":
+            return "మీకు సహాయం చేయడం నాకెంతో సంతోషం! మీ పిల్లల చదువు గురించి ఎప్పుడైనా అడగవచ్చు. మంచి రోజు కావాలని కోరుకుంటున్నాను! 😊"
+        elif target_lang == "kn":
+            return "ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ನನಗೆ ಸಂತೋಷವಾಗಿದೆ! ನಿಮ್ಮ ಮಗುವಿನ ಶಿಕ್ಷಣದ ಬಗ್ಗೆ ಯಾವುದೇ ಪ್ರಶ್ನೆಗಳಿದ್ದಾಗ ಖಂಡಿತವಾಗಿ ಕೇಳಿ. ನಿಮ್ಮ ದಿನ ಶುಭವಾಗಿರಲಿ! 😊"
+        elif target_lang == "bn":
+            return "আপনাকে সাহায্য করতে পেরে খুব আনন্দিত! আপনার সন্তানের পড়াশোনা নিয়ে যেকোনো প্রশ্ন থাকলে নির্দ্বিধায় জিজ্ঞাসা করুন। দিনটি শুভ হোক! 😊"
+        elif target_lang == "pa":
+            return "ਤੁਹਾਡੀ ਮਦਦ ਕਰਕੇ ਮੈਨੂੰ ਬਹੁਤ ਖ਼ੁਸ਼ੀ ਹੋਈ! ਜਦੋਂ ਵੀ ਬੱਚੇ ਦੀ ਪੜ੍ਹਾਈ ਬਾਰੇ ਕੋਈ ਸਵਾਲ ਹੋਵੇ, ਬੇਝਿਜਕ ਪੁੱਛੋ। ਤੁਹਾਡਾ ਦਿਨ ਵਧੀਆ ਰਹੇ! 😊"
+        elif target_lang == "ml":
+            return "നിങ്ങളെ സഹായിക്കാൻ കഴിഞ്ഞതിൽ സന്തോഷം! കുട്ടിയുടെ പഠനവുമായി ബന്ധപ്പെട്ട് എപ്പോൾ വേണമെങ്കിലും ചോദിക്കാം. നല്ലൊരു ദിവസം ആശംസിക്കുന്നു! 😊"
+        elif target_lang == "ur":
+            return "آپ کی مدد کرنا میرے لیے خوشی کی بات ہے! بچے کی تعلیم سے متعلق جب بھی کوئی سوال ہو، ضرور پوچھیے۔ آپ کا دن خوشگوار گزرے! 😊"
+        elif target_lang == "hinglish":
+            return "Aapki help karke mujhe bohot khushi hui! Jab bhi bachhe ki padhai ke baare me koi sawaal ho, bina jhijhak poochiye. Have a wonderful day! 😊"
 
     return text
 
