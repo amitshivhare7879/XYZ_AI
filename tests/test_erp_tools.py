@@ -33,6 +33,16 @@ def test_student_attendance_view():
     assert res["percentage"] == 91.2
     assert res["present_days"] == 83
 
+@pytest.mark.asyncio
+async def test_student_yesterday_attendance_query():
+    """Validates query: 'is i am marked present yesterday' returns recent school day status."""
+    res = await ConversationOrchestrator.process_message("is i am marked present yesterday", user=STUDENT_RAHUL)
+    assert "PRESENT" in res.response_text or "marked" in res.response_text.lower()
+    assert "%" in res.response_text
+    assert ("tool_get_attendance" in res.executed_tools or "get_attendance" in res.executed_tools)
+
+
+
 # 2. Parent Attendance Query for linked child
 def test_parent_attendance_view():
     res = tool_get_attendance(user=PARENT_AMIT, student_name="Rahul")
@@ -79,3 +89,21 @@ def test_parent_fees_view():
     res = tool_get_fees(user=PARENT_AMIT)
     assert "invoices" in res
     assert res["student_name"] == "Rahul Patel"
+
+@pytest.mark.asyncio
+async def test_parent_typo_attendance_flow():
+    """Validates typo tolerance: 'tell me about my son attedenace' matches attendance intent."""
+    res = await ConversationOrchestrator.process_message("tell me about my son attedenace", user=PARENT_AMIT)
+    assert "Rahul" in res.response_text
+    assert "%" in res.response_text
+    assert "tool_get_attendance" in res.executed_tools
+
+@pytest.mark.asyncio
+async def test_parent_last_5_days_record_flow():
+    """Validates itemized daily attendance breakdown for 'Give me the record of last 5 days.'"""
+    res = await ConversationOrchestrator.process_message("Give me the record of last 5 days.", user=PARENT_AMIT)
+    assert "Rahul" in res.response_text
+    assert "📅" in res.response_text or "PRESENT" in res.response_text
+    assert "tool_get_attendance" in res.executed_tools
+
+

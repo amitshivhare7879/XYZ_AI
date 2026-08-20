@@ -73,7 +73,8 @@ async def test_principal_persona_greeting():
 @pytest.mark.asyncio
 async def test_multi_turn_context_memory():
     """Verify that context (active student, topic, subject) is retained across turns."""
-    sid = "sess_multi_turn_01"
+    import uuid
+    sid = f"sess_multi_turn_{uuid.uuid4().hex[:8]}"
     
     # Turn 1: Parent asks about attendance
     res1 = await ConversationOrchestrator.process_message("How is my child's attendance?", user=PARENT_AMIT, session_id=sid)

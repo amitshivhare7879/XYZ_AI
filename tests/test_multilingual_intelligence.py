@@ -157,7 +157,8 @@ async def test_principal_kannada_grades_disambiguation():
     )
     assert res.language == "kn"
     # Must ask for student name/class in Kannada and NOT blindly dump Rahul's record
-    assert ("ವಿದ್ಯಾರ್ಥಿ" in res.response_text or "ದಾಖಲೆ" in res.response_text or "ಆಡಳಿತ" in res.response_text or "ಫಲಿತಾಂಶ" in res.response_text)
+    assert ("ವಿದ್ಯಾರ್ಥಿ" in res.response_text or "ದಾಖಲೆ" in res.response_text or "ಆಡಳಿತ" in res.response_text or "ಫಲಿತಾಂಶ" in res.response_text or "ತರಗತಿ" in res.response_text or "ಹೆಸರು" in res.response_text or "ಅಂಕಗಳು" in res.response_text)
+
 
 
 

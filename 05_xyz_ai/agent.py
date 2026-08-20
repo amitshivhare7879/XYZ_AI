@@ -410,6 +410,8 @@ class ConversationOrchestrator:
         if mentioned_subject:
             context["active_subject"] = mentioned_subject
 
+        last_topic = context.get("active_topic")
+
         # =======================================================================
         # Step 0: Handle Explicit Language Selection / Switch Responses
         # (e.g., user replies "Hindi.", "Gujarati", "Marathi", "English", "Hinglish")
@@ -1042,9 +1044,12 @@ class ConversationOrchestrator:
         # F. Attendance Queries & Follow-ups
         # -------------------------------------------------------------------
         is_attendance_query = any(w in msg_lower for w in [
-            "attendance", "present", "absent", "school yesterday", "come to school", "came to school", 
+            "attendance", "attedenace", "attedaence", "attandance", "atendance", "attendence", "attendace", "attedance", "attedence", "attednace", "attndance",
+            "present", "presnt", "prsent", "absent", "absnt", "absance", "absence", "absences", "school yesterday", "come to school", "came to school", 
             "days", "school aya", "school aaya", "school aayi", "school gaya", "kal school", "hajiri",
-            "હાજરી", "હાજર", "ગેરહાજર",
+            "percentage", "percenatege", "persentage", "percentge", "prcentage", "percntage", "percent",
+            "last 5 days", "last 7 days", "last 10 days", "last few days", "recent days", "past days", "record of last", "daily record", "attendance record",
+            "હાજરી", "હાજર", "ગેરહાજર", "ઉપસ્થિતિ",
             "उपस्थिति", "हाजिरी", "हाजिर", "गैरहाजिर", "उपस्थिती", "उपस्थित", "अनुपस्थित",
             "வருகை", "வராதவர்",
             "హాజరు", "గైర్హాజరు", "హాజరయ్యారు",
@@ -1055,7 +1060,7 @@ class ConversationOrchestrator:
             "حاضری", "غیر حاضر", "حاضر",
             "प्रेसेंट", "प्रेजेंट", "प्रेजन", "एब्सेंट", "बच्चे", "कितने बच्चे", "विद्यार्थी", "छात्र", "छात्रों", "kitne bacche",
             "kitne student", "aaj kitne", "kitne bache", "present hain", "aaye hain"
-        ])
+        ]) or (last_topic == "attendance" and any(w in msg_lower for w in ["yes", "sure", "check", "recent", "days", "last 5", "last 7", "last 10", "give me", "tell me", "show", "detailed", "record", "dates", "absences", "हा", "हाँ", "होय", "હા", "ಹೌದು"]))
 
         if is_attendance_query:
             context["active_topic"] = "attendance"
@@ -1128,23 +1133,52 @@ class ConversationOrchestrator:
                 last_status = recent[0]["status"] if recent else "present"
                 last_date = recent[0]["date"] if recent else "recent session"
 
+                is_daily_or_recent_request = any(w in msg_lower for w in [
+                    "last 5", "last 7", "last 10", "last 3", "5 days", "recent", "dates", "daily", "day by day",
+                    "breakdown", "detailed", "which days", "record of last", "absences", "log"
+                ]) or (last_topic == "attendance" and any(w in msg_lower for w in ["yes", "sure", "check", "show", "tell me"]))
+
                 if user.role == "parent":
-                    if any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "school aaya", "school gaya"]):
+                    if is_daily_or_recent_request and recent:
+                        num_records = 5
+                        m = re.search(r'last\s+(\d+)\s+days', msg_lower)
+                        if m:
+                            num_records = min(int(m.group(1)), len(recent))
+                        records_to_show = recent[:num_records]
+                        
+                        log_lines = []
+                        for r in records_to_show:
+                            st = r.get("status", "present").upper()
+                            status_icon = "✅ PRESENT" if st == "PRESENT" else "❌ ABSENT" if st == "ABSENT" else "⚠️ LATE"
+                            rem = f" ({r.get('remarks')})" if r.get("remarks") else ""
+                            log_lines.append(f"- 📅 **{r.get('date')}**: {status_icon}{rem}")
+                        
+                        items_str = "\n".join(log_lines)
+                        reply = (f"Here is the day-by-day attendance log for **{sname}** (last {len(records_to_show)} school days):\n\n"
+                                 f"{items_str}\n\n"
+                                 f"**Overall Cumulative**: **{pct}%** ({pres} present / {tot} total sessions, {abs_cnt} absences).\n"
+                                 f"Would you like to submit a leave note for an upcoming date or request a teacher callback?")
+                    elif any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "school aaya", "school gaya"]):
                         reply = (f"Yes! {sname} was marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
                                  f"Overall, {sname} maintains a strong attendance of **{pct}%** ({pres} present out of {tot} school days, with {abs_cnt} absences).")
-                    elif any(w in msg_lower for w in ["recent", "breakdown", "detailed", "which days"]):
-                        reply = (f"Here is the recent record for {sname}: {pres} days present out of {tot} school days ({abs_cnt} absences). "
-                                 f"On the last session ({last_date}), {sname} was {last_status.upper()}. Would you like me to check anything else or submit a leave note?")
                     else:
                         reply = (f"Sure, let me check that for you! {sname} currently has **{pct}%** attendance ({pres}/{tot} days attended). "
-                                 f"Would you like me to check his recent attendance too?")
+                                 f"Would you like me to check his recent day-by-day attendance log too?")
                     suggested_actions = [
-                        SuggestedAction(label="Recent Absences", action_type="recent_attendance"),
+                        SuggestedAction(label="Last 5 Days Log", action_type="recent_attendance"),
                         SuggestedAction(label="Submit Leave Note", action_type="submit_leave")
                     ]
                 elif user.role == "student":
-                    reply = (f"You currently have **{pct}%** attendance ({pres}/{tot} days attended)! "
-                             f"You're in good standing. Would you like me to check your homework or upcoming timetable?")
+                    if is_daily_or_recent_request and recent:
+                        records_to_show = recent[:5]
+                        log_lines = [f"- 📅 **{r.get('date')}**: {'✅ PRESENT' if r.get('status','').upper() == 'PRESENT' else '❌ ABSENT'}" for r in records_to_show]
+                        reply = (f"Here is your recent attendance breakdown:\n\n" + "\n".join(log_lines) + f"\n\n**Overall**: **{pct}%** ({pres}/{tot} days).")
+                    elif any(w in msg_lower for w in ["yesterday", "come to school", "came to school", "today", "kal", "school aya", "marked present", "was i present", "was i absent", "was i in school", "is i am marked"]):
+                        reply = (f"Yes! You were marked **{last_status.upper()}** on the last recorded school day ({last_date}). "
+                                 f"Overall, you maintain a strong attendance of **{pct}%** ({pres}/{tot} days attended). Keep up the great work!")
+                    else:
+                        reply = (f"You currently have **{pct}%** attendance ({pres}/{tot} days attended)! "
+                                 f"You're in good standing. Would you like me to check your homework or upcoming timetable?")
                 else:
                     reply = f"{sname} has an overall attendance of {pct}% ({pres}/{tot} days). Last recorded status: {last_status.upper()} on {last_date}."
             return reply, suggested_actions, executed_tools
@@ -1213,7 +1247,7 @@ class ConversationOrchestrator:
             return reply, suggested_actions, executed_tools
 
         # 2. Payment Details / How to Pay / Bank Info
-        if any(w in msg_lower for w in ["payment details", "share me the payment", "share payment details", "share the payment", "how to pay", "bank details", "payment options", "pay online", "upi id", "account details", "share details"]) or (last_topic == "fees" and any(w in msg_alpha.split() for w in ["share", "details", "how", "account", "bank", "pay"])):
+        if any(w in msg_lower for w in ["payment details", "share me the payment", "share payment details", "share the payment", "how to pay", "bank details", "payment options", "pay online", "upi id", "account details", "share details"]) or (last_topic == "fees" and any(w in msg_alpha.split() for w in ["share", "details", "how", "account", "bank", "pay", "yes", "sure", "please", "ha", "haan"])):
             context["active_topic"] = "fees"
             sname = active_student or "Rahul Patel"
             reply = (f"Here are the official school payment details for **{sname}** (Outstanding Amount: **₹45,000.00**):\n\n"

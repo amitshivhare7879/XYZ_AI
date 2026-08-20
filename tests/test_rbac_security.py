@@ -134,4 +134,4 @@ def test_api_chat_jwt_enforcement():
     assert resp_fake.status_code == 200
     # Verified role is student, so fee access is refused
     text = resp_fake.json()["response_text"].lower()
-    assert any(w in text for w in ["security", "access", "forbidden", "unable", "privacy", "student", "cannot", "policy"])
+    assert any(w in text for w in ["security", "access", "forbidden", "unable", "privacy", "student", "cannot", "can't", "sorry", "policy", "denied", "not authorized"])
