@@ -167,17 +167,27 @@ python -m shared.seed_data
 
 ### 5. Start the Application Server
 ```bash
-# Launch FastAPI backend & all portal frontends
-uvicorn 05_xyz_ai.main:app --host 0.0.0.0 --port 7860 --reload
+# Launch FastAPI backend & all portal frontends (Primary Command)
+uvicorn 05_xyz_ai.main:app --host 0.0.0.0 --port 8000 --reload
+```
+*And open **http://localhost:8000** in your browser to start.*
+
+*Or alternatively using the Hugging Face Spaces entrypoint (Port 7860):*
+```bash
+python app.py
+```
+*Or launch all portals on separate micro-frontend ports (3000-3004, 8000):*
+```bash
+python start_all.py
 ```
 
 ### 6. Open in Browser
-- 🔐 **Unified Login (Role Switcher)**: [http://localhost:7860/login](http://localhost:7860/login)
-- 🎓 **Student Academic Portal**: [http://localhost:7860/student](http://localhost:7860/student)
-- 👨‍👩‍👧 **Parent Support Portal**: [http://localhost:7860/parent](http://localhost:7860/parent)
-- 👩‍🏫 **Teacher / Staff Portal**: [http://localhost:7860/staff](http://localhost:7860/staff)
-- 🏛️ **Management / Principal Portal**: [http://localhost:7860/management](http://localhost:7860/management)
-- 📚 **Swagger Interactive API Docs**: [http://localhost:7860/docs](http://localhost:7860/docs)
+- 🔐 **Unified Login (Role Switcher)**: [http://localhost:8000/login](http://localhost:8000/login)
+- 🎓 **Student Academic Portal**: [http://localhost:8000/student](http://localhost:8000/student)
+- 👨‍👩‍👧 **Parent Support Portal**: [http://localhost:8000/parent](http://localhost:8000/parent)
+- 👩‍🏫 **Teacher / Staff Portal**: [http://localhost:8000/staff](http://localhost:8000/staff)
+- 🏛️ **Management / Principal Portal**: [http://localhost:8000/management](http://localhost:8000/management)
+- 📚 **Swagger Interactive API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
