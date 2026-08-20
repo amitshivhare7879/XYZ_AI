@@ -45,11 +45,10 @@ shared/*.db-wal
 .DS_Store
 Thumbs.db
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Archives
+*.zip
+*.tar.gz
+XYZ_AI_Submission.zip
 
 # Archives
 *.zip
